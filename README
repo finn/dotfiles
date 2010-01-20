@@ -1,1 +1,5 @@
 All dotfiles are arranged under the directory "home" as they would be in a user's $HOME directory.
+
+home
+|-- .git.core.excludesfile
+`-- .gitconfig
