@@ -1,0 +1,27 @@
+[user]
+    name = Finn Smith
+    email = finn@timeghost.net
+[github]
+    user = finn
+[core]
+    autocrlf = input
+    safecrlf = true
+    excludesfile = ~/.git.core.excludesfile
+    whitespace = trailing-space,cr-at-eol
+[alias]
+    st = status
+    ci = commit
+    br = branch
+    co = checkout
+    praise = blame
+[color]
+    ui = auto
+[diff]
+    renames = copy
+    tool = opendiff
+[difftool]
+    prompt = false
+[merge]
+    tool = opendiff
+[mergetool]
+    prompt = false
