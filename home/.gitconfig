@@ -19,9 +19,12 @@
 [diff]
     renames = copy
     tool = opendiff
+    renamelimit = 0
 [difftool]
     prompt = false
 [merge]
     tool = opendiff
 [mergetool]
     prompt = false
+[pack]
+    threads = 0
