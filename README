@@ -1,5 +1,85 @@
 All dotfiles are arranged under the directory "home" as they would be in a user's $HOME directory.
 
-home
-|-- .git.core.excludesfile
-`-- .gitconfig
+.
+|-- README
+`-- home
+    |-- .git.core.excludesfile
+    |-- .gitconfig
+    |-- .vim
+    |   |-- autoload
+    |   |   `-- rails.vim
+    |   |-- code.vim
+    |   |-- color-dos.vim
+    |   |-- colors
+    |   |   |-- automation.vim
+    |   |   |-- autumnleaf.vim
+    |   |   |-- boreal.vim
+    |   |   |-- delphi.vim
+    |   |   |-- fine_blue.vim
+    |   |   |-- github.vim
+    |   |   |-- habiLight.vim
+    |   |   |-- ir_black.vim
+    |   |   |-- ironman.vim
+    |   |   |-- kate.vim
+    |   |   |-- martin_krischik.vim
+    |   |   |-- monokai.vim
+    |   |   |-- osx_like.vim
+    |   |   |-- pyte.vim
+    |   |   |-- reliable.vim
+    |   |   |-- sienna.vim
+    |   |   |-- softlight.vim
+    |   |   `-- warm_grey.vim
+    |   |-- doc
+    |   |   |-- EnhancedCommentify.txt
+    |   |   |-- NERD_tree.txt
+    |   |   |-- bufexplorer.txt
+    |   |   |-- matchit.txt
+    |   |   |-- rails.txt
+    |   |   |-- surround.txt
+    |   |   |-- taglist.txt
+    |   |   |-- tags
+    |   |   |-- vcscommand.txt
+    |   |   `-- winmanager.txt
+    |   |-- filetype.vim
+    |   |-- ftplugin
+    |   |   |-- mail.vim
+    |   |   |-- ocaml_enhcomm.vim
+    |   |   |-- perl.vim
+    |   |   |-- php_enhcomm.vim
+    |   |   `-- ruby_structure.vim
+    |   |-- mcc.exrc
+    |   |-- nerdtree_plugin
+    |   |   |-- exec_menuitem.vim
+    |   |   `-- fs_menu.vim
+    |   |-- plugin
+    |   |   |-- DirDiff.vim
+    |   |   |-- EnhancedCommentify.vim
+    |   |   |-- NERD_tree.vim
+    |   |   |-- autoclose.vim
+    |   |   |-- bufexplorer.vim
+    |   |   |-- matchit.vim
+    |   |   |-- rails.vim
+    |   |   |-- repeat.vim
+    |   |   |-- surround.vim
+    |   |   |-- taglist.vim
+    |   |   |-- tasklist.vim
+    |   |   |-- unicycle.vim
+    |   |   |-- vcsbzr.vim
+    |   |   |-- vcscommand.vim
+    |   |   |-- vcscvs.vim
+    |   |   |-- vcsgit.vim
+    |   |   |-- vcshg.vim
+    |   |   |-- vcssvk.vim
+    |   |   |-- vcssvn.vim
+    |   |   |-- winfileexplorer.vim
+    |   |   |-- winmanager.vim
+    |   |   `-- wintagexplorer.vim
+    |   |-- syntax
+    |   |   |-- CVSAnnotate.vim
+    |   |   |-- SVKAnnotate.vim
+    |   |   |-- SVNAnnotate.vim
+    |   |   |-- gitAnnotate.vim
+    |   |   |-- mkd.vim
+    |   |   `-- vcscommit.vim
+    |   `-- text.vim
+    `-- .vimrc
