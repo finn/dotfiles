@@ -38,6 +38,11 @@ if [ -x /opt/local/bin/port ]; then
      export PKG_CONFIG_PATH=/opt/local/lib/pkgconfig:${PKG_CONFIG_PATH}
 fi
 
+# set PATH so it includes ruby gems bin if it exists
+if [ -d /var/lib/gems/1.8/bin ] ; then
+    export PATH="/var/lib/gems/1.8/bin:$PATH"
+fi
+
 # add home bin if it exists
 if [ -d "$HOME/bin" ] ; then
     export PATH="$HOME/bin:$PATH"
