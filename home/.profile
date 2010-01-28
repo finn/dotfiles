@@ -29,17 +29,18 @@ if [ -n "$BASH_VERSION" ]; then
     fi
 fi
 
-# add macports sbin if it exists
-if [ -d "/opt/local/sbin" ] ; then
-    PATH=/opt/local/sbin:$PATH
-fi
-
-# add macports bin if it exists
-if [ -d "/opt/local/bin" ] ; then
-    PATH=/opt/local/bin:$PATH
+if [ -x /opt/local/bin/port ]; then
+     export PATH=/opt/local/bin:/opt/local/sbin:${PATH}
+     export MANPATH=/opt/local/share/man:${MANPATH}
+     export INFOPATH=/opt/local/share/info:${INFOPATH}
+     export LDFLAGS="-L/opt/local/lib ${LDFLAGS}"
+     export CPATH=/opt/local/include:${CPATH}
+     export PKG_CONFIG_PATH=/opt/local/lib/pkgconfig:${PKG_CONFIG_PATH}
 fi
 
 # add home bin if it exists
 if [ -d "$HOME/bin" ] ; then
-    PATH="$HOME/bin:$PATH"
+    export PATH="$HOME/bin:$PATH"
 fi
+
+export EDITOR=vim
