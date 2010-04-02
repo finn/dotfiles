@@ -26,7 +26,7 @@ set expandtab
 set laststatus=2
 " fancy statusline with file encoding and BOM
 if has("statusline")
-    set statusline=%<%f\ %h%m%r%=%{\"[\".(&fenc==\"\"?&enc:&fenc).((exists(\"+bomb\")\ &&\ &bomb)?\",B\":\"\").\"]\ \"}%k\ %-14.(%l,%c%V%)\ %P
+    set statusline=%<%f\ %h%m%r%=%{\"[\".&ff.\"]\ \"}%{\"[\".(&fenc==\"\"?&enc:&fenc).((exists(\"+bomb\")\ &&\ &bomb)?\",B\":\"\").\"]\ \"}%k\ %-14.(%l,%c%V%)\ %P
 endif
 
 " XXX commented out to fix on RHEL
@@ -122,7 +122,7 @@ set linebreak
 set display+=lastline
 
 " the whitespace indicators
-set listchars=precedes:$,extends:$,tab:»·,trail:·,eol:¬
+set listchars=precedes:$,extends:$,tab:Â»Â·,trail:Â·,eol:Â¬
 
 " encommentify setting
 "let g:EnhCommentifyUserMode = 'Yes'
