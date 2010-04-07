@@ -268,3 +268,6 @@ let python_highlight_all = 1
 
 " tweak completion options
 set completeopt=menuone,longest,preview
+
+" expand the carriage return character when typed inside an empty delimiter pair
+"let delimitMate_expand_cr = "\<CR>\<CR>\<Up>\<Tab>"
