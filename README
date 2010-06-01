@@ -3,10 +3,16 @@ All dotfiles are arranged under the directory "home" as they would be in a user'
 .
 |-- README
 `-- home
+    |-- .bash_aliases
+    |-- .bash_completion
+    |-- .bash_logout
+    |-- .bashrc
     |-- .git.core.excludesfile
     |-- .gitconfig
+    |-- .profile
     |-- .vim
     |   |-- autoload
+    |   |   |-- delimitMate.vim
     |   |   `-- rails.vim
     |   |-- code.vim
     |   |-- color-dos.vim
@@ -32,7 +38,10 @@ All dotfiles are arranged under the directory "home" as they would be in a user'
     |   |-- doc
     |   |   |-- EnhancedCommentify.txt
     |   |   |-- NERD_tree.txt
+    |   |   |-- ack.txt
     |   |   |-- bufexplorer.txt
+    |   |   |-- delimitMate.txt
+    |   |   |-- fugitive.txt
     |   |   |-- matchit.txt
     |   |   |-- rails.txt
     |   |   |-- surround.txt
@@ -42,10 +51,13 @@ All dotfiles are arranged under the directory "home" as they would be in a user'
     |   |   `-- winmanager.txt
     |   |-- filetype.vim
     |   |-- ftplugin
+    |   |   |-- Wikipedia.vim
     |   |   |-- mail.vim
     |   |   |-- ocaml_enhcomm.vim
     |   |   |-- perl.vim
     |   |   |-- php_enhcomm.vim
+    |   |   |-- php_make.vim
+    |   |   |-- php_opts.vim
     |   |   `-- ruby_structure.vim
     |   |-- mcc.exrc
     |   |-- nerdtree_plugin
@@ -55,8 +67,10 @@ All dotfiles are arranged under the directory "home" as they would be in a user'
     |   |   |-- DirDiff.vim
     |   |   |-- EnhancedCommentify.vim
     |   |   |-- NERD_tree.vim
-    |   |   |-- autoclose.vim
+    |   |   |-- ack.vim
     |   |   |-- bufexplorer.vim
+    |   |   |-- delimitMate.vim
+    |   |   |-- fugitive.vim
     |   |   |-- matchit.vim
     |   |   |-- rails.vim
     |   |   |-- repeat.vim
@@ -78,6 +92,7 @@ All dotfiles are arranged under the directory "home" as they would be in a user'
     |   |   |-- CVSAnnotate.vim
     |   |   |-- SVKAnnotate.vim
     |   |   |-- SVNAnnotate.vim
+    |   |   |-- Wikipedia.vim
     |   |   |-- gitAnnotate.vim
     |   |   |-- mkd.vim
     |   |   `-- vcscommit.vim
