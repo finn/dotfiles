@@ -268,5 +268,3 @@ let python_highlight_all = 1
 
 " tweak completion options
 set completeopt=menuone,longest,preview
-
-let loaded_delimitMate = 0
