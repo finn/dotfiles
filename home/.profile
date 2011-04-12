@@ -59,3 +59,4 @@ export PIP_RESPECT_VIRTUALENV=true
 export PIP_VIRTUALENV_BASE=$WORKON_HOME
 
 export EDITOR=vim
+export CLICOLOR=vim
