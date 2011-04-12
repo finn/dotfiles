@@ -38,14 +38,24 @@ if [ -x /opt/local/bin/port ]; then
      export PKG_CONFIG_PATH=/opt/local/lib/pkgconfig:${PKG_CONFIG_PATH}
 fi
 
-# set PATH so it includes ruby gems bin if it exists
-if [ -d /var/lib/gems/1.8/bin ] ; then
-    export PATH="/var/lib/gems/1.8/bin:$PATH"
-fi
-
 # add home bin if it exists
 if [ -d "$HOME/bin" ] ; then
     export PATH="$HOME/bin:$PATH"
 fi
+
+# This loads RVM into a shell session.
+[[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm"
+[[ -r $rvm_path/scripts/completion ]] && . $rvm_path/scripts/completion
+
+# This loads perlbrew into a shell session.
+[[ -s "$HOME/perl5/perlbrew/etc/bashrc" ]] && source "$HOME/perl5/perlbrew/etc/bashrc"
+
+# Load python virtualenvwrapper (running on top of python-27 in macports)
+[[ -s /opt/local/bin/virtualenvwrapper.sh ]] && source /opt/local/bin/virtualenvwrapper.sh
+# make pip respect virtualenv
+export PIP_REQUIRE_VIRTUALENV=true
+export PIP_RESPECT_VIRTUALENV=true
+# make pip respect virtualenvwrapper
+export PIP_VIRTUALENV_BASE=$WORKON_HOME
 
 export EDITOR=vim
