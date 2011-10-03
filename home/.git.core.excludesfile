@@ -3,6 +3,7 @@
 # mac os x
 .DS_Store
 # vim
+.sw[a-z]
 .*.sw[a-z]
 *.un~
 Session.vim
