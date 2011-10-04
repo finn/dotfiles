@@ -9,7 +9,8 @@ endif
 set nocompatible
 noremap Q gq
 set nobackup writebackup
-set ignorecase smartcase
+set ignorecase
+set smartcase
 set fileformat=unix
 set shortmess+=I
 set vb
@@ -28,6 +29,10 @@ set laststatus=2
 if has("statusline")
     set statusline=%<%f\ %h%m%r%=%{\"[\".&ff.\"]\ \"}%{\"[\".(&fenc==\"\"?&enc:&fenc).((exists(\"+bomb\")\ &&\ &bomb)?\",B\":\"\").\"]\ \"}%k\ %-14.(%l,%c%V%)\ %P
 endif
+" default to utf-8
+set encoding=utf-8
+" add a little context to cursor location
+set scrolloff=3
 
 " no blinking block cursor
 set gcr=n:blinkon0
@@ -36,6 +41,9 @@ set autowrite
 " highlight searches
 set hlsearch
 set showmatch
+set incsearch
+" clear search highlight
+nnoremap <C-L> :nohlsearch<cr>:redraw!<cr>
 
 " line numbers
 set number
@@ -80,3 +88,8 @@ if (v:version >= 700)
     noremap <C-Tab> gt
     noremap <C-S-Tab> gT
 endif
+
+" get hid of help when you hit f1 instead of esc
+inoremap <F1> <ESC>
+nnoremap <F1> <ESC>
+vnoremap <F1> <ESC>
