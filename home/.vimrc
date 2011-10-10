@@ -53,13 +53,6 @@ set list
 set cul
 
 "" set path to directory of file being edited
-"if exists('+autochdir')
-"  set autochdir
-"else
-"  "au BufEnter * silent! lcd %:p:h:gs/ /\\ /
-"  au BufEnter * lcd %:p:h
-"endif
-" trying this for better compatibility with plugins
 autocmd BufEnter * silent! lcd %:p:h
 
 " softwrap
@@ -79,6 +72,9 @@ set listchars=precedes:$,extends:$,tab:»·,trail:·,eol:¬
 " better cmdline tab completion
 "set wildmenu
 "set wildmode=list:longest,full
+
+" turn on filetype detection and syntax highlighting
+filetype plugin indent on
 
 " map :W to :w for typos
 com -nargs=? -complete=file W w <args>
