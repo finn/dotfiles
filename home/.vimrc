@@ -21,6 +21,7 @@ set showcmd
 set tabstop=4
 set softtabstop=4
 set shiftwidth=4
+set shiftround
 set smarttab
 set expandtab
 " always display status line at bottom of vim
@@ -33,6 +34,10 @@ endif
 set encoding=utf-8
 " add a little context to cursor location
 set scrolloff=3
+
+" more history
+set history=1000
+set undolevels=1000
 
 " no blinking block cursor
 set gcr=n:blinkon0
@@ -51,9 +56,8 @@ set number
 set list
 " highlight cursor line
 set cul
-
-"" set path to directory of file being edited
-autocmd BufEnter * silent! lcd %:p:h
+" allow hidden (non-saved) buffers
+set hidden
 
 " softwrap
 set linebreak
@@ -75,6 +79,9 @@ set listchars=precedes:$,extends:$,tab:»·,trail:·,eol:¬
 
 " turn on filetype detection and syntax highlighting
 filetype plugin indent on
+
+" set path to directory of file being edited
+autocmd BufEnter * silent! lcd %:p:h
 
 " map :W to :w for typos
 com -nargs=? -complete=file W w <args>
