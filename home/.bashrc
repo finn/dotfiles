@@ -8,8 +8,9 @@ if [ -f ~/.bash_aliases ]; then
 fi
 
 # bash-completion
-if [ -f /opt/local/etc/bash_completion ]; then
-    . /opt/local/etc/bash_completion
+bash_complete="/usr/local/etc/bash_completion"
+if [ -f $bash_complete ]; then
+    . $bash_complete
 fi
 
 # enable programmable completion features (you don't need to enable
