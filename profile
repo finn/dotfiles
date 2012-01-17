@@ -39,7 +39,3 @@ if [ -n "$BASH_VERSION" ]; then
         source "$HOME/.bashrc"
     fi
 fi
-
-# load rvm
-[[ -f "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm"
-[[ -r $rvm_path/scripts/completion ]] && source $rvm_path/scripts/completion

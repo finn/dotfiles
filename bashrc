@@ -45,3 +45,16 @@ if [ -f $venvwrap ]; then
     # make pip respect virtualenvwrapper
     export PIP_VIRTUALENV_BASE=$WORKON_HOME
 fi
+
+# load rvm
+[[ -f "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm"
+[[ -r $rvm_path/scripts/completion ]] && source $rvm_path/scripts/completion
+
+# load local bash customizations
+bashrcd=~/.bashrc.d
+if [[ -d $bashrcd && -r $bashrcd && -x $bashrcd ]]; then
+    for f in $(ls "$bashrcd"); do
+        f=$bashrcd/$f
+        [[ ${f##*/} != @(*~|*.bak|*.swp) && -f $f && -r $f ]] && source $f
+    done
+fi
