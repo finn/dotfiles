@@ -18,6 +18,17 @@
 # When  a  login  shell  exits, bash reads and executes commands from the
 # file ~/.bash_logout, if it exists.
 #
+
+# add home bin if it exists
+if [ -d "$HOME/bin" ] ; then
+    export PATH="$HOME/bin:$PATH"
+fi
+
+# vim!
+export EDITOR=vim
+# terminal colors
+export CLICOLOR=1
+
 # When an interactive shell that is not a login shell  is  started,  bash
 # reads  and executes commands from ~/.bashrc, if that file exists.
 
@@ -25,34 +36,10 @@
 if [ -n "$BASH_VERSION" ]; then
     # include .bashrc if it exists
     if [ -f "$HOME/.bashrc" ]; then
-        . "$HOME/.bashrc"
+        source "$HOME/.bashrc"
     fi
 fi
 
-# add home bin if it exists
-if [ -d "$HOME/bin" ] ; then
-    export PATH="$HOME/bin:$PATH"
-fi
-
 # load rvm
-[[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm"
-[[ -r $rvm_path/scripts/completion ]] && . $rvm_path/scripts/completion
-
-# load perlbrew
-[[ -s "$HOME/perl5/perlbrew/etc/bashrc" ]] && source "$HOME/perl5/perlbrew/etc/bashrc"
-
-# load virtualenvwrapper for python
-venvwrap="/usr/local/bin/virtualenvwrapper.sh"
-if [[ -s $venvwrap ]]; then
-    source $venvwrap
-    # make pip respect virtualenv
-    export PIP_REQUIRE_VIRTUALENV=true
-    export PIP_RESPECT_VIRTUALENV=true
-    # make pip respect virtualenvwrapper
-    export PIP_VIRTUALENV_BASE=$WORKON_HOME
-fi
-
-# vim!
-export EDITOR=vim
-# terminal colors
-export CLICOLOR=1
+[[ -f "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm"
+[[ -r $rvm_path/scripts/completion ]] && source $rvm_path/scripts/completion
