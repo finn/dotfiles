@@ -51,7 +51,7 @@ fi
 [[ -r $rvm_path/scripts/completion ]] && source $rvm_path/scripts/completion
 
 # load local bash customizations
-bashrcd=~/.bashrc.d
+bashrcd="$HOME/.bashrc.d"
 if [[ -d $bashrcd && -r $bashrcd && -x $bashrcd ]]; then
     for f in $(ls "$bashrcd"); do
         f=$bashrcd/$f
