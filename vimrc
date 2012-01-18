@@ -140,6 +140,10 @@ noremap Q gq
 
 """ plugin settings
 
+" TODO taglist config
+
+" TODO NERD tree config
+
 " solarized
 if has('gui_running')
     colorscheme solarized
