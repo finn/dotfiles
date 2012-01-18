@@ -64,9 +64,6 @@ endif
 syntax enable
 filetype plugin indent on
 set background=dark
-if has('gui_running')
-    colorscheme solarized
-endif
 
 """ text formatting
 set backspace=indent,eol,start
@@ -140,6 +137,13 @@ nnoremap <F1> <ESC>
 vnoremap <F1> <ESC>
 " format lines
 noremap Q gq
+
+""" plugin settings
+
+" solarized
+if has('gui_running')
+    colorscheme solarized
+endif
 
 " TODO ?
 " errorbells
