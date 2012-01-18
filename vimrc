@@ -6,6 +6,9 @@ if has("win32")
     set runtimepath^=~/.vim
 endif
 
+" pathogen for plugin bundles
+call pathogen#infect()
+
 " vim not vi
 set nocompatible
 
