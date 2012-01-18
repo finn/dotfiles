@@ -63,6 +63,10 @@ endif
 " turn on filetype detection and syntax highlighting
 syntax enable
 filetype plugin indent on
+set background=dark
+if has('gui_running')
+    colorscheme solarized
+endif
 
 """ text formatting
 set backspace=indent,eol,start
@@ -130,7 +134,6 @@ if (v:version >= 700)
     noremap <C-Tab> gt
     noremap <C-S-Tab> gT
 endif
-
 " get rid of help when you hit f1 instead of esc
 inoremap <F1> <ESC>
 nnoremap <F1> <ESC>
