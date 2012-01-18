@@ -17,7 +17,16 @@
 # ...
 # When  a  login  shell  exits, bash reads and executes commands from the
 # file ~/.bash_logout, if it exists.
-#
+
+# TODO
+# if /usr/local/bin is in the PATH remove it
+#if [ -d "$HOME/bin" ] ; then
+#    export PATH="$HOME/bin:$PATH"
+#fi
+# ensure /usr/local/bin is at the beginning of the PATH
+if [ -d "/usr/local/bin" ] ; then
+    export PATH="/usr/local/bin:$PATH"
+fi
 
 # add home bin if it exists
 if [ -d "$HOME/bin" ] ; then
