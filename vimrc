@@ -9,16 +9,15 @@ endif
 " vim not vi
 set nocompatible
 
-" format lines
-noremap Q gq
-
 """ files
 " no backup or swap files, thanks
 set nobackup
 set nowritebackup
 set noswapfile
-" write files when shuffling buffers
+" write files before :next, :make, etc.
 set autowrite
+" reload changed files
+set autoread
 " allow hidden (non-saved) buffers
 set hidden
 " always default to unix style files
@@ -35,7 +34,7 @@ set showcmd
 " always display status line at bottom of vim
 set laststatus=2
 " add a little context to cursor location
-set scrolloff=3
+set scrolloff=1
 " no blinking block cursor
 set guicursor=n:blinkon0
 " line numbers
@@ -45,15 +44,22 @@ set list
 " highlight cursor line
 set cursorline
 set ttyfast
-
 " softwrap
 set linebreak
 "set showbreak=>
 " show as much of last line as possible instead of @
 set display+=lastline
-
 " the whitespace indicators
 set listchars=precedes:$,extends:$,tab:»·,trail:·,eol:¬
+" fancy statusline with file encoding and BOM
+if has("statusline")
+    set statusline=%<%f\ %h%m%r%=%{\"[\".&ff.\"]\ \"}%{\"[\".(&fenc==\"\"?&enc:&fenc).((exists(\"+bomb\")\ &&\ &bomb)?\",B\":\"\").\"]\ \"}%k\ %-14.(%l,%c%V%)\ %P
+endif
+
+""" filetypes, syntax coloring
+" turn on filetype detection and syntax highlighting
+syntax enable
+filetype plugin indent on
 
 """ text formatting
 set backspace=indent,eol,start
@@ -64,15 +70,6 @@ set shiftwidth=4
 set shiftround
 set smarttab
 set expandtab
-
-" fancy statusline with file encoding and BOM
-if has("statusline")
-    set statusline=%<%f\ %h%m%r%=%{\"[\".&ff.\"]\ \"}%{\"[\".(&fenc==\"\"?&enc:&fenc).((exists(\"+bomb\")\ &&\ &bomb)?\",B\":\"\").\"]\ \"}%k\ %-14.(%l,%c%V%)\ %P
-endif
-
-" more history
-set history=1000
-set undolevels=1000
 
 """ search / regexp
 set ignorecase
@@ -90,9 +87,13 @@ nnoremap <C-L> :nohlsearch<cr>:redraw!<cr>
 " g for global flag by default
 set gdefault
 
-""" movement
+""" movement, visuals
 " don't jump to first char when paging
 set nostartofline
+set virtualedit=block
+
+""" mouse
+set mousemodel=popup
 
 """ splits
 set splitbelow
@@ -102,34 +103,37 @@ set splitright
 " tweak completion options
 "set completeopt=menuone,longest,preview
 
-" better cmdline tab completion
+""" cmdline stuff
+" more history
+set history=1000
+set undolevels=1000
+" better tab completion
 set wildmenu
 set wildmode=list:longest,full
+"set wildmode=longest:full,full
 " TODO figure out how to detect if this is available or not
 " only available in later versions
 "if (v:version >= 703)
     "set wildignorecase
 "endif
 
-" turn on filetype detection and syntax highlighting
-filetype plugin indent on
-
+""" autocmds and remaps
 " set path to directory of file being edited
 autocmd BufEnter * silent! lcd %:p:h
-
 " map :W to :w for typos
 com -nargs=? -complete=file W w <args>
-
 " ctrl-tab and ctrl-shift-tab cycle tabs
 if (v:version >= 700)
     noremap <C-Tab> gt
     noremap <C-S-Tab> gT
 endif
 
-" get hid of help when you hit f1 instead of esc
+" get rid of help when you hit f1 instead of esc
 inoremap <F1> <ESC>
 nnoremap <F1> <ESC>
 vnoremap <F1> <ESC>
+" format lines
+noremap Q gq
 
 " TODO ?
 " errorbells
