@@ -18,14 +18,12 @@
 # When  a  login  shell  exits, bash reads and executes commands from the
 # file ~/.bash_logout, if it exists.
 
-# TODO
-# if /usr/local/bin is in the PATH remove it
-#if [ -d "$HOME/bin" ] ; then
-#    export PATH="$HOME/bin:$PATH"
-#fi
-# ensure /usr/local/bin is at the beginning of the PATH
+# put /usr/local/bin & sbin before standard system paths
 if [ -d "/usr/local/bin" ] ; then
-    export PATH="/usr/local/bin:$PATH"
+    # remove /usr/local paths
+    PATH_WITHOUT_USRLOCAL=$(perl -e 'print join(":", grep(!m"/usr/local/s?bin", split(/:/, $ENV{PATH}) ));')
+    # and put them in front
+    export PATH="/usr/local/bin:/usr/local/sbin:$PATH_WITHOUT_USRLOCAL"
 fi
 
 # add home bin if it exists
