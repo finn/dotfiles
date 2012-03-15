@@ -4,4 +4,4 @@
 "     perltidyrc
 " to load options from
 command! -range=% -nargs=* Tidy <line1>,<line2>!
-  \perltidy -profile=.../perltidyrc <args>
+  \perltidy --profile=.../perltidyrc <args>
