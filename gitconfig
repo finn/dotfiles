@@ -17,13 +17,14 @@
 [color]
     ui = auto
 [diff]
-    renames = copy
-    tool = opendiff
     renamelimit = 0
+    renames = copy
+    tool = p4merge
 [difftool]
     prompt = false
 [merge]
-    tool = opendiff
+    renamelimit = 0
+    tool = p4merge
 [mergetool]
     prompt = false
 [pack]
