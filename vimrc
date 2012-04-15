@@ -149,6 +149,9 @@ if has('gui_running')
     colorscheme solarized
 endif
 
+" powerline
+let g:Powerline_symbols = 'fancy'
+
 " TODO ?
 " errorbells
 " visualbells
