@@ -152,6 +152,33 @@ endif
 " powerline
 let g:Powerline_symbols = 'fancy'
 
+" tcomment
+" always put comment string in the first column
+let g:tcommentOptions = {'col': 1}
+" redefine some commonish comment types to remove leading whitespace
+let g:tcomment_types = {
+            \ 'apache':           '#%s',
+            \ 'cpp':              '//%s',
+            \ 'cfg':              '#%s',
+            \ 'conf':             '#%s',
+            \ 'crontab':          '#%s',
+            \ 'cs':               '//%s',
+            \ 'fstab':            '#%s',
+            \ 'gitcommit':        '#%s',
+            \ 'gitignore':        '#%s',
+            \ 'javaScript':       '//%s',
+            \ 'javascript':       '//%s',
+            \ 'java':             '//%s',
+            \ 'perl':             '#%s',
+            \ 'puppet':           '#%s',
+            \ 'python':           '#%s',
+            \ 'ruby':             '#%s',
+            \ 'ruby_3':           '###%s',
+            \ 'sh':               '#%s',
+            \ 'vim':              '"%s',
+            \ 'vim_3':            '"""%s',
+            \ }
+
 " TODO ?
 " errorbells
 " visualbells
