@@ -1,0 +1,7 @@
+# don't require checking result of 'print'
+[InputOutput::RequireCheckedSyscalls]
+functions = :builtins
+exclude_functions = print
+
+# no RCS warnings
+[-Miscellanea::RequireRcsKeywords]
