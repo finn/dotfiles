@@ -5,3 +5,12 @@ exclude_functions = print
 
 # no RCS warnings
 [-Miscellanea::RequireRcsKeywords]
+
+# no $VERSION warnings
+[-Modules::RequireVersionVar]
+
+# no tidy warnings
+[-CodeLayout::RequireTidyCode]
+
+# no POD section warnings
+[-Documentation::RequirePodSections]
