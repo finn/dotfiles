@@ -4,10 +4,9 @@
 [github]
     user = finn
 [core]
-    autocrlf = input
-    safecrlf = true
     excludesfile = ~/.git.core.excludesfile
     whitespace = trailing-space,cr-at-eol
+    ignorecase = false
 [alias]
     st = status
     ci = commit
