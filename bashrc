@@ -36,19 +36,25 @@ fi
 
 # XXX this is slow to load
 # load virtualenvwrapper for python
-venvwrap="/usr/local/bin/virtualenvwrapper.sh"
-if [ -f $venvwrap ]; then
-    source $venvwrap
-    # make pip respect virtualenv
-    export PIP_REQUIRE_VIRTUALENV=true
-    export PIP_RESPECT_VIRTUALENV=true
-    # make pip respect virtualenvwrapper
-    export PIP_VIRTUALENV_BASE=$WORKON_HOME
-fi
+#venvwrap="/usr/local/bin/virtualenvwrapper.sh"
+#if [ -f $venvwrap ]; then
+#    source $venvwrap
+#    # make pip respect virtualenv
+#    export PIP_REQUIRE_VIRTUALENV=true
+#    export PIP_RESPECT_VIRTUALENV=true
+#    # make pip respect virtualenvwrapper
+#    export PIP_VIRTUALENV_BASE=$WORKON_HOME
+#fi
 
 # load rvm
-[[ -f "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm"
-[[ -r $rvm_path/scripts/completion ]] && source $rvm_path/scripts/completion
+#[[ -f "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm"
+#[[ -r $rvm_path/scripts/completion ]] && source $rvm_path/scripts/completion
+
+# load rbenv
+#if [[ -d "$HOME/.rbenv/bin" ]]; then
+#    export PATH="$HOME/.rbenv/bin:$PATH"
+#    eval "$(rbenv init -)"
+#fi
 
 # load local bash customizations
 bashrcd="$HOME/.bashrc.d"
