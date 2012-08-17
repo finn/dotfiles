@@ -61,6 +61,8 @@ bashrcd="$HOME/.bashrc.d"
 if [[ -d $bashrcd && -r $bashrcd && -x $bashrcd ]]; then
     for f in $(ls "$bashrcd"); do
         f=$bashrcd/$f
-        [[ ${f##*/} != @(*~|*.bak|*.swp) && -f $f && -r $f ]] && source $f
+        if [[ -f $f && -r $f && $f != *~ && $f != *.bak && $f != *.swp ]]; then
+            source $f
+        fi
     done
 fi
