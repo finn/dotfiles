@@ -21,9 +21,9 @@
 # put /usr/local/bin & sbin before standard system paths
 if [ -d "/usr/local/bin" ] ; then
     # remove /usr/local paths
-    PATH_WITHOUT_USRLOCAL=$(perl -e 'print join(":", grep(!m"/usr/local/s?bin", split(/:/, $ENV{PATH}) ));')
+    path_without_usr_local=$(perl -e 'print join(":", grep(!m"/usr/local/s?bin", split(/:/, $ENV{PATH}) ));')
     # and put them in front
-    export PATH="/usr/local/bin:/usr/local/sbin:$PATH_WITHOUT_USRLOCAL"
+    export PATH="/usr/local/bin:/usr/local/sbin:$path_without_usr_local"
 fi
 
 # add home bin if it exists
