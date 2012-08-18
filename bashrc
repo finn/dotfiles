@@ -34,7 +34,7 @@ if [ -d $PERLBREW_ROOT ]; then
     [[ -f $perlbrew_bashrc ]] && source $perlbrew_bashrc
 fi
 
-# XXX this is slow to load
+# XXX this is slow to load?
 # load virtualenvwrapper for python
 venvwrap="/usr/local/bin/virtualenvwrapper.sh"
 if [ -f $venvwrap ]; then
