@@ -35,6 +35,8 @@ fi
 export EDITOR=vim
 # terminal colors
 export CLICOLOR=1
+# color in grep
+export GREP_OPTIONS='--color=auto'
 
 # When an interactive shell that is not a login shell  is  started,  bash
 # reads  and executes commands from ~/.bashrc, if that file exists.
@@ -45,4 +47,9 @@ if [ -n "$BASH_VERSION" ]; then
     if [ -f "$HOME/.bashrc" ]; then
         source "$HOME/.bashrc"
     fi
+fi
+
+git_prompt="$HOME/Documents/projects/git-prompt/git-prompt.sh"
+if [ -f $git_prompt ]; then
+    [[ $- == *i* ]] && . $git_prompt
 fi
