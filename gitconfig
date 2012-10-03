@@ -6,7 +6,6 @@
 [core]
     excludesfile = ~/.git.core.excludesfile
     whitespace = trailing-space,cr-at-eol
-    ignorecase = false
 [alias]
     st = status
     ci = commit
@@ -18,7 +17,7 @@
 [diff]
     renamelimit = 0
     renames = copy
-    tool = p4merge
+    tool = opendiff
 [difftool]
     prompt = false
 [merge]
@@ -29,4 +28,4 @@
 [pack]
     threads = 0
 [credential]
-	helper = osxkeychain
+    helper = osxkeychain

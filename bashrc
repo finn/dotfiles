@@ -1,3 +1,19 @@
+# When  bash  is  invoked as an interactive login shell, or as a
+# non-interactive shell with the --login option, it first reads and executes
+# commands from the file /etc/profile, if that file exists.  After reading that
+# file, it looks for ~/.bash_profile, ~/.bash_login, and ~/.profile, in that
+# order,  and reads  and  executes  commands from the first one that exists and
+# is readable.  The --noprofile option may be used when the shell is started to
+# inhibit this behavior.
+#
+# When a login shell exits, bash reads and executes commands from the file
+# ~/.bash_logout, if it exists.
+#
+# When an interactive shell that is not a login shell is started, bash reads
+# and executes commands from ~/.bashrc, if that  file  exists.  This  may  be
+# inhibited by using the --norc option.  The --rcfile file option will force
+# bash to read and execute commands from file instead of ~/.bashrc.
+
 # Alias definitions.
 # You may want to put all your additions into a separate file like
 # ~/.bash_aliases, instead of adding them here directly.
@@ -34,18 +50,6 @@ if [ -d $PERLBREW_ROOT ]; then
     [[ -f $perlbrew_bashrc ]] && source $perlbrew_bashrc
 fi
 
-# XXX this is slow to load?
-# load virtualenvwrapper for python
-venvwrap="/usr/local/bin/virtualenvwrapper.sh"
-if [ -f $venvwrap ]; then
-    source $venvwrap
-    # make pip respect virtualenv
-    export PIP_REQUIRE_VIRTUALENV=true
-    export PIP_RESPECT_VIRTUALENV=true
-    # make pip respect virtualenvwrapper
-    export PIP_VIRTUALENV_BASE=$WORKON_HOME
-fi
-
 # load rvm
 #[[ -f "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm"
 #[[ -r $rvm_path/scripts/completion ]] && source $rvm_path/scripts/completion
@@ -65,4 +69,17 @@ if [[ -d $bashrcd && -r $bashrcd && -x $bashrcd ]]; then
             source $f
         fi
     done
+fi
+
+# XXX this is slow to load?
+# load virtualenvwrapper for python (after custom PATHs)
+venvwrap="virtualenvwrapper.sh"
+which -s $venvwrap
+if [ $? -eq 0 ]; then
+    venvwrap=`which $venvwrap`
+    source $venvwrap
+    # make pip respect virtualenv
+    export PIP_RESPECT_VIRTUALENV=true
+    # make pip respect virtualenvwrapper
+    export PIP_VIRTUALENV_BASE=$WORKON_HOME
 fi
