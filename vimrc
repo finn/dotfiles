@@ -146,10 +146,10 @@ noremap Q gq
 
 
 " solarized
-let g:solarized_termcolors=256
-" if has('gui_running')
+if ( has('gui_running') || &t_Co == 256 )
+    let g:solarized_termcolors=256
     colorscheme solarized
-" endif
+endif
 
 " powerline
 let g:Powerline_symbols = 'fancy'
