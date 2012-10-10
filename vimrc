@@ -144,10 +144,12 @@ noremap Q gq
 
 " TODO NERD tree config
 
+
 " solarized
-if has('gui_running')
+let g:solarized_termcolors=256
+" if has('gui_running')
     colorscheme solarized
-endif
+" endif
 
 " powerline
 let g:Powerline_symbols = 'fancy'
