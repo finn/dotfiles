@@ -144,8 +144,10 @@ noremap Q gq
 
 " TODO NERD tree config
 
+
 " solarized
-if has('gui_running')
+if ( has('gui_running') || &t_Co == 256 )
+    let g:solarized_termcolors=256
     colorscheme solarized
 endif
 
