@@ -2,6 +2,8 @@ Clone dotfiles to $HOME and symlink the appropriate dotfiles e.g.
 
     ln -nsf dotfiles/vimrc .vimrc
 
+Contents:
+
     dotfiles/
     ├── Menlo-ForPowerline.ttc.zip
     ├── README.md
