@@ -1,4 +1,4 @@
-Clone dotfiles to $HOME and symlink the appropriate dotfiles e.g.
+Clone `dotfiles` to `$HOME` and symlink the appropriate dotfiles e.g.
 
     ln -nsf dotfiles/vimrc .vimrc
 
