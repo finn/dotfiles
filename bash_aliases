@@ -7,5 +7,6 @@ alias ll='ls -l'
 alias la='ls -A'
 alias ls='ls -CF'
 # location/navigation
-alias .='pwd'
-alias ..='cd .'
+alias ..='cd ..'
+
+# vim: filetype=sh
