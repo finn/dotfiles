@@ -44,7 +44,7 @@ export GREP_OPTIONS='--color=auto'
 if [ -n "$BASH_VERSION" ]; then
     # include .bashrc if it exists
     if [ -f "$HOME/.bashrc" ]; then
-        source "$HOME/.bashrc"
+        . "$HOME/.bashrc"
     fi
 fi
 
@@ -52,3 +52,5 @@ git_prompt="$HOME/Documents/projects/git-prompt/git-prompt.sh"
 if [ -f $git_prompt ]; then
     [[ $- == *i* ]] && . $git_prompt
 fi
+
+# vim: filetype=sh
