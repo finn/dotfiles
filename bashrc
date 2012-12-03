@@ -54,10 +54,10 @@ fi
 #[[ -r $rvm_path/scripts/completion ]] && . $rvm_path/scripts/completion
 
 # load rbenv
-#if [[ -d "$HOME/.rbenv/bin" ]]; then
-#    export PATH="$HOME/.rbenv/bin:$PATH"
-#    eval "$(rbenv init -)"
-#fi
+if [[ -d "$HOME/.rbenv/bin" ]]; then
+    export PATH="$HOME/.rbenv/bin:$PATH"
+    eval "$(rbenv init -)"
+fi
 
 # load local bash customizations
 bashrcd="$HOME/.bashrc.d"
