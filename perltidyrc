@@ -1,0 +1,89 @@
+# perltidy -l=120 -mbl=1 -nola -bar -t -b
+#
+#       -l=n, --maximum-line-length=n
+#           The default maximum line length is n=80 characters.  Perltidy will
+#           try to find line break points to keep lines below this length.
+#           However, long quotes and side comments may cause lines to exceed
+#           this length.  Setting -l=0 is equivalent to setting -l=(a large
+#           number).
+#
+#       -mbl=n --maximum-consecutive-blank-lines=n
+#           This parameter specifies the maximum number of consecutive blank
+#           lines which will be output within code sections of a script.  The
+#           default is n=1.  If the input file has more than n consecutive
+#           blank lines, the number will be reduced to n.  If n=0 then no blank
+#           lines will be output (unless all old blank lines are retained with
+#           the -kbl=2 flag of the next section).
+#
+#           This flag obviously does not apply to pod sections, here-documents,
+#           and quotes.
+#
+#       -olq, --outdent-long-quotes
+#           When -olq is set, lines which is a quoted string longer than the
+#           value maximum-line-length will have their indentation removed to
+#           make them more readable.  This is the default.  To prevent such
+#           out-denting, use -nolq or --nooutdent-long-lines.
+#
+#       Outdenting Labels: -ola,  --outdent-labels
+#           This command will cause labels to be outdented by 2 spaces (or
+#           whatever -ci has been set to), if possible.  This is the default.
+#           For example:
+#
+#                   my $i;
+#                 LOOP: while ( $i = <FOTOS> ) {
+#                       chomp($i);
+#                       next unless $i;
+#                       fixit($i);
+#                   }
+#
+#           Use -nola to not outdent labels.
+#
+#       -olc, --outdent-long-comments
+#           When -olc is set, lines which are full-line (block) comments
+#           longer than the value maximum-line-length will have their
+#           indentation removed.  This is the default; use -nolc to prevent
+#           outdenting.
+#
+#       -bar,    --opening-brace-always-on-right
+#           The default style, -nbl places the opening code block brace on a
+#           new line if it does not fit on the same line as the opening
+#           keyword, like this:
+#
+#                   if ( $bigwasteofspace1 && $bigwasteofspace2
+#                     || $bigwasteofspace3 && $bigwasteofspace4 )
+#                   {
+#                       big_waste_of_time();
+#                   }
+#
+#           To force the opening brace to always be on the right, use the -bar
+#           flag.  In this case, the above example becomes
+#
+#                   if ( $bigwasteofspace1 && $bigwasteofspace2
+#                     || $bigwasteofspace3 && $bigwasteofspace4 ) {
+#                       big_waste_of_time();
+#                   }
+#
+#           A conflict occurs if both -bl and -bar are specified.
+#
+#           -bbc, --blanks-before-comments
+#               A blank line will be introduced before a full-line comment.
+#               This is the default. Use -nbbc or --noblanks-before-comments
+#               to prevent such blank lines from being introduced.
+#
+#
+#       -b,    --backup-and-modify-in-place
+#           Modify the input file or files in-place and save the original with
+#           the extension .bak.  Any existing .bak file will be deleted.  See
+#           next item for changing the default backup extension.
+#
+#           A -b flag will be ignored if input is from standard input, or if
+#           the -html flag is set.
+
+-l=120
+-mbl=1
+-nolq
+-nola
+-nolc
+-bar
+-nbbc
+-b
