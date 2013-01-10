@@ -49,10 +49,6 @@ if [ -d $PERLBREW_ROOT ]; then
     [[ -f $perlbrew_bashrc ]] && . $perlbrew_bashrc
 fi
 
-# load rvm
-#[[ -f "$HOME/.rvm/scripts/rvm" ]] && . "$HOME/.rvm/scripts/rvm"
-#[[ -r $rvm_path/scripts/completion ]] && . $rvm_path/scripts/completion
-
 # load rbenv
 if [[ -d "$HOME/.rbenv/bin" ]]; then
     export PATH="$HOME/.rbenv/bin:$PATH"
