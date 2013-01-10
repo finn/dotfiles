@@ -1,7 +1,7 @@
-# don't require checking result of 'print'
+# don't require checking result of 'print' or 'say'
 [InputOutput::RequireCheckedSyscalls]
 functions = :builtins
-exclude_functions = print
+exclude_functions = print say
 
 # no RCS warnings
 [-Miscellanea::RequireRcsKeywords]
@@ -14,3 +14,6 @@ exclude_functions = print
 
 # no POD section warnings
 [-Documentation::RequirePodSections]
+
+# no backtick warnings
+[-InputOutput::ProhibitBacktickOperators]
