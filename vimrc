@@ -181,6 +181,25 @@ let g:tcomment_types = {
             \ 'vim_3':            '"""%s',
             \ }
 
+" markdown
+let g:markdown_fenced_languages = [
+            \ 'ruby',
+            \ 'perl',
+            \ 'python',
+            \ 'javascript',
+            \ 'html',
+            \ 'sql',
+            \ 'php',
+            \ 'css',
+            \ 'json',
+            \ 'java',
+            \ 'cpp',
+            \ 'apache',
+            \ 'bash',
+            \ ]
+
+
+
 " TODO ?
 " errorbells
 " visualbells
