@@ -198,7 +198,8 @@ let g:markdown_fenced_languages = [
             \ 'bash',
             \ ]
 
-
+" yankring
+let g:yankring_history_file = '.vim_yankring_history'
 
 " TODO ?
 " errorbells
