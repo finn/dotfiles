@@ -191,11 +191,9 @@ let g:markdown_fenced_languages = [
             \ 'sql',
             \ 'php',
             \ 'css',
-            \ 'json',
             \ 'java',
             \ 'cpp',
             \ 'apache',
-            \ 'bash',
             \ ]
 
 " yankring
