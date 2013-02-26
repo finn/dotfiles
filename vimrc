@@ -55,9 +55,9 @@ set display+=lastline
 " the whitespace indicators
 set listchars=precedes:$,extends:$,tab:»·,trail:·,eol:¬
 " fancy statusline with file encoding and BOM
-if has("statusline")
-    set statusline=%<%f\ %h%m%r%=%{\"[\".&ff.\"]\ \"}%{\"[\".(&fenc==\"\"?&enc:&fenc).((exists(\"+bomb\")\ &&\ &bomb)?\",B\":\"\").\"]\ \"}%k\ %-14.(%l,%c%V%)\ %P
-endif
+"if has("statusline")
+    "set statusline=%<%f\ %h%m%r%=%{\"[\".&ff.\"]\ \"}%{\"[\".(&fenc==\"\"?&enc:&fenc).((exists(\"+bomb\")\ &&\ &bomb)?\",B\":\"\").\"]\ \"}%k\ %-14.(%l,%c%V%)\ %P
+"endif
 
 """ filetypes, syntax coloring
 " turn on filetype detection and syntax highlighting
