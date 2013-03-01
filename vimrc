@@ -152,7 +152,8 @@ if ( has('gui_running') || &t_Co == 256 )
 endif
 
 " powerline
-let g:Powerline_symbols = 'fancy'
+" TODO re-enable once powerline isn't broken
+"let g:Powerline_symbols = 'fancy'
 
 " tcomment
 " always put comment string in the first column
