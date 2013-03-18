@@ -152,6 +152,7 @@ if ( has('gui_running') || &t_Co == 256 )
 endif
 
 " powerline
+" TODO re-enable once powerline isn't broken
 "let g:Powerline_symbols = 'fancy'
 
 " tcomment
