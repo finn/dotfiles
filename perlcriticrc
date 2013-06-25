@@ -1,7 +1,7 @@
 # don't require checking result of 'print' or 'say'
 [InputOutput::RequireCheckedSyscalls]
 functions = :builtins
-exclude_functions = print say
+exclude_functions = print say sleep
 
 # no $VERSION warnings
 [-Modules::RequireVersionVar]
