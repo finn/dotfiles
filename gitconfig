@@ -22,10 +22,16 @@
     prompt = false
 [merge]
     renamelimit = 0
-    tool = p4merge
+    keepBackup = false
+    tool = customp4merge
 [mergetool]
     prompt = false
 [pack]
     threads = 0
 [credential]
     helper = osxkeychain
+[mergetool "customp4merge"]
+    cmd = /Applications/p4merge.app/Contents/Resources/launchp4merge "$PWD/$BASE" "$PWD/$REMOTE" "$PWD/$LOCAL" "$PWD/$MERGED"
+    keepTemporaries = false
+    trustExitCode = false
+    keepBackup = false
