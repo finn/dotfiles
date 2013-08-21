@@ -42,11 +42,17 @@ if [ -f $home_complete ]; then
 fi
 
 # load perlbrew
-PERLBREW_ROOT="$HOME/perl5/perlbrew"
-if [ -d $PERLBREW_ROOT ]; then
-    export PERLBREW_ROOT
-    perlbrew_bashrc="$PERLBREW_ROOT/etc/bashrc"
-    [[ -f $perlbrew_bashrc ]] && . $perlbrew_bashrc
+#PERLBREW_ROOT="$HOME/perl5/perlbrew"
+#if [ -d $PERLBREW_ROOT ]; then
+#    export PERLBREW_ROOT
+#    perlbrew_bashrc="$PERLBREW_ROOT/etc/bashrc"
+#    [[ -f $perlbrew_bashrc ]] && . $perlbrew_bashrc
+#fi
+
+# load plenv
+if [[ -d "$HOME/.plenv/bin" ]]; then
+    export PATH="$HOME/.plenv/bin:$PATH"
+    eval "$(plenv init -)"
 fi
 
 # load rbenv
