@@ -49,7 +49,7 @@ fi
 #    [[ -f $perlbrew_bashrc ]] && . $perlbrew_bashrc
 #fi
 
-# load plenv
+# load plenv for custom perls
 if [[ -d "$HOME/.plenv/bin" ]]; then
     export PATH="$HOME/.plenv/bin:$PATH"
     eval "$(plenv init -)"
