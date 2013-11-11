@@ -17,25 +17,23 @@
 
 #include "ClangCompleter.h"
 #include "CompletionData.h"
+#include "../TestUtils.h"
+
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
 #include <boost/filesystem.hpp>
-namespace fs = boost::filesystem;
+
+namespace YouCompleteMe {
 
 using ::testing::ElementsAre;
 using ::testing::WhenSorted;
 
-namespace YouCompleteMe {
-
 TEST( ClangCompleterTest, CandidatesForLocationInFile ) {
-  fs::path path_to_testdata = fs::current_path() / fs::path( "testdata" );
-  fs::path test_file = path_to_testdata / fs::path( "basic.cpp" );
-
   ClangCompleter completer;
   std::vector< CompletionData > completions =
     completer.CandidatesForLocationInFile(
-      test_file.string(),
+      PathToTestFile( "basic.cpp" ).string(),
       11,
       7,
       std::vector< UnsavedFile >(),
@@ -45,25 +43,21 @@ TEST( ClangCompleterTest, CandidatesForLocationInFile ) {
 }
 
 
-TEST( ClangCompleterTest, CandidatesForQueryAndLocationInFileAsync ) {
-  fs::path path_to_testdata = fs::current_path() / fs::path( "testdata" );
-  fs::path test_file = path_to_testdata / fs::path( "basic.cpp" );
-
+TEST( ClangCompleterTest, GetDefinitionLocation ) {
   ClangCompleter completer;
-  completer.EnableThreading();
+  std::string filename = PathToTestFile( "basic.cpp" ).string();
 
-  Future< AsyncCompletions > completions_future =
-    completer.CandidatesForQueryAndLocationInFileAsync(
-      "",
-      test_file.string(),
-      11,
-      7,
+  // Clang operates on the reasonable assumption that line and column numbers
+  // are 1-based.
+  Location actual_location =
+    completer.GetDefinitionLocation(
+      filename,
+      9,
+      3,
       std::vector< UnsavedFile >(),
       std::vector< std::string >() );
 
-  completions_future.Wait();
-
-  EXPECT_TRUE( !completions_future.GetResults()->empty() );
+  EXPECT_EQ( Location( filename, 1, 8 ), actual_location );
 }
 
 } // namespace YouCompleteMe

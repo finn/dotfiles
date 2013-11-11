@@ -112,11 +112,8 @@ std::vector< CXUnsavedFile > ToCXUnsavedFiles(
   std::vector< CXUnsavedFile > clang_unsaved_files( unsaved_files.size() );
 
   for ( uint i = 0; i < unsaved_files.size(); ++i ) {
-    X_VERIFY( unsaved_files[ i ].filename_ );
-    X_VERIFY( unsaved_files[ i ].contents_ );
-    X_VERIFY( unsaved_files[ i ].length_ );
-    clang_unsaved_files[ i ].Filename = unsaved_files[ i ].filename_;
-    clang_unsaved_files[ i ].Contents = unsaved_files[ i ].contents_;
+    clang_unsaved_files[ i ].Filename = unsaved_files[ i ].filename_.c_str();
+    clang_unsaved_files[ i ].Contents = unsaved_files[ i ].contents_.c_str();
     clang_unsaved_files[ i ].Length   = unsaved_files[ i ].length_;
   }
 
@@ -188,12 +185,29 @@ Diagnostic DiagnosticWrapToDiagnostic( DiagnosticWrap diagnostic_wrap ) {
                              &diagnostic.column_number_,
                              &unused_offset );
 
-  diagnostic.filename_ = CXStringToString( clang_getFileName( file ) );
+  diagnostic.filename_ = CXFileToFilepath( file );
   diagnostic.text_ = CXStringToString(
                        clang_getDiagnosticSpelling( diagnostic_wrap.get() ) );
   diagnostic.long_formatted_text_ = FullDiagnosticText( diagnostic_wrap.get() );
 
   return diagnostic;
+}
+
+bool CursorIsValid( CXCursor cursor ) {
+  return !clang_Cursor_isNull( cursor ) &&
+         !clang_isInvalid( clang_getCursorKind( cursor ) );
+}
+
+bool CursorIsReference( CXCursor cursor ) {
+  return clang_isReference( clang_getCursorKind( cursor ) );
+}
+
+bool CursorIsDeclaration( CXCursor cursor ) {
+  return clang_isDeclaration( clang_getCursorKind( cursor ) );
+}
+
+std::string CXFileToFilepath( CXFile file ) {
+  return CXStringToString( clang_getFileName( file ) );
 }
 
 std::string ClangVersion() {

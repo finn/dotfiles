@@ -17,13 +17,14 @@
 
 #include "IdentifierCompleter.h"
 #include "PythonSupport.h"
-#include "Future.h"
+#include "versioning.h"
 
 #ifdef USE_CLANG_COMPLETER
 #  include "ClangCompleter.h"
 #  include "ClangUtils.h"
 #  include "CompletionData.h"
 #  include "Diagnostic.h"
+#  include "Location.h"
 #  include "UnsavedFile.h"
 #  include "CompilationDatabase.h"
 #endif // USE_CLANG_COMPLETER
@@ -32,20 +33,12 @@
 #include <boost/utility.hpp>
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 
-bool HasClangSupport()
-{
+bool HasClangSupport() {
 #ifdef USE_CLANG_COMPLETER
   return true;
 #else
   return false;
 #endif // USE_CLANG_COMPLETER
-}
-
-int YcmCoreVersion()
-{
-  // We increment this every time when we want to force users to recompile
-  // ycm_core.
-  return 2;
 }
 
 
@@ -54,45 +47,30 @@ BOOST_PYTHON_MODULE(ycm_core)
   using namespace boost::python;
   using namespace YouCompleteMe;
 
+  // Necessary because of usage of the ReleaseGil class
+  PyEval_InitThreads();
+
   def( "HasClangSupport", HasClangSupport );
   def( "FilterAndSortCandidates", FilterAndSortCandidates );
   def( "YcmCoreVersion", YcmCoreVersion );
 
   class_< IdentifierCompleter, boost::noncopyable >( "IdentifierCompleter" )
-    .def( "EnableThreading", &IdentifierCompleter::EnableThreading )
-    .def( "AddCandidatesToDatabase",
-          &IdentifierCompleter::AddCandidatesToDatabase )
-    .def( "AddCandidatesToDatabaseFromBufferAsync",
-          &IdentifierCompleter::AddCandidatesToDatabaseFromBufferAsync )
-    .def( "CandidatesForQueryAndTypeAsync",
-          &IdentifierCompleter::CandidatesForQueryAndTypeAsync );
+    .def( "AddIdentifiersToDatabase",
+          &IdentifierCompleter::AddIdentifiersToDatabase )
+    .def( "AddIdentifiersToDatabaseFromTagFiles",
+          &IdentifierCompleter::AddIdentifiersToDatabaseFromTagFiles )
+    .def( "AddIdentifiersToDatabaseFromBuffer",
+          &IdentifierCompleter::AddIdentifiersToDatabaseFromBuffer )
+    .def( "CandidatesForQueryAndType",
+          &IdentifierCompleter::CandidatesForQueryAndType );
 
   // TODO: rename these *Vec classes to *Vector; don't forget the python file
   class_< std::vector< std::string >,
       boost::shared_ptr< std::vector< std::string > > >( "StringVec" )
     .def( vector_indexing_suite< std::vector< std::string > >() );
 
-  class_< Future< AsyncResults > >( "FutureResults" )
-    .def( "ResultsReady", &Future< AsyncResults >::ResultsReady )
-    .def( "GetResults", &Future< AsyncResults >::GetResults );
-
-  class_< Future< void > >( "FutureVoid" )
-    .def( "ResultsReady", &Future< void >::ResultsReady )
-    .def( "GetResults", &Future< void >::GetResults );
-
 #ifdef USE_CLANG_COMPLETER
   def( "ClangVersion", ClangVersion );
-
-  class_< Future< AsyncCompletions > >( "FutureCompletions" )
-    .def( "ResultsReady", &Future< AsyncCompletions >::ResultsReady )
-    .def( "GetResults", &Future< AsyncCompletions >::GetResults );
-
-  class_< Future< AsyncCompilationInfoForFile > >(
-      "FutureCompilationInfoForFile" )
-    .def( "ResultsReady",
-          &Future< AsyncCompilationInfoForFile >::ResultsReady )
-    .def( "GetResults",
-          &Future< AsyncCompilationInfoForFile >::GetResults );
 
   // CAREFUL HERE! For filename and contents we are referring directly to
   // Python-allocated and -managed memory since we are accepting pointers to
@@ -113,13 +91,13 @@ BOOST_PYTHON_MODULE(ycm_core)
     .def( vector_indexing_suite< std::vector< UnsavedFile > >() );
 
   class_< ClangCompleter, boost::noncopyable >( "ClangCompleter" )
-    .def( "EnableThreading", &ClangCompleter::EnableThreading )
-    .def( "DiagnosticsForFile", &ClangCompleter::DiagnosticsForFile )
+    .def( "GetDeclarationLocation", &ClangCompleter::GetDeclarationLocation )
+    .def( "GetDefinitionLocation", &ClangCompleter::GetDefinitionLocation )
+    .def( "DeleteCachesForFile", &ClangCompleter::DeleteCachesForFile )
     .def( "UpdatingTranslationUnit", &ClangCompleter::UpdatingTranslationUnit )
-    .def( "UpdateTranslationUnitAsync",
-          &ClangCompleter::UpdateTranslationUnitAsync )
-    .def( "CandidatesForQueryAndLocationInFileAsync",
-          &ClangCompleter::CandidatesForQueryAndLocationInFileAsync );
+    .def( "UpdateTranslationUnit", &ClangCompleter::UpdateTranslationUnit )
+    .def( "CandidatesForLocationInFile",
+          &ClangCompleter::CandidatesForLocationInFile );
 
   class_< CompletionData >( "CompletionData" )
     .def( "TextToInsertInBuffer", &CompletionData::TextToInsertInBuffer )
@@ -142,18 +120,23 @@ BOOST_PYTHON_MODULE(ycm_core)
     .def_readonly( "text_", &Diagnostic::text_ )
     .def_readonly( "long_formatted_text_", &Diagnostic::long_formatted_text_ );
 
+  class_< Location >( "Location" )
+    .def_readonly( "line_number_", &Location::line_number_ )
+    .def_readonly( "column_number_", &Location::column_number_ )
+    .def_readonly( "filename_", &Location::filename_ )
+    .def( "IsValid", &Location::IsValid );
+
   class_< std::vector< Diagnostic > >( "DiagnosticVec" )
     .def( vector_indexing_suite< std::vector< Diagnostic > >() );
 
   class_< CompilationDatabase, boost::noncopyable >(
       "CompilationDatabase", init< std::string >() )
-    .def( "EnableThreading", &CompilationDatabase::EnableThreading )
     .def( "DatabaseSuccessfullyLoaded",
           &CompilationDatabase::DatabaseSuccessfullyLoaded )
+    .def( "AlreadyGettingFlags",
+          &CompilationDatabase::AlreadyGettingFlags )
     .def( "GetCompilationInfoForFile",
-          &CompilationDatabase::GetCompilationInfoForFile )
-    .def( "GetCompilationInfoForFileAsync",
-          &CompilationDatabase::GetCompilationInfoForFileAsync );
+          &CompilationDatabase::GetCompilationInfoForFile );
 
   class_< CompilationInfoForFile,
       boost::shared_ptr< CompilationInfoForFile > >(

@@ -34,6 +34,9 @@ typedef std::bitset< NUM_LETTERS > Bitset;
 
 Bitset LetterBitsetFromString( const std::string &text );
 
+// Public for tests
+std::string GetWordBoundaryChars( const std::string &text );
+
 class Candidate : boost::noncopyable {
 public:
 
@@ -49,7 +52,8 @@ public:
     return ( letters_present_ & query_bitset ) == query_bitset;
   }
 
-  Result QueryMatchResult( const std::string &query ) const;
+  Result QueryMatchResult( const std::string &query,
+                           bool case_sensitive ) const;
 
 private:
 
