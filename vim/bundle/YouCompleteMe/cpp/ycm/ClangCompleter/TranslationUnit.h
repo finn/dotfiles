@@ -18,20 +18,16 @@
 #ifndef TRANSLATIONUNIT_H_XQ7I6SVA
 #define TRANSLATIONUNIT_H_XQ7I6SVA
 
-#include "ConcurrentLatestValue.h"
-#include "Future.h"
 #include "UnsavedFile.h"
 #include "Diagnostic.h"
+#include "Location.h"
 
+#include <clang-c/Index.h>
 #include <boost/utility.hpp>
 #include <boost/thread/mutex.hpp>
 
 #include <string>
 #include <vector>
-
-typedef void *CXIndex;
-typedef struct CXTranslationUnitImpl *CXTranslationUnit;
-struct CXUnsavedFile;
 
 namespace YouCompleteMe {
 
@@ -60,18 +56,37 @@ public:
 
   bool IsCurrentlyUpdating() const;
 
-  void Reparse( const std::vector< UnsavedFile > &unsaved_files );
+  std::vector< Diagnostic > Reparse(
+    const std::vector< UnsavedFile > &unsaved_files );
+
+  void ReparseForIndexing( const std::vector< UnsavedFile > &unsaved_files );
 
   std::vector< CompletionData > CandidatesForLocation(
     int line,
     int column,
     const std::vector< UnsavedFile > &unsaved_files );
 
-private:
+  Location GetDeclarationLocation(
+    int line,
+    int column,
+    const std::vector< UnsavedFile > &unsaved_files );
 
+  Location GetDefinitionLocation(
+    int line,
+    int column,
+    const std::vector< UnsavedFile > &unsaved_files );
+
+private:
   void Reparse( std::vector< CXUnsavedFile > &unsaved_files );
 
+  void Reparse( std::vector< CXUnsavedFile > &unsaved_files,
+                uint parse_options );
+
   void UpdateLatestDiagnostics();
+
+  CXCursor GetCursor( int line, int column );
+
+  Location LocationFromSourceLocation( CXSourceLocation source_location );
 
   /////////////////////////////
   // PRIVATE MEMBER VARIABLES

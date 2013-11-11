@@ -21,7 +21,6 @@
 #include "exceptions.h"
 #include "ClangUtils.h"
 
-#include <clang-c/Index.h>
 #include <boost/shared_ptr.hpp>
 #include <boost/type_traits/remove_pointer.hpp>
 
@@ -57,13 +56,15 @@ TranslationUnit::TranslationUnit(
 
   std::vector< CXUnsavedFile > cxunsaved_files =
     ToCXUnsavedFiles( unsaved_files );
+  const CXUnsavedFile *unsaved = cxunsaved_files.size() > 0
+                                 ? &cxunsaved_files[ 0 ] : NULL;
 
   clang_translation_unit_ = clang_parseTranslationUnit(
                               clang_index,
                               filename.c_str(),
                               &pointer_flags[ 0 ],
                               pointer_flags.size(),
-                              &cxunsaved_files[ 0 ],
+                              const_cast<CXUnsavedFile *>( unsaved ),
                               cxunsaved_files.size(),
                               clang_defaultEditingTranslationUnitOptions() );
 
@@ -81,6 +82,8 @@ TranslationUnit::~TranslationUnit() {
 }
 
 void TranslationUnit::Destroy() {
+  unique_lock< mutex > lock( clang_access_mutex_ );
+
   if ( clang_translation_unit_ ) {
     clang_disposeTranslationUnit( clang_translation_unit_ );
     clang_translation_unit_ = NULL;
@@ -89,25 +92,11 @@ void TranslationUnit::Destroy() {
 
 
 std::vector< Diagnostic > TranslationUnit::LatestDiagnostics() {
-  std::vector< Diagnostic > diagnostics;
-
   if ( !clang_translation_unit_ )
-    return diagnostics;
+    return std::vector< Diagnostic >();
 
   unique_lock< mutex > lock( diagnostics_mutex_ );
-
-  // We don't need the latest diags after we return them once so we swap the
-  // internal data with a new, empty diag vector. This vector is then returned
-  // and on C++11 compilers a move ctor is invoked, thus no copy is created.
-  // Theoretically, just returning the value of a
-  // [boost::|std::]move(latest_diagnostics_) call _should_ leave the
-  // latest_diagnostics_ vector in an emtpy, valid state but I'm not going to
-  // rely on that. I just had to look this up in the standard to be sure, and
-  // future readers of this code (myself included) should not be forced to do
-  // that to understand what the hell is going on.
-
-  std::swap( latest_diagnostics_, diagnostics );
-  return diagnostics;
+  return latest_diagnostics_;
 }
 
 
@@ -122,12 +111,26 @@ bool TranslationUnit::IsCurrentlyUpdating() const {
 }
 
 
-void TranslationUnit::Reparse(
+std::vector< Diagnostic > TranslationUnit::Reparse(
   const std::vector< UnsavedFile > &unsaved_files ) {
   std::vector< CXUnsavedFile > cxunsaved_files =
     ToCXUnsavedFiles( unsaved_files );
 
   Reparse( cxunsaved_files );
+
+  unique_lock< mutex > lock( diagnostics_mutex_ );
+  return latest_diagnostics_;
+}
+
+
+void TranslationUnit::ReparseForIndexing(
+  const std::vector< UnsavedFile > &unsaved_files ) {
+  std::vector< CXUnsavedFile > cxunsaved_files =
+    ToCXUnsavedFiles( unsaved_files );
+
+  Reparse( cxunsaved_files,
+           CXTranslationUnit_PrecompiledPreamble |
+           CXTranslationUnit_SkipFunctionBodies );
 }
 
 
@@ -142,6 +145,8 @@ std::vector< CompletionData > TranslationUnit::CandidatesForLocation(
 
   std::vector< CXUnsavedFile > cxunsaved_files =
     ToCXUnsavedFiles( unsaved_files );
+  const CXUnsavedFile *unsaved = cxunsaved_files.size() > 0
+                                 ? &cxunsaved_files[ 0 ] : NULL;
 
   // codeCompleteAt reparses the TU if the underlying source file has changed on
   // disk since the last time the TU was updated and there are no unsaved files.
@@ -158,7 +163,7 @@ std::vector< CompletionData > TranslationUnit::CandidatesForLocation(
                           filename_.c_str(),
                           line,
                           column,
-                          &cxunsaved_files[ 0 ],
+                          const_cast<CXUnsavedFile *>( unsaved ),
                           cxunsaved_files.size(),
                           clang_defaultCodeCompleteOptions() ),
     clang_disposeCodeCompleteResults );
@@ -168,22 +173,84 @@ std::vector< CompletionData > TranslationUnit::CandidatesForLocation(
   return candidates;
 }
 
+Location TranslationUnit::GetDeclarationLocation(
+  int line,
+  int column,
+  const std::vector< UnsavedFile > &unsaved_files ) {
+  ReparseForIndexing( unsaved_files );
+  unique_lock< mutex > lock( clang_access_mutex_ );
+
+  if ( !clang_translation_unit_ )
+    return Location();
+
+  CXCursor cursor = GetCursor( line, column );
+
+  if ( !CursorIsValid( cursor ) )
+    return Location();
+
+  CXCursor referenced_cursor = clang_getCursorReferenced( cursor );
+
+  if ( !CursorIsValid( referenced_cursor ) )
+    return Location();
+
+  return LocationFromSourceLocation(
+           clang_getCursorLocation( referenced_cursor ) );
+}
+
+Location TranslationUnit::GetDefinitionLocation(
+  int line,
+  int column,
+  const std::vector< UnsavedFile > &unsaved_files ) {
+  ReparseForIndexing( unsaved_files );
+  unique_lock< mutex > lock( clang_access_mutex_ );
+
+  if ( !clang_translation_unit_ )
+    return Location();
+
+  CXCursor cursor = GetCursor( line, column );
+
+  if ( !CursorIsValid( cursor ) )
+    return Location();
+
+  CXCursor definition_cursor = clang_getCursorDefinition( cursor );
+
+  if ( !CursorIsValid( definition_cursor ) )
+    return Location();
+
+  return LocationFromSourceLocation(
+           clang_getCursorLocation( definition_cursor ) );
+}
+
 
 // Argument taken as non-const ref because we need to be able to pass a
 // non-const pointer to clang. This function (and clang too) will not modify the
 // param though.
 void TranslationUnit::Reparse(
   std::vector< CXUnsavedFile > &unsaved_files ) {
-  unique_lock< mutex > lock( clang_access_mutex_ );
+  Reparse( unsaved_files, clang_defaultEditingTranslationUnitOptions() );
+}
 
-  if ( !clang_translation_unit_ )
-    return;
 
-  int failure = clang_reparseTranslationUnit(
-                  clang_translation_unit_,
-                  unsaved_files.size(),
-                  &unsaved_files[ 0 ],
-                  clang_defaultEditingTranslationUnitOptions() );
+// Argument taken as non-const ref because we need to be able to pass a
+// non-const pointer to clang. This function (and clang too) will not modify the
+// param though.
+void TranslationUnit::Reparse( std::vector< CXUnsavedFile > &unsaved_files,
+                               uint parse_options ) {
+  int failure = 0;
+  {
+    unique_lock< mutex > lock( clang_access_mutex_ );
+
+    if ( !clang_translation_unit_ )
+      return;
+
+    CXUnsavedFile *unsaved = unsaved_files.size() > 0
+                             ? &unsaved_files[ 0 ] : NULL;
+
+    failure = clang_reparseTranslationUnit( clang_translation_unit_,
+                                            unsaved_files.size(),
+                                            unsaved,
+                                            parse_options );
+  }
 
   if ( failure ) {
     Destroy();
@@ -194,9 +261,9 @@ void TranslationUnit::Reparse(
 }
 
 
-// Should only be called while holding the clang_access_mutex_
 void TranslationUnit::UpdateLatestDiagnostics() {
-  unique_lock< mutex > lock( diagnostics_mutex_ );
+  unique_lock< mutex > lock1( clang_access_mutex_ );
+  unique_lock< mutex > lock2( diagnostics_mutex_ );
 
   latest_diagnostics_.clear();
   uint num_diagnostics = clang_getNumDiagnostics( clang_translation_unit_ );
@@ -211,6 +278,35 @@ void TranslationUnit::UpdateLatestDiagnostics() {
     if ( diagnostic.kind_ != 'I' )
       latest_diagnostics_.push_back( diagnostic );
   }
+}
+
+CXCursor TranslationUnit::GetCursor( int line, int column ) {
+  // ASSUMES A LOCK IS ALREADY HELD ON clang_access_mutex_!
+  if ( !clang_translation_unit_ )
+    return clang_getNullCursor();
+
+  CXFile file = clang_getFile( clang_translation_unit_, filename_.c_str() );
+  CXSourceLocation source_location = clang_getLocation(
+                                       clang_translation_unit_,
+                                       file,
+                                       line,
+                                       column );
+
+  return clang_getCursor( clang_translation_unit_, source_location );
+}
+
+Location TranslationUnit::LocationFromSourceLocation(
+  CXSourceLocation source_location ) {
+  // ASSUMES A LOCK IS ALREADY HELD ON clang_access_mutex_!
+  if ( !clang_translation_unit_ )
+    return Location();
+
+  CXFile file;
+  uint line;
+  uint column;
+  uint offset;
+  clang_getExpansionLocation( source_location, &file, &line, &column, &offset );
+  return Location( CXFileToFilepath( file ), line, column );
 }
 
 } // namespace YouCompleteMe
