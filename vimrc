@@ -7,7 +7,7 @@ if has("win32")
 endif
 
 " pathogen for plugin bundles
-call pathogen#infect()
+execute pathogen#infect()
 
 " vim not vi
 set nocompatible
