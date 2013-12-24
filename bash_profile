@@ -48,9 +48,4 @@ if [ -n "$BASH_VERSION" ]; then
     fi
 fi
 
-git_prompt="$HOME/Documents/projects/git-prompt/git-prompt.sh"
-if [ -f $git_prompt ]; then
-    [[ $- == *i* ]] && . $git_prompt
-fi
-
 # vim: filetype=sh
