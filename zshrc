@@ -7,10 +7,6 @@ ZSH=$HOME/.oh-my-zsh
 # time that oh-my-zsh is loaded.
 ZSH_THEME="robbyrussell"
 
-# Example aliases
-# alias zshconfig="mate ~/.zshrc"
-# alias ohmyzsh="mate ~/.oh-my-zsh"
-
 # Set to this to use case-sensitive completion
 # CASE_SENSITIVE="true"
 
@@ -30,7 +26,7 @@ ZSH_THEME="robbyrussell"
 # DISABLE_CORRECTION="true"
 
 # Uncomment following line if you want red dots to be displayed while waiting for completion
-# COMPLETION_WAITING_DOTS="true"
+COMPLETION_WAITING_DOTS="true"
 
 # Uncomment following line if you want to disable marking untracked files under
 # VCS as dirty. This makes repository status check for large repositories much,
@@ -40,7 +36,7 @@ ZSH_THEME="robbyrussell"
 # Uncomment following line if you want to  shown in the command execution time stamp
 # in the history command output. The optional three formats: "mm/dd/yyyy"|"dd.mm.yyyy"|
 # yyyy-mm-dd
-# HIST_STAMPS="mm/dd/yyyy"
+HIST_STAMPS="mm/dd/yyyy"
 
 # Which plugins would you like to load? (plugins can be found in ~/.oh-my-zsh/plugins/*)
 # Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
@@ -49,20 +45,97 @@ plugins=(git)
 
 source $ZSH/oh-my-zsh.sh
 
-# User configuration
+###
+### User configuration
+###
 
-export PATH=$HOME/bin:/usr/local/bin:$PATH
-# export MANPATH="/usr/local/man:$MANPATH"
+# TODO function to remove path element from PATH
+# TODO function to add path element to PATH
 
-# # Preferred editor for local and remote sessions
-# if [[ -n $SSH_CONNECTION ]]; then
-#   export EDITOR='vim'
-# else
-#   export EDITOR='mvim'
-# fi
+# put /usr/local/bin & sbin before standard system paths
+# remove /usr/local paths
+path_without_usr_local=$(perl -e 'print join(":", grep(!m"/usr/local/s?bin", split(/:/, $ENV{PATH}) ));')
+# and put them in front
+export PATH="/usr/local/bin:/usr/local/sbin:$path_without_usr_local"
 
-# Compilation flags
-# export ARCHFLAGS="-arch x86_64"
+# add home bin if it exists
+export PATH="$HOME/bin:$PATH"
 
-# ssh
-# export SSH_KEY_PATH="~/.ssh/dsa_id"
+# vim!
+export EDITOR=vim
+# terminal colors
+export CLICOLOR=1
+# color in grep
+export GREP_OPTIONS='--color=auto'
+
+###
+### Alias definitions
+###
+
+# ack is called ack-grep on debian/ubuntu
+if [ -x /usr/bin/ack-grep ]; then
+    alias ack="ack-grep"
+fi
+# some ls aliases
+alias ll='ls -l'
+alias la='ls -A'
+alias ls='ls -CF'
+# location/navigation
+alias ..='cd ..'
+
+###
+### Completions
+###
+
+# zsh-completion (from brew)
+local_completions="/usr/local/share/zsh-completions"
+if [ -d $local_completions ]; then
+   fpath=($local_completions $fpath)
+fi
+# TODO sqlite completions
+#complete -f -X '!*.@(sqlite|sql)' sqlite3 sqlite
+
+###
+### Load local shell customizations
+###
+
+zshrcd="$HOME/.zshrc.d"
+if [[ -d $zshrcd && -r $zshrcd && -x $zshrcd ]]; then
+    for f in $(ls "$zshrcd"); do
+        f=$zshrcd/$f
+        if [[ -f $f && -r $f && $f != *~ && $f != *.bak && $f != *.swp ]]; then
+            . $f
+        fi
+    done
+fi
+
+###
+### rbenv/plenv/pyenv/virtualenv
+###
+
+# load rbenv
+if [[ -d "$HOME/.rbenv/bin" ]]; then
+    export PATH="$HOME/.rbenv/bin:$PATH"
+    eval "$(rbenv init -)"
+fi
+
+# load plenv for custom perls
+if [[ -d "$HOME/.plenv/bin" ]]; then
+    export PATH="$HOME/.plenv/bin:$PATH"
+    eval "$(plenv init -)"
+fi
+
+# TODO pyenv?
+
+# load virtualenvwrapper for python (after custom PATHs)
+venvwrap="virtualenvwrapper.sh"
+if [ $? -eq 0 ]; then
+    venvwrap=`whence $venvwrap`
+    . $venvwrap
+    # make pip respect virtualenv
+    export PIP_RESPECT_VIRTUALENV=true
+    # make pip respect virtualenvwrapper
+    export PIP_VIRTUALENV_BASE=$WORKON_HOME
+fi
+
+# vim: filetype=zsh
