@@ -75,9 +75,9 @@ fi
 # XXX this is slow to load?
 # load virtualenvwrapper for python (after custom PATHs)
 venvwrap="virtualenvwrapper.sh"
-which -s $venvwrap
-if [ $? -eq 0 ]; then
-    venvwrap=`which $venvwrap`
+# test if command is available
+venvwrap=`type -p $venvwrap`
+if [[ -n "$venvwrap" && -x $venvwrap ]]; then
     . $venvwrap
     # make pip respect virtualenv
     export PIP_RESPECT_VIRTUALENV=true
