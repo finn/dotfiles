@@ -129,8 +129,10 @@ fi
 
 # load virtualenvwrapper for python (after custom PATHs)
 venvwrap="virtualenvwrapper.sh"
+# test if command is available
+whence -p $venvwrap > /dev/null
 if [ $? -eq 0 ]; then
-    venvwrap=`whence $venvwrap`
+    venvwrap=`whence -p $venvwrap`
     . $venvwrap
     # make pip respect virtualenv
     export PIP_RESPECT_VIRTUALENV=true
