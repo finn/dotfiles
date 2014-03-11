@@ -200,6 +200,8 @@ let g:markdown_fenced_languages = [
 " yankring
 let g:yankring_history_file = '.vim_yankring_history'
 
+set fuoptions=maxvert
+
 " TODO ?
 " errorbells
 " visualbells
