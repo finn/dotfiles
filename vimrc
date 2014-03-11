@@ -143,6 +143,7 @@ noremap Q gq
 " TODO taglist config
 
 " TODO NERD tree config
+map <Leader>n <plug>NERDTreeTabsToggle<CR>
 
 
 " solarized
