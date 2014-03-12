@@ -145,7 +145,6 @@ noremap Q gq
 " TODO NERD tree config
 map <Leader>n <plug>NERDTreeTabsToggle<CR>
 
-
 " solarized
 if ( has('gui_running') || &t_Co == 256 )
     let g:solarized_termcolors=256
