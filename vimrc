@@ -142,8 +142,12 @@ noremap Q gq
 
 " TODO taglist config
 
-" TODO NERD tree config
+" TODO NERDTree config
+
+" NERDTree tabs config
 map <Leader>n <plug>NERDTreeTabsToggle<CR>
+" always focus file pane on startup
+let g:nerdtree_tabs_smart_startup_focus = 2
 
 " solarized
 if ( has('gui_running') || &t_Co == 256 )
@@ -180,6 +184,7 @@ let g:tcomment_types = {
             \ 'sh':               '#%s',
             \ 'vim':              '"%s',
             \ 'vim_3':            '"""%s',
+            \ 'yaml':             '#%s',
             \ }
 
 " markdown
@@ -199,6 +204,10 @@ let g:markdown_fenced_languages = [
 
 " yankring
 let g:yankring_history_file = '.vim_yankring_history'
+
+" ctrlp
+let g:ctrlp_map = '<C-J>'
+let g:ctrlp_cmd = 'CtrlP'
 
 set fuoptions=maxvert
 
