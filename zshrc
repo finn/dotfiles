@@ -137,10 +137,6 @@ whence -p $venvwrap > /dev/null
 if [ $? -eq 0 ]; then
     venvwrap=`whence -p $venvwrap`
     . $venvwrap
-    # make pip respect virtualenv
-    export PIP_RESPECT_VIRTUALENV=true
-    # make pip respect virtualenvwrapper
-    export PIP_VIRTUALENV_BASE=$WORKON_HOME
 fi
 
 # vim: filetype=zsh
