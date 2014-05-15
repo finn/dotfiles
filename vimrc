@@ -148,6 +148,7 @@ noremap Q gq
 map <Leader>n <plug>NERDTreeTabsToggle<CR>
 " always focus file pane on startup
 let g:nerdtree_tabs_smart_startup_focus = 2
+"let g:nerdtree_tabs_autoclose = 0
 
 " solarized
 if ( has('gui_running') || &t_Co == 256 )
