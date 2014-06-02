@@ -126,6 +126,8 @@ set wildmode=list:longest,full
 autocmd BufEnter * silent! lcd %:p:h
 " map :W to :w for typos
 com -nargs=? -complete=file W w <args>
+" map :E to :e for typos
+com -nargs=? -complete=file E e <args>
 " ctrl-tab and ctrl-shift-tab cycle tabs
 if (v:version >= 700)
     noremap <C-Tab> gt
