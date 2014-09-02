@@ -49,18 +49,18 @@ fi
 #    [[ -f $perlbrew_bashrc ]] && . $perlbrew_bashrc
 #fi
 
-# load plenv for custom perls
-if [[ -d "$HOME/.plenv/bin" ]]; then
-    export PATH="$HOME/.plenv/bin:$PATH"
-    eval "$(plenv init -)"
-fi
-
-# load rbenv
-if [[ -d "$HOME/.rbenv/bin" ]]; then
-    export PATH="$HOME/.rbenv/bin:$PATH"
-    eval "$(rbenv init -)"
-fi
-
+## load plenv for custom perls
+#if [[ -d "$HOME/.plenv/bin" ]]; then
+#    export PATH="$HOME/.plenv/bin:$PATH"
+#    eval "$(plenv init -)"
+#fi
+#
+## load rbenv
+#if [[ -d "$HOME/.rbenv/bin" ]]; then
+#    export PATH="$HOME/.rbenv/bin:$PATH"
+#    eval "$(rbenv init -)"
+#fi
+#
 # load local bash customizations
 bashrcd="$HOME/.bashrc.d"
 if [[ -d $bashrcd && -r $bashrcd && -x $bashrcd ]]; then
@@ -72,15 +72,15 @@ if [[ -d $bashrcd && -r $bashrcd && -x $bashrcd ]]; then
     done
 fi
 
-# XXX this is slow to load?
-# load virtualenvwrapper for python (after custom PATHs)
-venvwrap="virtualenvwrapper.sh"
-# test if command is available
-venvwrap=`type -p $venvwrap`
-if [[ -n "$venvwrap" && -x $venvwrap ]]; then
-    . $venvwrap
-    # make pip respect virtualenv
-    export PIP_RESPECT_VIRTUALENV=true
-    # make pip respect virtualenvwrapper
-    export PIP_VIRTUALENV_BASE=$WORKON_HOME
-fi
+## XXX this is slow to load?
+## load virtualenvwrapper for python (after custom PATHs)
+#venvwrap="virtualenvwrapper.sh"
+## test if command is available
+#venvwrap=`type -p $venvwrap`
+#if [[ -n "$venvwrap" && -x $venvwrap ]]; then
+#    . $venvwrap
+#    # make pip respect virtualenv
+#    export PIP_RESPECT_VIRTUALENV=true
+#    # make pip respect virtualenvwrapper
+#    export PIP_VIRTUALENV_BASE=$WORKON_HOME
+#fi
