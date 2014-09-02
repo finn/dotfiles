@@ -214,6 +214,9 @@ let g:ctrlp_cmd = 'CtrlP'
 
 set fuoptions=maxvert
 
+" :BD alias for Bdelete
+command! -bang -complete=buffer -nargs=? BD Bdelete<bang> <args>
+
 " TODO ?
 " errorbells
 " visualbells
