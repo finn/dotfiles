@@ -134,7 +134,7 @@ fi
 venvwrap="virtualenvwrapper.sh"
 # test if command is available
 whence -p $venvwrap > /dev/null
-if [ $? -eq 0 ]; then
+if [[ $? -eq 0 ]]; then
     venvwrap=`whence -p $venvwrap`
     . $venvwrap
 fi
