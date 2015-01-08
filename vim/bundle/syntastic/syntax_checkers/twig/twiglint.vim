@@ -10,21 +10,32 @@
 "
 "============================================================================
 
-function! SyntaxCheckers_twig_GetHighlightRegex(item)
-    " Let's match the full line for now
-    return '\V'
-endfunction
+if exists("g:loaded_syntastic_twig_twiglint_checker")
+    finish
+endif
+let g:loaded_syntastic_twig_twiglint_checker = 1
 
-function! SyntaxCheckers_twig_twiglint_IsAvailable()
-    return executable('twig-lint')
-endfunction
+let s:save_cpo = &cpo
+set cpo&vim
 
-function! SyntaxCheckers_twig_twiglint_GetLocList()
-    let makeprg = "twig-lint lint --format=csv ".shellescape(expand('%'))
+function! SyntaxCheckers_twig_twiglint_GetLocList() dict
+    let makeprg = self.makeprgBuild({
+        \ 'args_before': 'lint',
+        \ 'args_after': '--format=csv' })
+
     let errorformat = '"%f"\,%l\,%m'
-    return SyntasticMake({ 'makeprg': makeprg, 'errorformat': errorformat})
+
+    return SyntasticMake({
+        \ 'makeprg': makeprg,
+        \ 'errorformat': errorformat})
 endfunction
 
 call g:SyntasticRegistry.CreateAndRegisterChecker({
     \ 'filetype': 'twig',
-    \ 'name': 'twiglint'})
+    \ 'name': 'twiglint',
+    \ 'exec': 'twig-lint'})
+
+let &cpo = s:save_cpo
+unlet s:save_cpo
+
+" vim: set sw=4 sts=4 et fdm=marker:

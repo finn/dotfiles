@@ -1,4 +1,3 @@
-
 "============================================================================
 "File:        scss.vim
 "Description: scss syntax checking plugin for syntastic
@@ -11,16 +10,16 @@
 "
 "============================================================================
 
-runtime syntax_checkers/sass/sass.vim
+if exists("g:loaded_syntastic_scss_sass_checker")
+    finish
+endif
+let g:loaded_syntastic_scss_sass_checker = 1
 
-function! SyntaxCheckers_scss_sass_IsAvailable()
-    return executable("sass")
-endfunction
-
-function! SyntaxCheckers_scss_sass_GetLocList()
-    return SyntaxCheckers_sass_sass_GetLocList()
-endfunction
+runtime! syntax_checkers/sass/*.vim
 
 call g:SyntasticRegistry.CreateAndRegisterChecker({
     \ 'filetype': 'scss',
-    \ 'name': 'sass'})
+    \ 'name': 'sass',
+    \ 'redirect': 'sass/sass'})
+
+" vim: set sw=4 sts=4 et fdm=marker:
