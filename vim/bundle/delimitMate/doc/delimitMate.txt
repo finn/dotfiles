@@ -1,4 +1,4 @@
-*delimitMate.txt*   Trying to keep those beasts at bay! v2.6     *delimitMate*
+*delimitMate.txt*   Trying to keep those beasts at bay! v2.7     *delimitMate*
 
 
 
@@ -34,10 +34,11 @@
     4. Commands________________________________|delimitMateCommands|
     5. Mappings________________________________|delimitMateMappings|
     6. Functions_______________________________|delimitMateFunctions|
-    7. TODO list_______________________________|delimitMateTodo|
-    8. Maintainer______________________________|delimitMateMaintainer|
-    9. Credits_________________________________|delimitMateCredits|
-   10. History_________________________________|delimitMateHistory|
+    7. Autocommands____________________________|delimitMateAutocmds|
+    8. TODO list_______________________________|delimitMateTodo|
+    9. Maintainer______________________________|delimitMateMaintainer|
+   10. Credits_________________________________|delimitMateCredits|
+   11. History_________________________________|delimitMateHistory|
 
 ==============================================================================
  1.- INTRODUCTION                                           *delimitMateIntro*
@@ -47,16 +48,12 @@ etc.; besides some other related features that should make your time in insert
 mode a little bit easier.
 
 Most of the features can be modified or disabled permanently, using global
-variables, or on a FileType basis, using autocommands. With a couple of
-exceptions and limitations, this features don't break undo, redo or history.
+variables, or on a FileType basis, using autocommands.
 
 NOTE 1: If you have any trouble with this plugin, please run |:DelimitMateTest|
 in a new buffer to see what is not working.
 
-NOTE 2: |'timeout'| needs to be set when working in the terminal, otherwise you
-might find weird behaviour with mappings including <Esc> or arrow keys.
-
-NOTE 3: Abbreiations set with |:iabbrev| will not be expanded by delimiters
+NOTE 2: Abbreviations set with |:iabbrev| will not be expanded by delimiters
 used on delimitMate, you should use <C-]> (read |i_CTRL-]|) to expand them on
 the go.
 
@@ -64,7 +61,7 @@ the go.
  2. CUSTOMIZATION                                         *delimitMateOptions*
 
 You can create your own mappings for some features using the global functions.
-Read |DelimitMateFunctions| for more info.
+Read |delimitMateFunctions| for more info.
 
 ------------------------------------------------------------------------------
    2.1 OPTIONS SUMMARY                              *delimitMateOptionSummary*
@@ -91,6 +88,8 @@ specific file types, see |delimitMateOptionDetails| for examples.
 
 |'delimitMate_expand_space'|      Turns on/off the expansion of <Space>.
 
+|'delimitMate_jump_expansion'|    Turns on/off jumping over expansions.
+
 |'delimitMate_smart_quotes'|      Turns on/off the "smart quotes" feature.
 
 |'delimitMate_smart_matchpairs'|  Turns on/off the "smart matchpairs" feature.
@@ -102,6 +101,10 @@ specific file types, see |delimitMateOptionDetails| for examples.
                                 syntax group names.
 
 |'delimitMate_excluded_ft'|       Turns off the script for the given file types.
+
+|'delimitMate_eol_marker'|        Determines what to insert after the closing
+                                matchpair when typing an opening matchpair on
+                                the end of the line.
 
 |'delimitMate_apostrophes'|       Tells delimitMate how it should "fix"
                                 balancing of single quotes when used as
@@ -117,7 +120,7 @@ autocmd to modify delimitMate's behavior for specific file types, read more in
 |delimitMateFileType|.
 
 Note: Use buffer variables only to set options for specific file types using
-:autocmd, use global variables to set options for every buffer. Read more in
+:autocmd, use global variables to set options for all buffers. Read more in
 |g:var| and |b:var|.
 
 ------------------------------------------------------------------------------
@@ -180,8 +183,10 @@ e.g.: >
 Values: A list of quotes.                                                    ~
 Default: []                                                                  ~
 
-Quotes listed here will not be able to jump out of the empty pair, thus
-allowing the autoclosed quotes to be nested.
+When adding a third quote listed in this option is inserted, three quotes will
+be inserted to the right of the cursor and the cursor will stay in the middle.
+If more quotes are inserted the number of quotes on both sides of the cursor
+will stay balanced.
 e.g.: >
         let delimitMate_nesting_quotes = ['"','`']
         au FileType python let b:delimitMate_nesting_quotes = ['"']
@@ -189,7 +194,7 @@ e.g.: >
 ------------------------------------------------------------------------------
                                                      *'delimitMate_expand_cr'*
                                                    *'b:delimitMate_expand_cr'*
-Values: 1 or 0                                                               ~
+Values: 0, 1 or 2                                                             ~
 Default: 0                                                                   ~
 
 This option turns on/off the expansion of <CR>. Read |delimitMateExpansion|
@@ -211,16 +216,51 @@ e.g.: >
         au FileType tcl let b:delimitMate_expand_space = 1
 <
 ------------------------------------------------------------------------------
+                                          *'delimitMate_expand_inside_quotes'*
+                                        *'b:delimitMate_expand_inside_quotes'*
+Values: 1 or 0                                                                ~
+Default: 0                                                                   ~
+When this option is set to 1 the expansion of space and cr will also be
+applied to quotes. Read |delimitMateExpansion| for details.
+
+e.g.: >
+        let delimitMate_expand_inside_quotes = 1
+        au FileType mail let b:delimitMate_expand_inside_quotes = 1
+<
+------------------------------------------------------------------------------
+                                                *'delimitMate_jump_expansion'*
+                                              *'b:delimitMate_jump_expansion'*
+Values: 1 or 0                                                               ~
+Default: 0                                                                   ~
+This option turns on/off the jumping over <CR> and <Space> expansions when
+inserting closing matchpairs. Read |delimitMateExpansion| for details.
+e.g.: >
+        let delimitMate_jump_expansion = 1
+        au FileType tcl let b:delimitMate_jump_expansion = 1
+<
+------------------------------------------------------------------------------
                                                   *'delimitMate_smart_quotes'*
                                                 *'b:delimitMate_smart_quotes'*
-Values: 1 or 0                                                               ~
-Default: 1                              ~
+Values: String with an optional !  at the beginning followed by a regexp     ~
+Default:~
+'\%(\w\|[^[:punct:][:space:]]\|\%(\\\\\)*\\\)\%#\|\%#\%(\w\|[^[:space:][:punct:]]\)'                  ~
 
-This option turns on/off the smart quotes feature. Read
-|delimitMateSmartQuotes| for details.
+A bang (!) at the beginning is removed and used to "negate" the pattern. The
+remaining text is used as a regexp to be matched on the current line. A single
+quote is inserted when the pattern matches and a bang is not present. The bang
+changes that, so a single quote is inserted only if the regexp does not match.
+
+This feature is disabled when the variable is set to an empty string, with the
+exception of apostrophes.
+
+Note that you need to use '\%#' to match the position of the cursor.  Keep in
+mind that '\%#' matches with zero width, so if you need to match the char
+under the cursor (which would be the one to the right on insert mode) use
+something like '\%#.'.
+
 e.g.: >
-        let delimitMate_smart_quotes = 0
-        au FileType tcl let b:delimitMate_smart_quotes = 1
+        let delimitMate_smart_quotes = '\w\%#'
+        au FileType tcl let b:delimitMate_smart_quotes = '!\s\%#\w'
 <
 ------------------------------------------------------------------------------
                                               *'delimitMate_smart_matchpairs'*
@@ -268,6 +308,17 @@ This options turns delimitMate off for the listed file types, use this option
 only if you don't want any of the features it provides on those file types.
 e.g.: >
         let delimitMate_excluded_ft = "mail,txt"
+<
+------------------------------------------------------------------------------
+                                                    *'delimitMate_eol_marker'*
+Values: String.                                                              ~
+Default: Empty.                                                              ~
+
+The contents of this string will be inserted after the closing matchpair or
+quote when the respective opening matchpair or quote is inserted at the end
+of the line.
+e.g.: >
+        au FileType c,perl let b:delimitMate_eol_marker = ";"
 <
 ------------------------------------------------------------------------------
                                                    *'delimitMate_apostrophes'*
@@ -343,26 +394,38 @@ you should use <C-]> (read |i_CTRL-]|) to expand them on the go.
 ------------------------------------------------------------------------------
    3.2 EXPANSION OF SPACE AND CAR RETURN                *delimitMateExpansion*
 
-When the cursor is inside an empty pair of delimiters, <Space> and <CR> can be
+When the cursor is inside an empty pair of any matchpair, <Space> and <CR> can be
 expanded, see |'delimitMate_expand_space'| and
 |'delimitMate_expand_cr'|:
 
 Expand <Space> to: >
 
-                    <Space><Space><Left>  |  You get
-                  ====================================
-                              (|)         |    ( | )
+                    You start with  |  You get
+                  ==============================
+                        (|)         |    ( | )
 <
 Expand <CR> to: >
 
-                      <CR><CR><Up>  |  You get
-                    ============================
-                           (|)      |    (
-                                    |    |
+                   You start with   |  You get
+                  ==============================
+                        (|)         |    (
+                                    |      |
                                     |    )
 <
 
-NOTE that the expansion of <CR> will break the redo command.
+When you have |'delimitMate_jump_expansion'| enabled, if there is an existing
+closing paren/bracket/etc. on the next line, delimitMate will make the cursor
+jump over any whitespace/<CR> and place it after the existing closing
+delimiter instead of inserting a new one.
+
+When |'delimitMate_expand_cr'| is set to 2, the following will also happen: >
+
+                    You start with  |  You get
+                  ==============================
+                       (foo|)       |    (foo
+                                    |      |
+                                    |    )
+<
 
 Since <Space> and <CR> are used everywhere, I have made the functions involved
 in expansions global, so they can be used to make custom mappings. Read
@@ -372,8 +435,7 @@ in expansions global, so they can be used to make custom mappings. Read
    3.3 BACKSPACE                                        *delimitMateBackspace*
 
 If you press backspace inside an empty pair, both delimiters are deleted. When
-expansions are enabled, <BS> will also delete the expansions. NOTE that
-deleting <CR> expansions will break the redo command.
+expansions are enabled, <BS> will also delete the expansions.
 
 If you type <S-BS> (shift + backspace) instead, only the closing delimiter
 will be deleted. NOTE that this will not usually work when using Vim from the
@@ -397,11 +459,11 @@ e.g. typing at the "|": >
 ------------------------------------------------------------------------------
    3.4 SMART QUOTES                                   *delimitMateSmartQuotes*
 
-Only one quote will be inserted following a quote, a "\" or, following or
-preceding a keyword character. This should cover closing quotes after a
-string, opening quotes before a string, escaped quotes and apostrophes. Except
-for apostrophes, this feature can be disabled setting the option
-|'delimitMate_smart_quotes'| to 0.
+Only one quote will be inserted following a quote, a "\", following or
+preceding a keyword character, or when the number of quotes in the current
+line is odd. This should cover closing quotes after a string, opening quotes
+before a string, escaped quotes and apostrophes. See more details about
+customizing this feature on |'delimitMate_smart_quotes'|.
 
 e.g. typing at the "|": >
 
@@ -574,26 +636,12 @@ In order to make custom mappings easier and prevent overwritting existing
 ones, delimitMate uses the |<Plug>| + |hasmapto()| (|usr_41.txt|) construct
 for its mappings.
 
-These are the default mappings:
+These are the default mappings for the extra features:
 
 <BS>         is mapped to <Plug>delimitMateBS
 <S-BS>       is mapped to <Plug>delimitMateS-BS
 <S-Tab>      is mapped to <Plug>delimitMateS-Tab
 <C-G>g       is mapped to <Plug>delimitMateJumpMany
-<Del>        is mapped to <Plug>delimitMateDel
-<Esc>        is mapped to <Plug>delimitMateEsc
-<Left>       is mapped to <Plug>delimitMateLeft
-<Right>      is mapped to <Plug>delimitMateRight
-<Home>       is mapped to <Plug>delimitMateHome
-<End>        is mapped to <Plug>delimitMateEnd
-<Up>         is mapped to <Plug>delimitMateUp
-<Down>       is mapped to <Plug>delimitMateDown
-<PageUp>     is mapped to <Plug>delimitMatePageUp
-<PageDown>   is mapped to <Plug>delimitMatePageDown
-<S-Down>     is mapped to <Plug>delimitMateS-Down
-<S-Up>       is mapped to <Plug>delimitMateS-Up
-<LeftMouse>  is mapped to <Plug>delimitMateMLeftMouse
-<RightMouse> is mapped to <Plug>delimitMateMRightMouse
 
 The rest of the mappings correspond to parens, quotes, CR, Space, etc. and they
 depend on the values of the delimitMate options, they have the following form:
@@ -607,9 +655,9 @@ e.g.: for "(":
 e.g.: If you have <CR> expansion enabled, you might want to skip it on pop-up
 menus:
 
-    imap <expr> <CR> pumvisible() ?
-                     \"\<c-y>" :
-                     \ "<Plug>delimitMateCR"
+    imap <expr> <CR> pumvisible()
+                     \ ? "\<C-Y>"
+                     \ : "<Plug>delimitMateCR"
 
 
 ==============================================================================
@@ -622,7 +670,7 @@ Returns 1 if the cursor is inside an empty pair, 0 otherwise.
 e.g.: >
 
     inoremap <expr> <CR> delimitMate#WithinEmptyPair() ?
-             \ "\<C-R>=delimitMate#ExpandReturn()\<CR>" :
+             \ "<Plug>delimitMateCR" :
              \ "external_mapping"
 <
 
@@ -633,23 +681,56 @@ Returns 1 if there is a closing delimiter or a quote to the right of the
 cursor, 0 otherwise.
 
 ------------------------------------------------------------------------------
-delimitMate#JumpAny(key)                               *delimitMate#JumpAny()*
+delimitMate#JumpAny()                               *delimitMate#JumpAny()*
 
 This function returns a mapping that will make the cursor jump to the right
 when delimitMate#ShouldJump() returns 1, returns the argument "key" otherwise.
 e.g.: You can use this to create your own mapping to jump over any delimiter.
 >
-   inoremap <C-Tab> <C-R>=delimitMate#JumpAny("\<C-Tab>")<CR>
+   inoremap <expr> <C-Tab> delimitMate#JumpAny()
 <
+==============================================================================
+ 7. AUTOCOMMANDS                                         *delimitMateAutocmds*
+
+delimitMate emits 2 |User| autocommands to make it easier for users to
+leverage delimitMate's support for per-filetype customization.
+
+------------------------------------------------------------------------------
+delimitMate_map                                              *delimitMate_map*
+
+This |User| event is emittted just prior to delimitMate defining its
+buffer-local key mappings. You can use this command to define your own
+mappings that are disabled when delimitMate is turned off or excludes the
+current filetype.
+>
+    au User delimitMate_map call s:delimitMate_map()
+    function s:delimitMate_map()
+        imap <buffer><expr> <C-Tab> delimitMate#JumpAny()
+    endfunction
+<
+------------------------------------------------------------------------------
+delimitMate_unmap                                          *delimitMate_unmap*
+
+This |User| event is emitted just after delimitMate clears its buffer-local
+key mappings. You can use this command to clear your own mappings that you set
+in response to |delimitMate_map|.
+>
+    au User delimitMate_unmap call s:delimitMate_unmap()
+    function s:delimitMate_unmap()
+        silent! iunmap <buffer> <C-Tab>
+    endfunction
+<
+Note: This event may be emitted before |delimitMate_map|, and may be emitted
+multiple times in a row without any intervening |delimitMate_map| events.
 
 ==============================================================================
- 7. TODO LIST                                                *delimitMateTodo*
+ 8. TODO LIST                                                *delimitMateTodo*
 
 - Automatic set-up by file type.
 - Make block-wise visual wrapping work on un-even regions.
 
 ==============================================================================
- 8. MAINTAINER                                         *delimitMateMaintainer*
+ 9. MAINTAINER                                         *delimitMateMaintainer*
 
 Hi there! My name is Israel Chauca F. and I can be reached at:
     mailto:israelchauca@gmail.com
@@ -658,7 +739,7 @@ Feel free to send me any suggestions and/or comments about this plugin, I'll
 be very pleased to read them.
 
 ==============================================================================
- 9. CREDITS                                               *delimitMateCredits*
+ 10. CREDITS                                              *delimitMateCredits*
 
 Contributors: ~
 
@@ -694,12 +775,20 @@ copied from the following sources:
 This script was inspired by the auto-completion of delimiters on TextMate.
 
 ==============================================================================
- 10. HISTORY                                               *delimitMateHistory*
+ 11. HISTORY                                               *delimitMateHistory*
 
   Version      Date      Release notes                                       ~
 |---------|------------|-----------------------------------------------------|
-    2.6     2011-01-14 * Current release:
-                         - Add smart_matchpairs feature.
+    2.7     2013-07-15 * Current release:
+                         - Lots of bug fixes.
+                         - Add delimitMate_offByDefault.
+                         - Add delimitMate_eol_marker.
+                         - Reduce the number of mappings.
+                         - Stop using setline().
+                         - Better handling of nested quotes.
+                         - Allow a custom pattern for smart_quotes.
+|---------|------------|-----------------------------------------------------|
+    2.6     2011-01-14 * - Add smart_matchpairs feature.
                          - Add mapping to jump over contiguous delimiters.
                          - Fix behaviour of b:loaded_delimitMate.
 |---------|------------|-----------------------------------------------------|
@@ -824,4 +913,4 @@ _____|_____|_____|_____|_____|_____|_____|_____|_____|_____|_____|_____|____ ~
 __|_____|_____|_____|_____|_____|_____|_____|_____|_____|_____|_____|_____|_ ~
 _____|_____|_____|_____|_____|_____|_____|_____|_____|_____|_____|_____|____ ~
 
-vim:tw=78:et:ts=2:sw=2:ft=help:norl:formatoptions+=tcroqn:autoindent:
+vim:tw=78:et:ts=8:sw=2:ft=help:norl:formatoptions+=tcroqn:autoindent:
