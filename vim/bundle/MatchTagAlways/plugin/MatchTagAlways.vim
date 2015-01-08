@@ -15,14 +15,14 @@
 " You should have received a copy of the GNU General Public License
 " along with MatchTagAlways.  If not, see <http://www.gnu.org/licenses/>.
 
-if exists( "g:loaded_matchtagalways" )
+if exists( "g:loaded_matchtagalways" ) || !has('python')
   finish
 endif
 let g:loaded_matchtagalways = 1
 
-if !has( 'python' )
+if !( has( 'python' ) || has( 'python3' ) )
   echohl WarningMsg |
-        \ echomsg "MatchTagAlways unavailable: requires python 2.x" |
+        \ echomsg "MatchTagAlways unavailable: requires python." |
         \ echohl None
   finish
 endif
@@ -33,6 +33,9 @@ let g:mta_filetypes =
       \ 'xhtml' : 1,
       \ 'xml' : 1,
       \ 'jinja' : 1,
+      \ 'eruby' : 1,
+      \ 'htmldjango' : 1,
+      \ 'django' : 1,
       \} )
 
 let g:mta_use_matchparen_group =
