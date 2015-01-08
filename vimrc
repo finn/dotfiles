@@ -217,6 +217,9 @@ set fuoptions=maxvert
 " :BD alias for Bdelete
 command! -bang -complete=buffer -nargs=? BD Bdelete<bang> <args>
 
+" TODO alias :Trim to :TrailerTrim
+
+
 " TODO ?
 " errorbells
 " visualbells
