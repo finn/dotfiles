@@ -26,6 +26,14 @@ if !exists("g:ag_mapping_message")
 endif
 
 function! ag#Ag(cmd, args)
+  let l:ag_executable = get(split(g:agprg, " "), 0)
+
+  " Ensure that `ag` is installed
+  if !executable(l:ag_executable)
+    echoe "Ag command '" . l:ag_executable . "' was not found. Is the silver searcher installed and on your $PATH?"
+    return
+  endif
+
   " If no pattern is provided, search for the word under the cursor
   if empty(a:args)
     let l:grepargs = expand("<cword>")
@@ -35,20 +43,29 @@ function! ag#Ag(cmd, args)
 
   " Format, used to manage column jump
   if a:cmd =~# '-g$'
+    let s:agformat_backup=g:agformat
     let g:agformat="%f"
+  elseif exists("s:agformat_backup")
+    let g:agformat=s:agformat_backup
   elseif !exists("g:agformat")
     let g:agformat="%f:%l:%c:%m"
   endif
 
-  let grepprg_bak=&grepprg
-  let grepformat_bak=&grepformat
+  let l:grepprg_bak=&grepprg
+  let l:grepformat_bak=&grepformat
+  let l:t_ti_bak=&t_ti
+  let l:t_te_bak=&t_te
   try
     let &grepprg=g:agprg
     let &grepformat=g:agformat
+    set t_ti=
+    set t_te=
     silent execute a:cmd . " " . escape(l:grepargs, '|')
   finally
-    let &grepprg=grepprg_bak
-    let &grepformat=grepformat_bak
+    let &grepprg=l:grepprg_bak
+    let &grepformat=l:grepformat_bak
+    let &t_ti=l:t_ti_bak
+    let &t_te=l:t_te_bak
   endtry
 
   if a:cmd =~# '^l'
