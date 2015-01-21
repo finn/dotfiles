@@ -5,8 +5,8 @@
     user = finn
 [core]
     excludesfile = ~/.git.core.excludesfile
-	whitespace = space-before-tab,trailing-space,cr-at-eol
-	ignorecase = false
+    whitespace = space-before-tab,trailing-space,cr-at-eol
+    ignorecase = false
 [alias]
     st = status
     ci = commit
@@ -18,27 +18,28 @@
     ui = auto
 [diff]
     renamelimit = 0
-	renames = copy
+    renames = copy
     tool = opendiff
 [difftool]
     prompt = false
 [merge]
     renamelimit = 0
     keepBackup = false
-    tool = p4merge
+    tool = launchp4merge
 [mergetool]
     prompt = false
 [pack]
-	threads = 0
-[mergetool "customp4merge"]
-    cmd = /Applications/p4merge.app/Contents/Resources/launchp4merge "$PWD/$BASE" "$PWD/$REMOTE" "$PWD/$LOCAL" "$PWD/$MERGED"
+    threads = 0
+[mergetool "launchp4merge"]
+    cmd = /Applications/p4/p4merge.app/Contents/Resources/launchp4merge "$BASE" "$REMOTE" "$LOCAL" "$MERGED"
     keepTemporaries = false
     trustExitCode = false
     keepBackup = false
 [push]
-	default = simple
+    default = simple
 [filter "media"]
-	clean = git-media-clean %f
-	smudge = git-media-smudge %f
+    clean = git media clean %f
+    smudge = git media smudge %f
+    required = true
 [credential]
-	helper = osxkeychain
+    helper = osxkeychain
