@@ -1,45 +1,45 @@
 [user]
-    name = Finn Smith
-    email = finn@timeghost.net
+	name = Finn Smith
+	email = finn@timeghost.net
 [github]
-    user = finn
+	user = finn
 [core]
-    excludesfile = ~/.git.core.excludesfile
-    whitespace = space-before-tab,trailing-space,cr-at-eol
-    ignorecase = false
+	excludesfile = ~/.git.core.excludesfile
+	whitespace = space-before-tab,trailing-space,cr-at-eol
+	ignorecase = false
 [alias]
-    st = status
-    ci = commit
-    br = branch
-    co = checkout
-    praise = blame
-    foo = bar
+	st = status
+	ci = commit
+	br = branch
+	co = checkout
+	praise = blame
+	foo = bar
 [color]
-    ui = auto
+	ui = auto
 [diff]
-    renamelimit = 0
-    renames = copy
-    tool = opendiff
+	renamelimit = 0
+	renames = copy
+	tool = opendiff
 [difftool]
-    prompt = false
+	prompt = false
 [merge]
-    renamelimit = 0
-    keepBackup = false
-    tool = launchp4merge
+	renamelimit = 0
+	keepBackup = false
+	tool = launchp4merge
 [mergetool]
-    prompt = false
+	prompt = false
 [pack]
-    threads = 0
+	threads = 0
 [mergetool "launchp4merge"]
-    cmd = /Applications/p4/p4merge.app/Contents/Resources/launchp4merge "$BASE" "$REMOTE" "$LOCAL" "$MERGED"
-    keepTemporaries = false
-    trustExitCode = false
-    keepBackup = false
+	cmd = /Applications/p4/p4merge.app/Contents/Resources/launchp4merge "$BASE" "$REMOTE" "$LOCAL" "$MERGED"
+	keepTemporaries = false
+	trustExitCode = false
+	keepBackup = false
 [push]
-    default = simple
+	default = simple
 [filter "media"]
-    clean = git media clean %f
-    smudge = git media smudge %f
-    required = true
+	clean = git media clean %f
+	smudge = git media smudge %f
+	required = true
 [credential]
-    helper = osxkeychain
+	helper = osxkeychain
