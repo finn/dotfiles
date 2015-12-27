@@ -1,9 +1,9 @@
 " Vim filetype plugin file
 " Language:      Perl
-" Maintainer:    Andy Lester <andy@petdance.com>
-" Homepage:      http://github.com/petdance/vim-perl
-" Bugs/requests: http://github.com/petdance/vim-perl/issues
-" Last Change:   2009-08-14
+" Maintainer:    vim-perl <vim-perl@googlegroups.com>
+" Homepage:      http://github.com/vim-perl/vim-perl
+" Bugs/requests: http://github.com/vim-perl/vim-perl/issues
+" Last Change:   {{LAST_CHANGE}}
 
 if exists("b:did_ftplugin") | finish | endif
 let b:did_ftplugin = 1
@@ -13,7 +13,8 @@ let b:did_ftplugin = 1
 let s:save_cpo = &cpo
 set cpo-=C
 
-setlocal formatoptions+=crq
+setlocal formatoptions-=t
+setlocal formatoptions+=crqol
 setlocal keywordprg=perldoc\ -f
 
 setlocal comments=:#
@@ -32,11 +33,12 @@ endif
 setlocal include=\\<\\(use\\\|require\\)\\>
 setlocal includeexpr=substitute(substitute(substitute(v:fname,'::','/','g'),'->\*','',''),'$','.pm','')
 setlocal define=[^A-Za-z_]
+setlocal iskeyword+=:
 
 " The following line changes a global variable but is necessary to make
-" gf and similar commands work.  The change to iskeyword was incorrect.
-" Thanks to Andrew Pimlott for pointing out the problem. If this causes a
-" problem for you, add an after/ftplugin/perl.vim file that contains
+" gf and similar commands work. Thanks to Andrew Pimlott for pointing
+" out the problem. If this causes a problem for you, add an
+" after/ftplugin/perl.vim file that contains
 "       set isfname-=:
 set isfname+=:
 
@@ -75,8 +77,13 @@ endif
 "---------------------------------------------
 
 " Undo the stuff we changed.
-let b:undo_ftplugin = "setlocal fo< com< cms< inc< inex< def< isf< kp< path<" .
+let b:undo_ftplugin = "setlocal fo< com< cms< inc< inex< def< isk< isf< kp< path<" .
 	    \	      " | unlet! b:browsefilter"
+
+" proper matching for matchit plugin
+let b:match_skip = 's:comment\|string\|perlQQ\|perlShellCommand\|perlHereDoc\|perlSubstitution\|perlTranslation\|perlMatch\|perlFormatField'
+let b:match_words = '\<if\>:\<elsif\>:\<else\>'
 
 " Restore the saved compatibility options.
 let &cpo = s:save_cpo
+unlet s:save_cpo
