@@ -1,9 +1,9 @@
 " Vim indent file
 " Language:      Perl 5
-" Author:        Andy Lester <andy@petdance.com>
-" Homepage:      http://github.com/petdance/vim-perl
-" Bugs/requests: http://github.com/petdance/vim-perl/issues
-" Last Change:   August 11, 2010
+" Maintainer:    vim-perl <vim-perl@googlegroups.com>
+" Homepage:      http://github.com/vim-perl/vim-perl
+" Bugs/requests: http://github.com/vim-perl/vim-perl/issues
+" Last Change:   {{LAST_CHANGE}}
 
 " Suggestions and improvements by :
 "   Aaron J. Sherman (use syntax for hints)
@@ -35,26 +35,16 @@ if !b:indent_use_syntax
     setlocal indentkeys+=0=EO
 endif
 
-" Only define the function once.
-if exists("*GetPerlIndent")
-    finish
-endif
-
 let s:cpo_save = &cpo
 set cpo-=C
 
-function GetPerlIndent()
+function! GetPerlIndent()
 
     " Get the line to be indented
     let cline = getline(v:lnum)
 
     " Indent POD markers to column 0
     if cline =~ '^\s*=\L\@!'
-        return 0
-    endif
-
-    " Don't reindent comments on first column
-    if cline =~ '^#.'
         return 0
     endif
 
@@ -138,6 +128,8 @@ function GetPerlIndent()
             if synid == ""
                         \ || synid == "perlMatchStartEnd"
                         \ || synid == "perlHereDoc"
+                        \ || synid == "perlBraces"
+                        \ || synid == "perlStatementIndirObj"
                         \ || synid =~ "^perlFiledescStatement"
                         \ || synid =~ '^perl\(Sub\|Block\|Package\)Fold'
                 let brace = strpart(line, bracepos, 1)
@@ -154,6 +146,8 @@ function GetPerlIndent()
             let synid = synIDattr(synID(v:lnum, bracepos, 0), "name")
             if synid == ""
                         \ || synid == "perlMatchStartEnd"
+                        \ || synid == "perlBraces"
+                        \ || synid == "perlStatementIndirObj"
                         \ || synid =~ '^perl\(Sub\|Block\|Package\)Fold'
                 let ind = ind - &sw
             endif
