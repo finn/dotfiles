@@ -9,6 +9,8 @@
 	ignorecase = false
 [alias]
 	st = status
+	sb = status -s -b
+	ss = status -s
 	ci = commit
 	br = branch
 	co = checkout
