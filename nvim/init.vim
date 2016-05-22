@@ -10,7 +10,8 @@ endif
 execute pathogen#infect()
 
 " vim not vi
-set nocompatible
+" XXX on by default in nvim
+"set nocompatible
 
 """ files
 " no backup or swap files, thanks
@@ -20,13 +21,15 @@ set noswapfile
 " write files before :next, :make, etc.
 set autowrite
 " reload changed files
-set autoread
+" XXX on by default in nvim
+"set autoread
 " allow hidden (non-saved) buffers
 set hidden
 " always default to unix style files
 set fileformat=unix
 " default to utf-8
-set encoding=utf-8
+" XXX on by default in nvim
+"set encoding=utf-8
 
 """ display
 " no intro message when launching vim
@@ -35,7 +38,8 @@ set visualbell
 set ruler
 set showcmd
 " always display status line at bottom of vim
-set laststatus=2
+" XXX on by default in nvim
+"set laststatus=2
 " add a little context to cursor location
 set scrolloff=1
 " no blinking block cursor
@@ -46,14 +50,17 @@ set number
 set list
 " highlight cursor line
 set cursorline
-set ttyfast
+" XXX on by default in nvim
+"set ttyfast
 " softwrap
 set linebreak
-"set showbreak=>
+"set showbreak=↪
+set showbreak=↳
 " show as much of last line as possible instead of @
-set display+=lastline
+" XXX on by default in nvim
+"set display+=lastline
 " the whitespace indicators
-set listchars=precedes:$,extends:$,tab:»·,trail:·,eol:¬
+set listchars=precedes:$,extends:$,tab:»·,trail:·,eol:¬,nbsp:×
 " fancy statusline with file encoding and BOM
 if has("statusline")
     set statusline=%<%f\ %h%m%r%=%{\"[\".&ff.\"]\ \"}%{\"[\".(&fenc==\"\"?&enc:&fenc).((exists(\"+bomb\")\ &&\ &bomb)?\",B\":\"\").\"]\ \"}%k\ %-14.(%l,%c%V%)\ %P
@@ -61,13 +68,17 @@ endif
 
 """ filetypes, syntax coloring
 " turn on filetype detection and syntax highlighting
-syntax enable
-filetype plugin indent on
+" XXX on by default in nvim
+"syntax enable
+" XXX on by default in nvim
+"filetype plugin indent on
 set background=dark
 
 """ text formatting
-set backspace=indent,eol,start
-set autoindent
+" XXX on by default in nvim
+"set backspace=indent,eol,start
+" XXX on by default in nvim
+"set autoindent
 set tabstop=4
 set softtabstop=4
 set shiftwidth=4
@@ -79,9 +90,11 @@ set expandtab
 set ignorecase
 set smartcase
 " highlight searches
-set hlsearch
+" XXX on by default in nvim
+"set hlsearch
 set showmatch
-set incsearch
+" XXX on by default in nvim
+"set incsearch
 " clear search highlight
 nnoremap <C-L> :nohlsearch<cr>:redraw!<cr>
 " very magic makes parens more sane
@@ -109,10 +122,12 @@ set splitright
 
 """ cmdline stuff
 " more history
-set history=1000
+" XXX to 10000 by default in nvim
+"set history=1000
 set undolevels=1000
 " better tab completion
-set wildmenu
+" XXX on by default in nvim
+"set wildmenu
 set wildmode=list:longest,full
 "set wildmode=longest:full,full
 " TODO figure out how to detect if this is available or not
@@ -218,7 +233,6 @@ let g:ctrlp_cmd = 'CtrlP'
 command! -bang -complete=buffer -nargs=? BD Bdelete<bang> <args>
 
 " TODO alias :Trim to :TrailerTrim
-
 
 " TODO ?
 " errorbells
