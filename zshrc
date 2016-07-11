@@ -1,3 +1,5 @@
+# vim: filetype=zsh
+
 # Path to your oh-my-zsh configuration.
 ZSH=$HOME/.oh-my-zsh
 
@@ -139,4 +141,4 @@ if [[ $? -eq 0 ]]; then
     . $venvwrap
 fi
 
-# vim: filetype=zsh
+test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell_integration.zsh"
