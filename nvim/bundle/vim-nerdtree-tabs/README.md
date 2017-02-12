@@ -52,6 +52,8 @@ Vim-nerdtree-tabs provides these commands:
 
 * `:NERDTreeTabsToggle` toggles NERDTree on/off for all tabs.
 
+* `:NERDTreeTabsFind` find currently opened file and select it
+
 * `:NERDTreeMirrorOpen` acts as `:NERDTreeMirror`, but smarter: When opening,
   it first tries to use an existing tree (i.e. previously closed in this tab or
   perform a mirror of another tab's tree). If all this fails, a new tree is
@@ -74,6 +76,7 @@ There are also plug-mappings available with the same functionality:
 * `<plug>NERDTreeTabsOpen`
 * `<plug>NERDTreeTabsClose`
 * `<plug>NERDTreeTabsToggle`
+* `<plug>NERDTreeTabsFind`
 * `<plug>NERDTreeMirrorOpen`
 * `<plug>NERDTreeMirrorToggle`
 * `<plug>NERDTreeSteppedOpen`
@@ -86,10 +89,12 @@ You can switch on/off some features of the plugin by setting global vars to 1
 values:
 
 * `g:nerdtree_tabs_open_on_gui_startup` (default: `1`)  
-  Open NERDTree on gvim/macvim startup
+  Open NERDTree on gvim/macvim startup. (When set to `2`, 
+  open only if directory was given as startup argument).
 
 * `g:nerdtree_tabs_open_on_console_startup` (default: `0`)  
-  Open NERDTree on console vim startup
+  Open NERDTree on console vim startup. (When set to `2`, 
+  open only if directory was given as startup argument).
 
 * `g:nerdtree_tabs_no_startup_for_diff` (default: `1`)  
   Do not open NERDTree if vim starts in diff mode
@@ -124,6 +129,9 @@ values:
 * `g:nerdtree_tabs_startup_cd` (default: `1`)  
   When given a directory name as a command line parameter when launching Vim,
   `:cd` into it.
+
+* `g:nerdtree_tabs_autofind` (default: `0`)  
+  Automatically find and select currently opened file in NERDTree.
 
 ### Example
 

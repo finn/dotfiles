@@ -1,11 +1,13 @@
 " === plugin configuration variables === {{{
 "
-" open NERDTree on gvim/macvim startup
+" Open NERDTree on gvim/macvim startup. When set to `2`,
+" open only if directory was given as startup argument.
 if !exists('g:nerdtree_tabs_open_on_gui_startup')
   let g:nerdtree_tabs_open_on_gui_startup = 1
 endif
 
-" open NERDTree on console vim startup (off by default)
+" Open NERDTree on console vim startup (off by default). When set to `2`, 
+" open only if directory was given as startup argument.
 if !exists('g:nerdtree_tabs_open_on_console_startup')
   let g:nerdtree_tabs_open_on_console_startup = 0
 endif
@@ -59,6 +61,11 @@ endif
 if !exists('g:nerdtree_tabs_startup_cd')
   let g:nerdtree_tabs_startup_cd = 1
 endif
+
+" automatically find and select currently opened file
+if !exists('g:nerdtree_tabs_autofind')
+  let g:nerdtree_tabs_autofind = 0
+endif
 "
 " }}}
 " === plugin mappings === {{{
@@ -66,11 +73,12 @@ endif
 noremap <silent> <script> <Plug>NERDTreeTabsOpen     :call <SID>NERDTreeOpenAllTabs()
 noremap <silent> <script> <Plug>NERDTreeTabsClose    :call <SID>NERDTreeCloseAllTabs()
 noremap <silent> <script> <Plug>NERDTreeTabsToggle   :call <SID>NERDTreeToggleAllTabs()
+noremap <silent> <script> <Plug>NERDTreeTabsFind     :call <SID>NERDTreeFindFile()
 noremap <silent> <script> <Plug>NERDTreeMirrorOpen   :call <SID>NERDTreeMirrorOrCreate()
 noremap <silent> <script> <Plug>NERDTreeMirrorToggle :call <SID>NERDTreeMirrorToggle()
 noremap <silent> <script> <Plug>NERDTreeSteppedOpen  :call <SID>NERDTreeSteppedOpen()
 noremap <silent> <script> <Plug>NERDTreeSteppedClose :call <SID>NERDTreeSteppedClose()
-noremap <silent> <script> <Plug>NERDTreeFocusToggle :call <SID>NERDTreeFocusToggle()
+noremap <silent> <script> <Plug>NERDTreeFocusToggle  :call <SID>NERDTreeFocusToggle()
 "
 " }}}
 " === plugin commands === {{{
@@ -78,6 +86,7 @@ noremap <silent> <script> <Plug>NERDTreeFocusToggle :call <SID>NERDTreeFocusTogg
 command! NERDTreeTabsOpen     call <SID>NERDTreeOpenAllTabs()
 command! NERDTreeTabsClose    call <SID>NERDTreeCloseAllTabs()
 command! NERDTreeTabsToggle   call <SID>NERDTreeToggleAllTabs()
+command! NERDTreeTabsFind     call <SID>NERDTreeFindFile()
 command! NERDTreeMirrorOpen   call <SID>NERDTreeMirrorOrCreate()
 command! NERDTreeMirrorToggle call <SID>NERDTreeMirrorToggle()
 command! NERDTreeSteppedOpen  call <SID>NERDTreeSteppedOpen()
@@ -204,7 +213,7 @@ endfun
 " }}}
 " s:NERDTreeFocusToggle() {{{
 "
-" focus the NERDTree view or creates it if in a file, 
+" focus the NERDTree view or creates it if in a file,
 " or unfocus NERDTree view if in NERDTree
 fun! s:NERDTreeFocusToggle()
   let s:disable_handlers_for_tabdo = 1
@@ -400,6 +409,15 @@ fun! s:RestoreNERDTreeViewIfPossible()
 endfun
 
 " }}}
+" s:NERDTreeFindFile() {{{
+"
+fun! s:NERDTreeFindFile()
+  if s:IsNERDTreeOpenInCurrentTab()
+    silent NERDTreeFind
+  endif
+endfun
+
+" }}}
 "
 " === NERDTree view manipulation (scroll and cursor positions) === }}}
 "
@@ -434,9 +452,12 @@ fun! s:LoadPlugin()
     autocmd VimEnter * call <SID>VimEnterHandler()
     autocmd TabEnter * call <SID>TabEnterHandler()
     autocmd TabLeave * call <SID>TabLeaveHandler()
-    autocmd WinEnter * call <SID>WinEnterHandler()
+    " We enable nesting for this autocommand (see :h autocmd-nested) so that
+    " exiting Vim when NERDTree is the last window triggers the VimLeave event.
+    autocmd WinEnter * nested call <SID>WinEnterHandler()
     autocmd WinLeave * call <SID>WinLeaveHandler()
     autocmd BufWinEnter * call <SID>BufWinEnterHandler()
+    autocmd BufRead * call <SID>BufReadHandler()
   augroup END
 
   let g:nerdtree_tabs_loaded = 1
@@ -446,13 +467,12 @@ endfun
 " s:VimEnterHandler() {{{
 "
 fun! s:VimEnterHandler()
-  " if the argument to vim is a directory, cd into it
-  if g:nerdtree_tabs_startup_cd && isdirectory(argv(0))
-    exe 'cd ' . escape(argv(0), '\ ')
-  endif
+  let l:open_nerd_tree_on_startup = (g:nerdtree_tabs_open_on_console_startup == 1 && !has('gui_running')) ||
+                                  \ (g:nerdtree_tabs_open_on_gui_startup == 1 && has('gui_running'))
 
-  let l:open_nerd_tree_on_startup = (g:nerdtree_tabs_open_on_console_startup && !has('gui_running')) ||
-                                  \ (g:nerdtree_tabs_open_on_gui_startup && has('gui_running'))
+  let l:open_directory_on_startup = isdirectory(argv(0)) && 
+			  \ ((g:nerdtree_tabs_open_on_console_startup == 2 && !has('gui_running')) || 
+			  \ (g:nerdtree_tabs_open_on_gui_startup == 2 && has('gui_running')))
 
   if g:nerdtree_tabs_no_startup_for_diff && &diff
       let l:open_nerd_tree_on_startup = 0
@@ -461,7 +481,13 @@ fun! s:VimEnterHandler()
   " this makes sure that globally_active is true when using 'gvim .'
   let s:nerdtree_globally_active = l:open_nerd_tree_on_startup
 
-  if l:open_nerd_tree_on_startup
+  " if the argument to vim is a directory, cd into it
+  if l:open_directory_on_startup || g:nerdtree_tabs_startup_cd && isdirectory(argv(0))
+    exe 'cd ' . escape(argv(0), '\ ')
+  endif
+
+
+  if l:open_nerd_tree_on_startup || l:open_directory_on_startup
     let l:focus_file = !s:IfFocusOnStartup()
     let l:main_bufnr = bufnr('%')
 
@@ -469,8 +495,21 @@ fun! s:VimEnterHandler()
       call s:NERDTreeOpenAllTabs()
     endif
 
-    if (l:focus_file && g:nerdtree_tabs_smart_startup_focus == 1) || g:nerdtree_tabs_smart_startup_focus == 2
+    if (l:focus_file && g:nerdtree_tabs_smart_startup_focus == 1) ||
+			    \ g:nerdtree_tabs_smart_startup_focus == 2 ||
+			    \ l:open_directory_on_startup
       exe bufwinnr(l:main_bufnr) . "wincmd w"
+    endif
+
+    if l:open_directory_on_startup
+      " close buffer not connected to NERDTree and open connected one
+      new
+      exe bufwinnr(l:main_bufnr) . "wincmd w"
+      quit
+
+      if g:nerdtree_tabs_smart_startup_focus != 2
+        NERDTreeFocus
+      endif
     endif
   endif
 endfun
@@ -566,6 +605,20 @@ fun! s:BufWinEnterHandler()
     if !g:nerdtree_tabs_focus_on_files
       call s:NERDTreeRestoreFocus()
     endif
+  endif
+endfun
+
+" }}}
+" s:BufReadHandler() {{{
+"
+" BufRead event gets triggered after a new buffer has been
+" successfully read from file.
+"
+fun! s:BufReadHandler()
+  " Refresh NERDTree to show currently opened file
+  if g:nerdtree_tabs_autofind
+    call s:NERDTreeFindFile()
+    call s:NERDTreeUnfocus()
   endif
 endfun
 
