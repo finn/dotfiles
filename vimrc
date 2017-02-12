@@ -110,7 +110,7 @@ set splitright
 """ cmdline stuff
 " more history
 set history=1000
-set undolevels=1000
+set undolevels=10000
 " better tab completion
 set wildmenu
 set wildmode=list:longest,full
@@ -218,7 +218,6 @@ set fuoptions=maxvert
 command! -bang -complete=buffer -nargs=? BD Bdelete<bang> <args>
 
 " TODO alias :Trim to :TrailerTrim
-
 
 " TODO ?
 " errorbells

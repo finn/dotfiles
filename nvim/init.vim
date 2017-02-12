@@ -10,7 +10,7 @@ endif
 execute pathogen#infect()
 
 " vim not vi
-" XXX on by default in nvim
+" XXX nvim: on by default
 "set nocompatible
 
 """ files
@@ -21,14 +21,14 @@ set noswapfile
 " write files before :next, :make, etc.
 set autowrite
 " reload changed files
-" XXX on by default in nvim
+" XXX nvim: on by default
 "set autoread
 " allow hidden (non-saved) buffers
 set hidden
 " always default to unix style files
 set fileformat=unix
 " default to utf-8
-" XXX on by default in nvim
+" XXX nvim: on by default
 "set encoding=utf-8
 
 """ display
@@ -38,7 +38,7 @@ set visualbell
 set ruler
 set showcmd
 " always display status line at bottom of vim
-" XXX on by default in nvim
+" XXX nvim: on by default
 "set laststatus=2
 " add a little context to cursor location
 set scrolloff=1
@@ -50,14 +50,14 @@ set number
 set list
 " highlight cursor line
 set cursorline
-" XXX on by default in nvim
+" XXX nvim: on by default
 "set ttyfast
 " softwrap
 set linebreak
 "set showbreak=↪
 set showbreak=↳
 " show as much of last line as possible instead of @
-" XXX on by default in nvim
+" XXX nvim: on by default
 "set display+=lastline
 " the whitespace indicators
 set listchars=precedes:$,extends:$,tab:»·,trail:·,eol:¬,nbsp:×
@@ -68,16 +68,16 @@ endif
 
 """ filetypes, syntax coloring
 " turn on filetype detection and syntax highlighting
-" XXX on by default in nvim
+" XXX nvim: on by default
 "syntax enable
-" XXX on by default in nvim
+" XXX nvim: on by default
 "filetype plugin indent on
 set background=dark
 
 """ text formatting
-" XXX on by default in nvim
+" XXX nvim: on by default
 "set backspace=indent,eol,start
-" XXX on by default in nvim
+" XXX nvim: on by default
 "set autoindent
 set tabstop=4
 set softtabstop=4
@@ -90,10 +90,10 @@ set expandtab
 set ignorecase
 set smartcase
 " highlight searches
-" XXX on by default in nvim
+" XXX nvim: on by default
 "set hlsearch
 set showmatch
-" XXX on by default in nvim
+" XXX nvim: on by default
 "set incsearch
 " clear search highlight
 nnoremap <C-L> :nohlsearch<cr>:redraw!<cr>
@@ -122,11 +122,11 @@ set splitright
 
 """ cmdline stuff
 " more history
-" XXX to 10000 by default in nvim
+" XXX nvim: to 10000 by default
 "set history=1000
-set undolevels=1000
+set undolevels=10000
 " better tab completion
-" XXX on by default in nvim
+" XXX nvim: on by default
 "set wildmenu
 set wildmode=list:longest,full
 "set wildmode=longest:full,full
@@ -227,6 +227,7 @@ let g:yankring_history_file = '.vim_yankring_history'
 let g:ctrlp_map = '<C-J>'
 let g:ctrlp_cmd = 'CtrlP'
 
+" XXX nvim: not available
 "set fuoptions=maxvert
 
 " :BD alias for Bdelete
