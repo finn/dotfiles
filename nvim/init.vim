@@ -44,6 +44,8 @@ set laststatus=2
 set scrolloff=1
 " no blinking block cursor
 set guicursor=n:blinkon0
+" XXX nvim: change cursor shape in term (no blink)
+let $NVIM_TUI_ENABLE_CURSOR_SHAPE=1
 " line numbers
 set number
 " display invisibles
