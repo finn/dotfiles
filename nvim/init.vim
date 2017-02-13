@@ -124,8 +124,8 @@ set splitright
 
 """ cmdline stuff
 " more history
-" XXX nvim: to 10000 by default
-"set history=1000
+" XXX nvim: to 10000 by default?
+set history=10000
 set undolevels=10000
 " better tab completion
 " XXX nvim: on by default?
@@ -157,17 +157,15 @@ vnoremap <F1> <ESC>
 " format lines
 noremap Q gq
 
+set fuoptions=maxvert
+
+" :BD alias for Bdelete
+command! -bang -complete=buffer -nargs=? BD Bdelete<bang> <args>
+
+" shorten updatetime for gitgutter
+set updatetime=250
+
 """ plugin settings
-
-" TODO taglist config
-
-" TODO NERDTree config
-
-" NERDTree tabs config
-map <Leader>n <plug>NERDTreeTabsToggle<CR>
-" always focus file pane on startup
-let g:nerdtree_tabs_smart_startup_focus = 2
-"let g:nerdtree_tabs_autoclose = 0
 
 " color scheme
 if ( has('gui_running') )
@@ -178,6 +176,16 @@ elseif ( &t_Co == 256 )
     let g:solarized_termcolors=256
     colorscheme solarized
 endif
+
+" TODO taglist config
+
+" TODO NERDTree config
+
+" NERDTree tabs config
+map <Leader>n <plug>NERDTreeTabsToggle<CR>
+" always focus file pane on startup
+let g:nerdtree_tabs_smart_startup_focus = 2
+"let g:nerdtree_tabs_autoclose = 0
 
 " powerline
 " TODO re-enable once powerline isn't broken
@@ -235,9 +243,6 @@ let g:ctrlp_cmd = 'CtrlP'
 
 " XXX nvim: not available
 "set fuoptions=maxvert
-
-" :BD alias for Bdelete
-command! -bang -complete=buffer -nargs=? BD Bdelete<bang> <args>
 
 " TODO alias :Trim to :TrailerTrim
 
