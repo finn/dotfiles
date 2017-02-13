@@ -152,8 +152,12 @@ map <Leader>n <plug>NERDTreeTabsToggle<CR>
 let g:nerdtree_tabs_smart_startup_focus = 2
 "let g:nerdtree_tabs_autoclose = 0
 
-" solarized
-if ( has('gui_running') || &t_Co == 256 )
+" color scheme
+if ( has('gui_running') )
+    " onedark in gui
+    colorscheme onedark
+elseif ( &t_Co == 256 )
+    " solarized in terminal
     let g:solarized_termcolors=256
     colorscheme solarized
 endif

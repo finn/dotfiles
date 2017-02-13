@@ -10,8 +10,8 @@ endif
 execute pathogen#infect()
 
 " vim not vi
-" XXX nvim: on by default
-"set nocompatible
+" XXX nvim: on by default?
+set nocompatible
 
 """ files
 " no backup or swap files, thanks
@@ -21,15 +21,15 @@ set noswapfile
 " write files before :next, :make, etc.
 set autowrite
 " reload changed files
-" XXX nvim: on by default
-"set autoread
+" XXX nvim: on by default?
+set autoread
 " allow hidden (non-saved) buffers
 set hidden
 " always default to unix style files
 set fileformat=unix
 " default to utf-8
-" XXX nvim: on by default
-"set encoding=utf-8
+" XXX nvim: on by default?
+set encoding=utf-8
 
 """ display
 " no intro message when launching vim
@@ -38,8 +38,8 @@ set visualbell
 set ruler
 set showcmd
 " always display status line at bottom of vim
-" XXX nvim: on by default
-"set laststatus=2
+" XXX nvim: on by default?
+set laststatus=2
 " add a little context to cursor location
 set scrolloff=1
 " no blinking block cursor
@@ -50,15 +50,15 @@ set number
 set list
 " highlight cursor line
 set cursorline
-" XXX nvim: on by default
-"set ttyfast
+" XXX nvim: on by default?
+set ttyfast
 " softwrap
 set linebreak
 "set showbreak=↪
 set showbreak=↳
 " show as much of last line as possible instead of @
-" XXX nvim: on by default
-"set display+=lastline
+" XXX nvim: on by default?
+set display+=lastline
 " the whitespace indicators
 set listchars=precedes:$,extends:$,tab:»·,trail:·,eol:¬,nbsp:×
 " fancy statusline with file encoding and BOM
@@ -68,17 +68,17 @@ endif
 
 """ filetypes, syntax coloring
 " turn on filetype detection and syntax highlighting
-" XXX nvim: on by default
-"syntax enable
-" XXX nvim: on by default
-"filetype plugin indent on
+" XXX nvim: on by default?
+syntax enable
+" XXX nvim: on by default?
+filetype plugin indent on
 set background=dark
 
 """ text formatting
-" XXX nvim: on by default
-"set backspace=indent,eol,start
-" XXX nvim: on by default
-"set autoindent
+" XXX nvim: on by default?
+set backspace=indent,eol,start
+" XXX nvim: on by default?
+set autoindent
 set tabstop=4
 set softtabstop=4
 set shiftwidth=4
@@ -90,11 +90,11 @@ set expandtab
 set ignorecase
 set smartcase
 " highlight searches
-" XXX nvim: on by default
-"set hlsearch
+" XXX nvim: on by default?
+set hlsearch
 set showmatch
-" XXX nvim: on by default
-"set incsearch
+" XXX nvim: on by default?
+set incsearch
 " clear search highlight
 nnoremap <C-L> :nohlsearch<cr>:redraw!<cr>
 " very magic makes parens more sane
@@ -126,8 +126,8 @@ set splitright
 "set history=1000
 set undolevels=10000
 " better tab completion
-" XXX nvim: on by default
-"set wildmenu
+" XXX nvim: on by default?
+set wildmenu
 set wildmode=list:longest,full
 "set wildmode=longest:full,full
 " TODO figure out how to detect if this is available or not
@@ -167,8 +167,12 @@ map <Leader>n <plug>NERDTreeTabsToggle<CR>
 let g:nerdtree_tabs_smart_startup_focus = 2
 "let g:nerdtree_tabs_autoclose = 0
 
-" solarized
-if ( has('gui_running') || &t_Co == 256 )
+" color scheme
+if ( has('gui_running') )
+    " onedark in gui
+    colorscheme onedark
+elseif ( &t_Co == 256 )
+    " solarized in terminal
     let g:solarized_termcolors=256
     colorscheme solarized
 endif
