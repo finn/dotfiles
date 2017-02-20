@@ -157,7 +157,8 @@ vnoremap <F1> <ESC>
 " format lines
 noremap Q gq
 
-set fuoptions=maxvert
+" XXX nvim: not available
+"set fuoptions=maxvert
 
 " :BD alias for Bdelete
 command! -bang -complete=buffer -nargs=? BD Bdelete<bang> <args>
