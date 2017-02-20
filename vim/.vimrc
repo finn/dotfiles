@@ -140,7 +140,9 @@ vnoremap <F1> <ESC>
 " format lines
 noremap Q gq
 
-set fuoptions=maxvert
+if has("gui_macvim")
+    set fuoptions=maxvert
+endif
 
 " :BD alias for Bdelete
 command! -bang -complete=buffer -nargs=? BD Bdelete<bang> <args>
