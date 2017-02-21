@@ -70,6 +70,9 @@ export CLICOLOR=1
 # color in grep
 export GREP_OPTIONS='--color=auto'
 
+# email (for git et al)
+export EMAIL=finn@timeghost.net
+
 # emacs mode
 bindkey -e
 

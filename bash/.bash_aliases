@@ -1,3 +1,5 @@
+# vim: filetype=sh
+
 # ack is called ack-grep on debian/ubuntu
 if [ -x /usr/bin/ack-grep ]; then
     alias ack="ack-grep"
@@ -8,5 +10,3 @@ alias la='ls -A'
 alias ls='ls -CF'
 # location/navigation
 alias ..='cd ..'
-
-# vim: filetype=sh
