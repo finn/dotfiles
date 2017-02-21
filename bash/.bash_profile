@@ -1,3 +1,5 @@
+# vim: filetype=sh
+
 # ~/.bash_profile: executed by the command interpreter for login shells.
 
 # the default umask is set in /etc/profile; for setting the umask
@@ -40,6 +42,9 @@ export CLICOLOR=1
 # color in grep
 export GREP_OPTIONS='--color=auto'
 
+# email (for git et al)
+export EMAIL=finn@timeghost.net
+
 # if running bash
 if [ -n "$BASH_VERSION" ]; then
     # include .bashrc if it exists
@@ -47,19 +52,3 @@ if [ -n "$BASH_VERSION" ]; then
         . "$HOME/.bashrc"
     fi
 fi
-
-###
-### Load local shell customizations
-###
-
-bashrcd="$HOME/.bashrc.d"
-if [[ -d $bashrcd && -r $bashrcd && -x $bashrcd ]]; then
-    for f in $(ls "$bashrcd"); do
-        f=$bashrcd/$f
-        if [[ -f $f && -r $f && $f != *~ && $f != *.bak && $f != *.swp ]]; then
-            . $f
-        fi
-    done
-fi
-
-# vim: filetype=sh
