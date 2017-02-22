@@ -12,6 +12,7 @@ DIRS += $(HOME)/.bashrc.d
 
 STOW_PKGS += ack
 STOW_PKGS += bash
+STOW_PKGS += fish
 STOW_PKGS += git
 STOW_PKGS += home
 STOW_PKGS += nvim
@@ -32,6 +33,6 @@ stow : dirs $(STOW_PKGS)
 $(DIRS) :
 	$(INSTALL_D) $(DIRS)
 
-# execute stow for each dir, and ignore errors
+# execute stow for each dir (and ignore errors)
 $(STOW_PKGS) :
 	-stow -d $(DOTFILES_DIR) -t $(HOME) $@
