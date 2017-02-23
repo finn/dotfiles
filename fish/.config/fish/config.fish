@@ -1,6 +1,6 @@
 ### PATH
 
-# prepend ~/bin
+# prepend ~/bin to PATH
 if test -d ~/bin/
     set -U fish_user_paths ~/bin
 end
