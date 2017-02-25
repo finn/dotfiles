@@ -28,5 +28,10 @@ alias nview 'nvim -R'
 # load plenv for custom perls
 if test -d ~/.plenv/bin
     set -x PATH ~/.plenv/bin $PATH
-    status --is-interactive; and . (plenv init -|psub)
+    status --is-interactive; and source (plenv init -|psub)
+end
+
+# iterm2 shell integration
+if test -e ~/.iterm2_shell_integration.fish
+    source ~/.iterm2_shell_integration.fish
 end
