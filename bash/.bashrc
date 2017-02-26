@@ -41,14 +41,6 @@ if [ -f $home_complete ]; then
     source $home_complete
 fi
 
-# load perlbrew
-#PERLBREW_ROOT="$HOME/perl5/perlbrew"
-#if [ -d $PERLBREW_ROOT ]; then
-#    export PERLBREW_ROOT
-#    perlbrew_bashrc="$PERLBREW_ROOT/etc/bashrc"
-#    [[ -f $perlbrew_bashrc ]] && . $perlbrew_bashrc
-#fi
-
 ## load plenv for custom perls
 #if [[ -d "$HOME/.plenv/bin" ]]; then
 #    export PATH="$HOME/.plenv/bin:$PATH"
@@ -60,7 +52,7 @@ fi
 #    export PATH="$HOME/.rbenv/bin:$PATH"
 #    eval "$(rbenv init -)"
 #fi
-#
+
 # load local bash customizations
 bashrcd="$HOME/.bashrc.d"
 if [[ -d $bashrcd && -r $bashrcd && -x $bashrcd ]]; then
@@ -84,3 +76,6 @@ fi
 #    # make pip respect virtualenvwrapper
 #    export PIP_VIRTUALENV_BASE=$WORKON_HOME
 #fi
+
+# fzf
+[ -f ~/.fzf.bash ] && source ~/.fzf.bash

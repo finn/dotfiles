@@ -145,3 +145,6 @@ if [[ $? -eq 0 ]]; then
 fi
 
 test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell_integration.zsh"
+
+# fzf
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
