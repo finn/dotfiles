@@ -15,6 +15,8 @@ set -x CLICOLOR 1
 set -x GREP_OPTIONS '--color=auto'
 # email (for git et al)
 set -x EMAIL finn@timeghost.net
+# fzf opts
+set -x FZF_DEFAULT_OPTS '--reverse --border --cycle --tabstop=4'
 
 ### aliases
 
