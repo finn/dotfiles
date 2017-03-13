@@ -13,8 +13,8 @@ set -x EDITOR nvim
 set -x CLICOLOR 1
 # color in grep
 set -x GREP_OPTIONS '--color=auto'
-# email (for git et al)
-set -x EMAIL finn@timeghost.net
+# set default email if not set (for git et al)
+set -q EMAIL; or set -x EMAIL finn@timeghost.net
 # fzf opts
 set -x FZF_DEFAULT_OPTS '--reverse --border --cycle --tabstop=4 --no-extended'
 
