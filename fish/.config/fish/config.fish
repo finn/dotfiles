@@ -33,6 +33,9 @@ if test -d ~/.plenv/bin
     status --is-interactive; and source (plenv init -|psub)
 end
 
+# load virtualfish if it's present
+eval (python -m virtualfish ^/dev/null)
+
 # iterm2 shell integration
 if test -e ~/.iterm2_shell_integration.fish
     source ~/.iterm2_shell_integration.fish
