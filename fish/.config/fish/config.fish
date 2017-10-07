@@ -20,8 +20,9 @@ set -x FZF_DEFAULT_OPTS '--reverse --border --cycle --tabstop=4 --no-extended'
 
 ### aliases
 
-# rg with smart case by default
-alias rg 'rg -S'
+# ag/rg with smart case + sort files by default
+alias ag 'ag --smart-case'
+alias rg 'rg --smart-case --sort-files'
 
 # some ls aliases
 alias ll 'ls -l'
