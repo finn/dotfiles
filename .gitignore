@@ -5,3 +5,4 @@ vim/bundle/*/doc/tags
 nvim/.netrwhist
 nvim/bundle/*/doc/tags
 fish/.config/fish/fishd.*
+*.pyc
