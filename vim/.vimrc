@@ -124,10 +124,12 @@ set wildmode=list:longest,full
 """ autocmds and remaps
 " set path to directory of file being edited
 autocmd BufEnter * silent! lcd %:p:h
-" map :W to :w for typos
-com -nargs=? -complete=file W w <args>
 " map :E to :e for typos
-com -nargs=? -complete=file E e <args>
+command! -bang -nargs=? -complete=file E e<bang> <args>
+" map :W to :w for typos
+command! -bang -nargs=? -complete=file W w<bang> <args>
+" map :Q to :q for typos
+command! -bang Q q<bang>
 " ctrl-tab and ctrl-shift-tab cycle tabs
 if (v:version >= 700)
   noremap <C-Tab> gt
@@ -144,13 +146,14 @@ if has("gui_macvim")
   set fuoptions=maxvert
 endif
 
+""" plugin settings
+
+" vim-bbye
 " :BD alias for Bdelete
 command! -bang -complete=buffer -nargs=? BD Bdelete<bang> <args>
 
 " shorten updatetime for gitgutter
 set updatetime=250
-
-""" plugin settings
 
 " color scheme
 if ( has('gui_running') )
@@ -222,7 +225,8 @@ let g:markdown_fenced_languages = [
 " yankring
 let g:yankring_history_file = '.vim_yankring_history'
 
-" TODO alias :Trim to :TrailerTrim
+" alias :Trim to :TrailerTrim
+command! -bar -range=% Trim <line1>,<line2>:TrailerTrim
 
 " TODO ?
 " errorbells
