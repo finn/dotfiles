@@ -1,6 +1,6 @@
 "============================================================================
 "File:        frosted.vim
-"Description: Syntax checking plugin for syntastic.vim
+"Description: Syntax checking plugin for syntastic
 "Maintainer:  LCD 47 <lcd047 at gmail dot com>
 "License:     This program is free software. It comes without any warranty,
 "             to the extent permitted by applicable law. You can redistribute
@@ -36,17 +36,17 @@ function! SyntaxCheckers_python_frosted_GetLocList() dict
         \ 'returns': [0, 1] })
 
     for e in loclist
-        let e["col"] += 1
+        let e['col'] += 1
 
         let parts = matchlist(e.text, '\v^([EW]\d+):([^:]*):(.+)')
         if len(parts) >= 4
-            let e["type"] = parts[1][0]
-            let e["text"] = parts[3] . ' [' . parts[1] . ']'
-            let e["hl"] = '\V\<' . escape(parts[2], '\') . '\>'
-        elseif e["text"] =~? '\v^I\d+:'
-            let e["valid"] = 0
+            let e['type'] = parts[1][0]
+            let e['text'] = parts[3] . ' [' . parts[1] . ']'
+            let e['hl'] = '\V\<' . escape(parts[2], '\') . '\>'
+        elseif e['text'] =~? '\v^I\d+:'
+            let e['valid'] = 0
         else
-            let e["vcol"] = 0
+            let e['vcol'] = 0
         endif
     endfor
 

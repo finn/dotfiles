@@ -1,6 +1,6 @@
 "============================================================================
 "File:        nagelfar.vim
-"Description: Syntax checking plugin for syntastic.vim
+"Description: Syntax checking plugin for syntastic
 "Maintainer:  James Pickard <james.pickard at gmail dot com>
 "License:     This program is free software. It comes without any warranty,
 "             to the extent permitted by applicable law. You can redistribute
@@ -13,7 +13,7 @@
 "Notes:       Requires nagelfar v1.1.12 or later with support for -H option.
 "             See nagelfar homepage http://nagelfar.berlios.de/.
 
-if exists("g:loaded_syntastic_tcl_nagelfar_checker")
+if exists('g:loaded_syntastic_tcl_nagelfar_checker')
     finish
 endif
 let g:loaded_syntastic_tcl_nagelfar_checker = 1

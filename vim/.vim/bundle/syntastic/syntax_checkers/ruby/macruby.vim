@@ -1,6 +1,6 @@
 "============================================================================
 "File:        macruby.vim
-"Description: Syntax checking plugin for syntastic.vim
+"Description: Syntax checking plugin for syntastic
 "License:     This program is free software. It comes without any warranty,
 "             to the extent permitted by applicable law. You can redistribute
 "             it and/or modify it under the terms of the Do What The Fuck You
@@ -9,7 +9,7 @@
 "
 "============================================================================
 
-if exists("g:loaded_syntastic_ruby_macruby_checker")
+if exists('g:loaded_syntastic_ruby_macruby_checker')
     finish
 endif
 let g:loaded_syntastic_ruby_macruby_checker = 1
@@ -18,7 +18,9 @@ let s:save_cpo = &cpo
 set cpo&vim
 
 function! SyntaxCheckers_ruby_macruby_GetLocList() dict
-    let makeprg = self.makeprgBuild({ 'args_after': '-W1 -c' })
+    let makeprg = self.makeprgBuild({
+        \ 'args': '-W1',
+        \ 'args_after': '-c' })
 
     let errorformat =
         \ '%-GSyntax OK,'.

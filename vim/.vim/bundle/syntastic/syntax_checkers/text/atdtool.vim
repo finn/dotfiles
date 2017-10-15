@@ -1,6 +1,6 @@
 "============================================================================
 "File:        atdtool.vim
-"Description: Syntax checking plugin for syntastic.vim
+"Description: Syntax checking plugin for syntastic
 "Maintainer:  LCD 47 <lcd047 at gmail dot com>
 "License:     This program is free software. It comes without any warranty,
 "             to the extent permitted by applicable law. You can redistribute
@@ -10,7 +10,7 @@
 "
 "============================================================================
 
-if exists("g:loaded_syntastic_text_atdtool_checker")
+if exists('g:loaded_syntastic_text_atdtool_checker')
     finish
 endif
 let g:loaded_syntastic_text_atdtool_checker = 1
@@ -24,7 +24,7 @@ set cpo&vim
 
 function! SyntaxCheckers_text_atdtool_GetHighlightRegex(item)
     let term = matchstr(a:item['text'], '\m "\zs[^"]\+\ze"\($\| | suggestions:\)')
-    if term != ''
+    if term !=# ''
         let col = get(a:item, 'col', 0)
         let term = (col != 0 ? '\%' . col . 'c' : '') . '\V' . escape(term, '\')
     endif

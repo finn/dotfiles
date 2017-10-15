@@ -1,6 +1,6 @@
 "============================================================================
 "File:        checkpatch.vim
-"Description: Syntax checking plugin for syntastic.vim using checkpatch.pl
+"Description: Syntax checking plugin for syntastic using checkpatch.pl
 "Maintainer:  Daniel Walker <dwalker at fifo99 dot com>
 "License:     This program is free software. It comes without any warranty,
 "             to the extent permitted by applicable law. You can redistribute
@@ -9,7 +9,7 @@
 "             See http://sam.zoy.org/wtfpl/COPYING for more details.
 "============================================================================
 
-if exists("g:loaded_syntastic_c_checkpatch_checker")
+if exists('g:loaded_syntastic_c_checkpatch_checker')
     finish
 endif
 let g:loaded_syntastic_c_checkpatch_checker = 1

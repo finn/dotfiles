@@ -1,6 +1,6 @@
 "============================================================================
 "File:        mdl.vim
-"Description: Syntax checking plugin for syntastic.vim
+"Description: Syntax checking plugin for syntastic
 "Maintainer:  Charles Beynon <etothepiipower at gmail dot com>
 "License:     This program is free software. It comes without any warranty,
 "             to the extent permitted by applicable law. You can redistribute
@@ -10,7 +10,7 @@
 "
 "============================================================================
 
-if exists("g:loaded_syntastic_markdown_mdl_checker")
+if exists('g:loaded_syntastic_markdown_mdl_checker')
     finish
 endif
 let g:loaded_syntastic_markdown_mdl_checker = 1
@@ -26,7 +26,7 @@ function! SyntaxCheckers_markdown_mdl_GetLocList() dict
     let makeprg = self.makeprgBuild({ 'args': '--warnings' })
 
     let errorformat =
-        \ '%E%f:%l: %m,'.
+        \ '%E%f:%\s%\=%l: %m,'.
         \ '%W%f: Kramdown Warning: %m found on line %l'
 
     return SyntasticMake({
