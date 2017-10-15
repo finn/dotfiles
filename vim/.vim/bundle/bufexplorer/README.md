@@ -5,9 +5,10 @@ BufExplorer Plugin for Vim
 
 With bufexplorer, you can quickly and easily switch between buffers by using the one of the default public interfaces:
 
-  '\be' (normal open)  or
-  '\bs' (force horizontal split open)  or
-  '\bv' (force vertical split open)
+  '<Leader>be' (normal open)  or
+  '<Leader>bt' (toggle open / close)  or
+  '<Leader>bs' (force horizontal split open)  or
+  '<Leader>bv' (force vertical split open)
 
 Once the bufexplorer window is open you can use the normal movement keys (hjkl) to move around and then use <Enter> or <Left-Mouse-Click> to select the buffer you would like to open. If you would like to have the selected buffer opened in a new tab, simply press either <Shift-Enter> or 't'. Please note that when opening a buffer in a tab, that if the buffer is already in another tab, bufexplorer can switch to that tab automatically for you if you would like. More about that in the supplied VIM help.
 
@@ -26,21 +27,45 @@ For more about options, sort orders, configuration options, etc. please see the 
 This plugin can also be found at http://www.vim.org/scripts/script.php?script_id=42.
 
 ## Installation
+### Manually
+1.  If you do not want to use on the the bundle handlers, you can take the zip
+    file from vim.org and unzip it and copy the plugin to your vimfiles\plugin
+    directory and the txt file to your vimfiles\doc directory.  If you do that,
+    make sure you generate the help by executing
 
-If you do not have a preferred installation method, I would recommend installing [vundle.vim](https://github.com/gmarik/vundle), and
-then simply putting the following in your _vimrc or .vimrc file:
+    `:helptag <your runtime directory>/doc`
 
-    Bundle 'jlanzarotta/bufexplorer'
+    Once help tags have been generated, you can view the manual with
+    `:help bufexplorer`.
 
-If you do not want to use [vundle.vim](https://github.com/gmarik/vundle), you can take the zip file from vim.org and unzip it and copy the plugin to your vimfiles\plugin directory and the txt file to your vimfiles\doc directory.  If you do that, make sure you generate the help by executing
+### Vundle (https://github.com/gmarik/Vundle.vim)
+1. Add the following configuration to your `.vimrc`.
 
-`:helptag <your runtime directory>/doc`
+        Plugin 'jlanzarotta/bufexplorer'
 
-Once help tags have been generated, you can view the manual with
-`:help bufexplorer`.
+2. Install with `:BundleInstall`.
+
+### NeoBundle (https://github.com/Shougo/neobundle.vim)
+1. Add the following configuration to your `.vimrc`.
+
+        NeoBundle 'jlanzarotta/bufexplorer'
+
+2. Install with `:NeoBundleInstall`.
+
+### Plug (https://github.com/junegunn/vim-plug)
+1. Add the following configuration to your `.vimrc`.
+
+        Plug 'jlanzarotta/bufexplorer'
+
+2. Instal with `:PlugInstall`.
+
+### Pathogen
+1. Install with the following command.
+
+        git clone https://github.com/jlanzarotta/bufexplorer.git ~/.vim/bundle/bufexplorer.vim
 
 ## License
-Copyright (c) 2001-2014, Jeff Lanzarotta
+Copyright (c) 2001-2017, Jeff Lanzarotta
 
 All rights reserved.
 
