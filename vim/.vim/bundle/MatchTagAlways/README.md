@@ -1,6 +1,6 @@
 # Always highlight enclosing tags
 
-[![Build Status](https://travis-ci.org/Valloric/MatchTagAlways.png?branch=master)](https://travis-ci.org/Valloric/MatchTagAlways)
+[![Build Status](https://travis-ci.org/Valloric/MatchTagAlways.svg?branch=master)](https://travis-ci.org/Valloric/MatchTagAlways)
 
 The MatchTagAlways.vim (MTA) plug-in for the [Vim text editor][vim] always
 highlights the XML/HTML tags that enclose your cursor location. It's probably
@@ -95,6 +95,22 @@ See `:help highlight` for more details on text highlighting commands.
 Default: `1`
 
     let g:mta_set_default_matchtag_color = 1
+
+## Comands
+
+You can use the plugin to also go to the closing tag if this tag is in the
+visible screen. 
+
+### `MtaJumpToOtherTag`
+
+Jumps to the enclosing tag if the tag is visible. If you are on top of an
+opening tag, it will jump to the closing tag. If you are on the closing tag,
+it will jump to the opening tag. If you are inside a tag, then it will jump to
+the closing tag. 
+
+Setting a mapping for this command: 
+
+    nnoremap <leader>% :MtaJumpToOtherTag<cr>
 
 ## FAQ
 
