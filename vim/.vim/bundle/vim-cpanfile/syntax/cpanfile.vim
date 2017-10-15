@@ -10,14 +10,12 @@ set cpo&vim
 
 syn keyword cpanfileInclude requires recommends suggests conflicts
                           \ configure_requires build_requires
-                          \ test_requires author_requires
+                          \ test_requires author_requires mirror
 syn keyword cpanfileConditional on feature
 " syn keyword ??? osname " TODO it has not implemented yet.
 
 hi def link cpanfileInclude     Include
 hi def link cpanfileConditional Conditional
-
-let b:current_syntax = "cpanfile"
 
 let &cpo = s:cpo_save
 unlet s:cpo_save
