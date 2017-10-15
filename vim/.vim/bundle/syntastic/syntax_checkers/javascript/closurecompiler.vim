@@ -9,7 +9,7 @@
 "             See http://sam.zoy.org/wtfpl/COPYING for more details.
 "============================================================================
 
-if exists("g:loaded_syntastic_javascript_closurecompiler_checker")
+if exists('g:loaded_syntastic_javascript_closurecompiler_checker')
     finish
 endif
 let g:loaded_syntastic_javascript_closurecompiler_checker = 1
@@ -42,11 +42,12 @@ function! SyntaxCheckers_javascript_closurecompiler_GetLocList() dict
     call syntastic#log#deprecationWarn('javascript_closure_compiler_options', 'javascript_closurecompiler_args')
     call syntastic#log#deprecationWarn('javascript_closure_compiler_file_list', 'javascript_closurecompiler_file_list')
 
-    let flist = expand(get(g:, 'syntastic_javascript_closurecompiler_file_list', ''), 1)
+    let buf = bufnr('')
+    let flist = expand(syntastic#util#bufVar(buf, 'javascript_closurecompiler_file_list'), 1)
     if filereadable(flist)
         let file_list = map( readfile(flist), 'expand(v:var, 1)' )
     else
-        let file_list = [expand('%', 1)]
+        let file_list = [bufname(buf)]
     endif
 
     let makeprg = self.makeprgBuild({

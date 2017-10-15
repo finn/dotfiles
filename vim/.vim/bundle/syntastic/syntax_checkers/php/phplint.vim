@@ -1,6 +1,6 @@
 "============================================================================
 "File:        phplint.vim
-"Description: Syntax checking plugin for syntastic.vim
+"Description: Syntax checking plugin for syntastic
 "Maintainer:  LCD 47 <lcd047 at gmail dot com>
 "License:     This program is free software. It comes without any warranty,
 "             to the extent permitted by applicable law. You can redistribute
@@ -10,7 +10,7 @@
 "
 "============================================================================
 
-if exists("g:loaded_syntastic_php_phplint_checker")
+if exists('g:loaded_syntastic_php_phplint_checker')
     finish
 endif
 let g:loaded_syntastic_php_phplint_checker = 1
@@ -20,31 +20,31 @@ set cpo&vim
 
 function! SyntaxCheckers_php_phplint_GetHighlightRegex(item)
     let term = matchstr(a:item['text'], '\munresolved function \zs\S\+\ze')
-    if term != ''
+    if term !=# ''
         return '\V' . escape(term, '\')
     endif
     let term = matchstr(a:item['text'], '\m\(class\|function\|method\) \zs\S\+\ze was declared as')
-    if term != ''
+    if term !=# ''
         return '\V' . escape(term, '\')
     endif
     let term = matchstr(a:item['text'], '\maccess forbidden to \(private\|protected\) \(class\|constant\|method\|variable\|\(private\|protected\) property\) \zs\S\+\ze')
-    if term != ''
+    if term !=# ''
         return '\V' . escape(term, '\')
     endif
     let term = matchstr(a:item['text'], '\musing deprecated \(class\|constant\|method\|property\|variable\) \zs\S\+\ze')
-    if term != ''
+    if term !=# ''
         return '\V' . escape(term, '\')
     endif
     let term = matchstr(a:item['text'], '\munresolved function \zs\S\+\ze')
-    if term != ''
+    if term !=# ''
         return '\V' . escape(term, '\')
     endif
     let term = matchstr(a:item['text'], '\munresolved function \zs\S\+\ze')
-    if term != ''
+    if term !=# ''
         return '\V' . escape(term, '\')
     endif
     let term = matchstr(a:item['text'], '\munresolved function \zs\S\+\ze')
-    return term != '' ? '\V' . escape(term, '\') : ''
+    return term !=# '' ? '\V' . escape(term, '\') : ''
 endfunction
 
 function! SyntaxCheckers_php_phplint_GetLocList() dict
