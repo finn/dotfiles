@@ -3,7 +3,7 @@
 
 " use ~/.vim in windows too
 if has("win32")
-    set runtimepath^=~/.vim
+  set runtimepath^=~/.vim
 endif
 
 " pathogen for plugin bundles
@@ -56,7 +56,7 @@ set display+=lastline
 set listchars=precedes:$,extends:$,tab:»·,trail:·,eol:¬
 " fancy statusline with file encoding and BOM
 if has("statusline")
-    set statusline=%<%f\ %h%m%r%=%{\"[\".&ff.\"]\ \"}%{\"[\".(&fenc==\"\"?&enc:&fenc).((exists(\"+bomb\")\ &&\ &bomb)?\",B\":\"\").\"]\ \"}%k\ %-14.(%l,%c%V%)\ %P
+  set statusline=%<%f\ %h%m%r%=%{\"[\".&ff.\"]\ \"}%{\"[\".(&fenc==\"\"?&enc:&fenc).((exists(\"+bomb\")\ &&\ &bomb)?\",B\":\"\").\"]\ \"}%k\ %-14.(%l,%c%V%)\ %P
 endif
 
 """ filetypes, syntax coloring
@@ -118,7 +118,7 @@ set wildmode=list:longest,full
 " TODO figure out how to detect if this is available or not
 " only available in later versions
 "if (v:version >= 703)
-    "set wildignorecase
+"set wildignorecase
 "endif
 
 """ autocmds and remaps
@@ -130,8 +130,8 @@ com -nargs=? -complete=file W w <args>
 com -nargs=? -complete=file E e <args>
 " ctrl-tab and ctrl-shift-tab cycle tabs
 if (v:version >= 700)
-    noremap <C-Tab> gt
-    noremap <C-S-Tab> gT
+  noremap <C-Tab> gt
+  noremap <C-S-Tab> gT
 endif
 " get rid of help when you hit f1 instead of esc
 inoremap <F1> <ESC>
@@ -141,7 +141,7 @@ vnoremap <F1> <ESC>
 noremap Q gq
 
 if has("gui_macvim")
-    set fuoptions=maxvert
+  set fuoptions=maxvert
 endif
 
 " :BD alias for Bdelete
@@ -154,12 +154,12 @@ set updatetime=250
 
 " color scheme
 if ( has('gui_running') )
-    " onedark in gui
-    colorscheme onedark
+  " onedark in gui
+  colorscheme onedark
 elseif ( &t_Co == 256 )
-    " solarized in terminal
-    let g:solarized_termcolors=256
-    colorscheme solarized
+  " solarized in terminal
+  let g:solarized_termcolors=256
+  colorscheme solarized
 endif
 
 " TODO taglist config
@@ -181,43 +181,43 @@ let g:nerdtree_tabs_smart_startup_focus = 2
 let g:tcommentOptions = {'col': 1}
 " redefine some commonish comment types to remove leading whitespace
 let g:tcomment_types = {
-            \ 'apache':           '#%s',
-            \ 'cpp':              '//%s',
-            \ 'cfg':              '#%s',
-            \ 'conf':             '#%s',
-            \ 'crontab':          '#%s',
-            \ 'cs':               '//%s',
-            \ 'fstab':            '#%s',
-            \ 'gitcommit':        '#%s',
-            \ 'gitignore':        '#%s',
-            \ 'javaScript':       '//%s',
-            \ 'javascript':       '//%s',
-            \ 'java':             '//%s',
-            \ 'perl':             '#%s',
-            \ 'puppet':           '#%s',
-            \ 'python':           '#%s',
-            \ 'ruby':             '#%s',
-            \ 'ruby_3':           '###%s',
-            \ 'sh':               '#%s',
-            \ 'vim':              '"%s',
-            \ 'vim_3':            '"""%s',
-            \ 'yaml':             '#%s',
-            \ }
+      \ 'apache':           '#%s',
+      \ 'cpp':              '//%s',
+      \ 'cfg':              '#%s',
+      \ 'conf':             '#%s',
+      \ 'crontab':          '#%s',
+      \ 'cs':               '//%s',
+      \ 'fstab':            '#%s',
+      \ 'gitcommit':        '#%s',
+      \ 'gitignore':        '#%s',
+      \ 'javaScript':       '//%s',
+      \ 'javascript':       '//%s',
+      \ 'java':             '//%s',
+      \ 'perl':             '#%s',
+      \ 'puppet':           '#%s',
+      \ 'python':           '#%s',
+      \ 'ruby':             '#%s',
+      \ 'ruby_3':           '###%s',
+      \ 'sh':               '#%s',
+      \ 'vim':              '"%s',
+      \ 'vim_3':            '"""%s',
+      \ 'yaml':             '#%s',
+      \ }
 
 " markdown
 let g:markdown_fenced_languages = [
-            \ 'ruby',
-            \ 'perl',
-            \ 'python',
-            \ 'javascript',
-            \ 'html',
-            \ 'sql',
-            \ 'php',
-            \ 'css',
-            \ 'java',
-            \ 'cpp',
-            \ 'apache',
-            \ ]
+      \ 'ruby',
+      \ 'perl',
+      \ 'python',
+      \ 'javascript',
+      \ 'html',
+      \ 'sql',
+      \ 'php',
+      \ 'css',
+      \ 'java',
+      \ 'cpp',
+      \ 'apache',
+      \ ]
 
 " yankring
 let g:yankring_history_file = '.vim_yankring_history'
