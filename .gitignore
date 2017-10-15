@@ -1,8 +1,8 @@
 *~
 *.swp
-vim/.netrwhist
-vim/bundle/*/doc/tags
-nvim/.netrwhist
-nvim/bundle/*/doc/tags
-fish/.config/fish/fishd.*
 *.pyc
+vim/.vim/.netrwhist
+vim/.vim/bundle/*/doc/tags
+nvim/.config/nvim/.netrwhist
+nvim/.config/nvim/bundle/*/doc/tags
+fish/.config/fish/fishd.*
