@@ -222,10 +222,6 @@ let g:markdown_fenced_languages = [
 " yankring
 let g:yankring_history_file = '.vim_yankring_history'
 
-" ctrlp
-let g:ctrlp_map = '<C-J>'
-let g:ctrlp_cmd = 'CtrlP'
-
 " TODO alias :Trim to :TrailerTrim
 
 " TODO ?
