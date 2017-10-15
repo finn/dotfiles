@@ -15,7 +15,7 @@
 " You should have received a copy of the GNU General Public License
 " along with MatchTagAlways.  If not, see <http://www.gnu.org/licenses/>.
 
-if exists( "g:loaded_matchtagalways" ) || !has('python')
+if exists( "g:loaded_matchtagalways" )
   finish
 endif
 let g:loaded_matchtagalways = 1
@@ -42,6 +42,8 @@ let g:mta_use_matchparen_group =
       \ get( g:, 'mta_use_matchparen_group', 1 )
 let g:mta_set_default_matchtag_color =
       \ get( g:, 'mta_set_default_matchtag_color', 1 )
+
+command -nargs=0 MtaJumpToOtherTag call MatchTagAlways#GoToEnclosingTag()
 
 augroup matchtagalways
   autocmd! FileType * call MatchTagAlways#Setup()
