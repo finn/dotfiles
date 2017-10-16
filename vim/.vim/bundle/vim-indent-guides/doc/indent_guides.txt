@@ -9,8 +9,8 @@
 
 
 Author:      Nate Kane <nathanaelkane AT gmail DOT com>
-Version:     1.6
-Last Change: 01 Jan 2012
+Version:     1.7
+Last Change: 07 Mar 2013
 
 ==============================================================================
 CONTENTS                                                *indent-guides-contents*
@@ -141,6 +141,26 @@ Default: 1. Values: 0 or 1.
 >
   let g:indent_guides_space_guides = 0
 <
+
+------------------------------------------------------------------------------
+                                                    *'indent_guides_tab_guides'*
+Use this option to control whether the plugin considers tabs as indention.
+
+Default: 1. Values: 0 or 1.
+>
+  let g:indent_guides_tab_guides = 0
+<
+
+------------------------------------------------------------------------------
+                                                  *'indent_guides_soft_pattern'*
+Use this option to explicitly specify a pattern for soft indentation. For
+example to match spaces only in the beginning of line use ' ' pattern.
+
+Default: '\s'. Values: Vim regexp.
+>
+  let g:indent_guides_soft_pattern = ' '
+<
+
 ------------------------------------------------------------------------------
                                          *'indent_guides_enable_on_vim_startup'*
 Use this option to control whether the plugin is enabled on Vim startup.
@@ -150,20 +170,38 @@ Default: 0. Values: 0 or 1.
   let g:indent_guides_enable_on_vim_startup = 0
 <
 
+------------------------------------------------------------------------------
+                                             *'indent_guides_exclude_filetypes'*
+Use this option to specify a list of filetypes to disable the plugin for.
+
+Default: ['help']. Values: list of strings.
+>
+  let g:indent_guides_exclude_filetypes = ['help', 'nerdtree']
+<
+
+------------------------------------------------------------------------------
+                                               *'indent_guides_default_mapping'*
+Use this option to control whether the default mapping (<Leader>ig) gets set.
+
+Default: 1. Values: 0 or 1.
+>
+  let g:indent_guides_default_mapping = 0
+<
+
 ==============================================================================
 4. MAPPINGS                                             *indent-guides-mappings*
 
 The default mapping for toggling indent guides is <Leader>ig. You can easily
 map it to other keys. For example:
 >
-  :nmap <Leader>ig :IndentGuidesToggle<CR>
+  :nmap <silent> <Leader>ig <Plug>IndentGuidesToggle
 <
 
 You can also map some other commands that are not mapped by default. For
 example:
 >
-  :nmap <Leader>ie :IndentGuidesEnable<CR>
-  :nmap <Leader>id :IndentGuidesDisable<CR>
+  :nmap <silent> <Leader>ie <Plug>IndentGuidesEnable
+  :nmap <silent> <Leader>id <Plug>IndentGuidesDisable
 <
 
 ==============================================================================
@@ -226,21 +264,39 @@ Bug reports, feedback, suggestions etc are welcomed.
 ==============================================================================
 7. CHANGELOG                                           *indent-guides-changelog*
 
+1.8 (pending release)~
+  * Added option g:|indent_guides_soft_pattern| to control the pattern for
+    soft indentation (thanks @sergey-vlasov).
+  * Added option g:|indent_guides_default_mapping| to control whether the
+    default mapping (<Leader>ig) gets set (thanks @suy).
+  * Set size of indent guide to `tabstop` value when `shiftwidth=0` or
+    `noexpandtab` is used (thanks @darkfeline and @wilywampa).
+  * Don't load plugin in unsupported versions of Vim (thanks @dersaidin).
+  * Added option g:|indent_guides_tab_guides| to control whether tabs are
+    considered as indention (thanks @amerlyq).
+
+1.7~
+  * Added way to override the default mapping (thanks @xuhdev).
+  * Added option g:|indent_guides_exclude_filetypes| to specify a list of
+    filetypes to disable the plugin for.
+  * Disable the plugin when in a diff.
+  * Various bug fixes.
+
 1.6~
   * Added option g:|indent_guides_space_guides| to control whether spaces are
-    considered as indention (thanks scoz).
-  * Added 'doc/tags' to gitignore (thanks lenniboy).
-  * Fixed E803 ID not found spam (thanks mutewinter).
-  * Fixed str2float issue with Vim 7.1 (thanks acx0).
+    considered as indention (thanks @scoz).
+  * Added 'doc/tags' to gitignore (thanks @lenniboy).
+  * Fixed E803 ID not found spam (thanks @mutewinter).
+  * Fixed str2float issue with Vim 7.1 (thanks @acx0).
 
 1.5~
   * Added highlight support for files with a mixture of tab and space indent
-    styles (thanks graywh).
+    styles (thanks @graywh).
   * Added -bar to all the :commands so they can chain with other :commands
-    (thanks to graywh).
-  * No longer overriding pre-defined custom highlight colors (thanks graywh).
+    (thanks @graywh).
+  * No longer overriding pre-defined custom highlight colors (thanks @graywh).
   * Using str2float to work around a float bug in some versions of Vim 7.2
-    (thanks voidus).
+    (thanks @voidus).
 
 1.4~
   * Added the new plugin option g:|indent_guides_enable_on_vim_startup|.
@@ -272,7 +328,7 @@ Bug reports, feedback, suggestions etc are welcomed.
 The MIT Licence
 http://www.opensource.org/licenses/mit-license.php
 
-Copyright (c) 2010-2012 Nate Kane
+Copyright (c) 2010-2013 Nate Kane
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
