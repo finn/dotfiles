@@ -1,6 +1,6 @@
 "============================================================================
 "File:        z80syntaxchecker.vim
-"Description: Syntax checking plugin for syntastic.vim
+"Description: Syntax checking plugin for syntastic
 "Maintainer:  Romain Giot <giot.romain at gmail dot com>
 "License:     This program is free software. It comes without any warranty,
 "             to the extent permitted by applicable law. You can redistribute
@@ -10,7 +10,7 @@
 "
 "============================================================================
 
-if exists("g:loaded_syntastic_z80_z80syntaxchecker_checker")
+if exists('g:loaded_syntastic_z80_z80syntaxchecker_checker')
     finish
 endif
 let g:loaded_syntastic_z80_z80syntaxchecker_checker = 1

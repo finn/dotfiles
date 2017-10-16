@@ -21,10 +21,22 @@ endif
 let s:save_cpo = &cpo
 set cpo&vim
 
+function! SyntaxCheckers_javascript_flow_IsAvailable() dict
+    if !executable(self.getExec())
+        return 0
+    endif
+    return syntastic#util#versionIsAtLeast(self.getVersion(self.getExecEscaped() . ' version'), [0, 34])
+endfunction
+
 function! SyntaxCheckers_javascript_flow_GetLocList() dict
+    let buf = bufnr('')
+    if syntastic#util#findFileInParent('.flowconfig', fnamemodify(bufname(buf), ':p:h')) ==# ''
+        return []
+    endif
+
     let makeprg = self.makeprgBuild({
-        \ 'exe_after': 'check',
-        \ 'args_after': '--show-all-errors --json' })
+        \ 'exe': self.getExecEscaped() . ' status',
+        \ 'args_after': '--quiet --show-all-errors --json' })
 
     let errorformat =
         \ '%f:%l:%c:%n: %m,' .

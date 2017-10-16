@@ -1,6 +1,6 @@
 "==============================================================================
 "       FileName: applescript.vim
-"           Desc: Syntax checking plugin for syntastic.vim
+"           Desc: Syntax checking plugin for syntastic
 "         Author: Zhao Cai
 "          Email: caizhaoff@gmail.com
 "        Version: 0.2.1
@@ -25,7 +25,7 @@
 "
 "============================================================================
 
-if exists("g:loaded_syntastic_applescript_osacompile_checker")
+if exists('g:loaded_syntastic_applescript_osacompile_checker')
     finish
 endif
 let g:loaded_syntastic_applescript_osacompile_checker = 1

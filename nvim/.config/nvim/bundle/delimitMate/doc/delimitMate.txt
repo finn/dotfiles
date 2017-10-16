@@ -266,7 +266,7 @@ e.g.: >
                                               *'delimitMate_smart_matchpairs'*
                                             *'b:delimitMate_smart_matchpairs'*
 Values: Regexp                                                               ~
-Default: '^\%(\w\|\!\|£\|\$\|_\|["'']\s*\S\)'                                ~
+Default: '^\%(\w\|\!\|[£$]\|[^[:space:][:punct:]]\)'                                ~
 
 This regex is matched against the text to the right of cursor, if it's not
 empty and there is a match delimitMate will not autoclose the pair. At the
@@ -384,11 +384,11 @@ With auto-close: >
                           Type     |  You get
                         =======================
                            (       |    (|)
-                        –––––––––––|–––––––––––
+                        -----------|-----------
                            ()      |    ()|
-                        –––––––––––|–––––––––––
+                        -----------|-----------
                         (<S-Tab>   |    ()|
-                        –––––––––––|–––––––––––
+                        -----------|-----------
                         {("<C-G>g  |  {("")}|
 <
 Without auto-close: >
@@ -396,11 +396,11 @@ Without auto-close: >
                           Type        |  You get
                         =========================
                            ()         |    (|)
-                        –––––––––-----|––––––––––
+                        --------------|----------
                            ())        |    ()|
-                        –––––––––-----|––––––––––
+                        --------------|----------
                         ()<S-Tab>     |    ()|
-                        ––––––––––––––|–––––––––––
+                        --------------|----------
                         {}()""<C-G>g  |  {("")}|
 <
 NOTE: Abbreviations will not be expanded by delimiters used on delimitMate,
