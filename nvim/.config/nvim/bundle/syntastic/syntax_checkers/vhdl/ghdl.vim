@@ -1,6 +1,6 @@
 "============================================================================
 "File:        ghdl.vim
-"Description: Syntax checking plugin for syntastic.vim
+"Description: Syntax checking plugin for syntastic
 "Maintainer:  Jan Wagner <jaydyou at janidom dot de>
 "License:     This program is free software. It comes without any warranty,
 "             to the extent permitted by applicable law. You can redistribute
@@ -10,7 +10,7 @@
 "
 "============================================================================
 
-if exists("g:loaded_syntastic_vhdl_ghdl_checker")
+if exists('g:loaded_syntastic_vhdl_ghdl_checker')
     finish
 endif
 let g:loaded_syntastic_vhdl_ghdl_checker = 1

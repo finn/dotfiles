@@ -1,6 +1,6 @@
 "============================================================================
 "File:        yacc.vim
-"Description: Syntax checking plugin for syntastic.vim
+"Description: Syntax checking plugin for syntastic
 "Maintainer:  LCD 47 <lcd047 at gmail dot com>
 "License:     This program is free software. It comes without any warranty,
 "             to the extent permitted by applicable law. You can redistribute
@@ -10,7 +10,7 @@
 "
 "============================================================================
 
-if exists("g:loaded_syntastic_yacc_bison_checker")
+if exists('g:loaded_syntastic_yacc_bison_checker')
     finish
 endif
 let g:loaded_syntastic_yacc_bison_checker = 1

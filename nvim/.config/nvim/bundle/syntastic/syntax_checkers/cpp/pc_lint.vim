@@ -1,6 +1,6 @@
 "============================================================================
 "File:        pc_lint.vim
-"Description: Syntax checking plugin for syntastic.vim
+"Description: Syntax checking plugin for syntastic
 "Maintainer:  Steve Bragg <steve at empresseffects dot com>
 "License:     This program is free software. It comes without any warranty,
 "             to the extent permitted by applicable law. You can redistribute
@@ -10,17 +10,14 @@
 "
 "============================================================================
 
-if exists("g:loaded_syntastic_cpp_pc_lint_checker")
+if exists('g:loaded_syntastic_cpp_pc_lint_checker')
     finish
 endif
 let g:loaded_syntastic_cpp_pc_lint_checker = 1
 
-runtime! syntax_checkers/c/*.vim
-
 call g:SyntasticRegistry.CreateAndRegisterChecker({
     \ 'filetype': 'cpp',
     \ 'name': 'pc_lint',
-    \ 'exec': 'lint-nt',
     \ 'redirect': 'c/pc_lint'})
 
 " vim: set sw=4 sts=4 et fdm=marker:

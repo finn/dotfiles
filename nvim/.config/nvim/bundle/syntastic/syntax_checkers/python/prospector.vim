@@ -1,6 +1,6 @@
 "============================================================================
 "File:        prospector.vim
-"Description: Syntax checking plugin for syntastic.vim
+"Description: Syntax checking plugin for syntastic
 "Maintainer:  LCD 47 <lcd047 at gmail dot com>
 "License:     This program is free software. It comes without any warranty,
 "             to the extent permitted by applicable law. You can redistribute
@@ -10,7 +10,7 @@
 "
 "============================================================================
 
-if exists("g:loaded_syntastic_python_prospector_checker")
+if exists('g:loaded_syntastic_python_prospector_checker')
     finish
 endif
 let g:loaded_syntastic_python_prospector_checker = 1
@@ -26,16 +26,11 @@ function! SyntaxCheckers_python_prospector_IsAvailable() dict
     if !executable(self.getExec())
         return 0
     endif
-
-    let ver = syntastic#util#getVersion(self.getExecEscaped() . ' --version')
-    call self.log(self.getExec() . ' version =', ver)
-
-    return syntastic#util#versionIsAtLeast(ver, [0, 7])
+    return syntastic#util#versionIsAtLeast(self.getVersion(), [0, 7])
 endfunction
 
 function! SyntaxCheckers_python_prospector_GetLocList() dict
     let makeprg = self.makeprgBuild({
-        \ 'args': '--external-config merge',
         \ 'args_after': '--messages-only --absolute-paths --die-on-tool-error --zero-exit --output-format json' })
 
     let errorformat = '%f:%l:%c: %m'
