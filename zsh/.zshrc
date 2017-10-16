@@ -148,3 +148,7 @@ test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell
 
 # fzf
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+# fzf opts
+export FZF_DEFAULT_COMMAND='rg --hidden -g "!.git/" --files'
+export FZF_DEFAULT_OPTS='--reverse --border --cycle --tabstop=4 --no-extended'
+export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"

@@ -79,3 +79,7 @@ fi
 
 # fzf
 [ -f ~/.fzf.bash ] && source ~/.fzf.bash
+# fzf opts
+export FZF_DEFAULT_COMMAND='rg --hidden -g "!.git/" --files'
+export FZF_DEFAULT_OPTS='--reverse --border --cycle --tabstop=4 --no-extended'
+export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"

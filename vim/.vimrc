@@ -131,6 +131,10 @@ command! -bang -nargs=? -complete=file E e<bang> <args>
 command! -bang -nargs=? -complete=file W w<bang> <args>
 " map :Q to :q for typos
 command! -bang Q q<bang>
+" map :Qa to :qa for typos
+command! -bang Qa qa<bang>
+" map :QA to :qa for typos
+command! -bang QA qa<bang>
 " ctrl-tab and ctrl-shift-tab cycle tabs
 if (v:version >= 700)
   noremap <C-Tab> gt
@@ -213,13 +217,16 @@ let g:yankring_history_file = '.vim_yankring_history'
 " alias :Trim to :TrailerTrim
 command! -bar -range=% Trim <line1>,<line2>:TrailerTrim
 
+" FZF with CTRL-T
+" TODO: basedir should be root of git repo when in git repo
+nnoremap <C-T> :FZF<cr>
+
 " TODO update tcomment_vim ( vim commentary ??? )
 " TODO cf YankRing.vim ( clip ??? )
 " TODO cf ack.vim ( vim grepper ??? )
 " TODO cf ag.vim ( vim grepper ??? )
 " TODO cf vim-surround ( sandwich ??? )
 " TODO config syntastic
-" TODO config fzf.vim
 
 " TODO ?
 " errorbells
