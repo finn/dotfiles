@@ -213,6 +213,17 @@ let g:yankring_history_file = '.vim_yankring_history'
 " alias :Trim to :TrailerTrim
 command! -bar -range=% Trim <line1>,<line2>:TrailerTrim
 
+" TODO cf YankRing.vim ( clip ??? )
+" TODO cf ack.vim ( vim grepper ??? )
+" TODO cf ag.vim ( vim grepper ??? )
+" TODO cf vim-surround ( sandwich ??? )
+" TODO config syntastic
+" TODO update fzf.vim
+" TODO update tcomment_vim ( vim commentart ??? )
+" TODO update vim-fugitive
+" TODO update vim-git
+" TODO update vim-gitgutter
+
 " TODO ?
 " errorbells
 " visualbells
