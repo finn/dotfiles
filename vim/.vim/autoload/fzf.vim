@@ -1,0 +1,1 @@
+/usr/local/opt/fzf/plugin/fzf.vim
