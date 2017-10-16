@@ -33,6 +33,11 @@ endfunction
 function! indent_guides#enable()
   let g:indent_guides_autocmds_enabled = 1
 
+  if &diff || indent_guides#exclude_filetype()
+    call indent_guides#clear_matches()
+    return
+  end
+
   call indent_guides#init_script_vars()
   call indent_guides#highlight_colors()
   call indent_guides#clear_matches()
@@ -42,14 +47,16 @@ function! indent_guides#enable()
   for l:level in range(s:start_level, s:indent_levels)
     let l:group = 'IndentGuides' . ((l:level % 2 == 0) ? 'Even' : 'Odd')
     let l:column_start = (l:level - 1) * s:indent_size + 1
-    let l:soft_pattern = indent_guides#indent_highlight_pattern('\s', l:column_start, s:guide_size)
-    let l:hard_pattern = indent_guides#indent_highlight_pattern('\t', l:column_start, s:indent_size)
 
     " define the higlight patterns and add to matches list
     if g:indent_guides_space_guides
+      let l:soft_pattern = indent_guides#indent_highlight_pattern(g:indent_guides_soft_pattern, l:column_start, s:guide_size)
       call add(w:indent_guides_matches, matchadd(l:group, l:soft_pattern))
     end
-    call add(w:indent_guides_matches, matchadd(l:group, l:hard_pattern))
+    if g:indent_guides_tab_guides
+      let l:hard_pattern = indent_guides#indent_highlight_pattern('\t', l:column_start, s:indent_size)
+      call add(w:indent_guides_matches, matchadd(l:group, l:hard_pattern))
+    end
   endfor
 endfunction
 
@@ -86,7 +93,7 @@ endfunction
 "
 function! indent_guides#highlight_colors()
   if s:auto_colors
-    if has('gui_running')
+    if has('gui_running') || has('nvim')
       call indent_guides#gui_highlight_colors()
     else
       call indent_guides#basic_highlight_colors()
@@ -102,8 +109,8 @@ function! indent_guides#basic_highlight_colors()
   let l:cterm_colors = (&g:background == 'dark') ? ['darkgrey', 'black'] : ['lightgrey', 'white']
   let l:gui_colors   = (&g:background == 'dark') ? ['grey15', 'grey30']  : ['grey70', 'grey85']
 
-  exe 'hi IndentGuidesEven guibg=' . l:gui_colors[0] . ' ctermbg=' . l:cterm_colors[0]
-  exe 'hi IndentGuidesOdd  guibg=' . l:gui_colors[1] . ' ctermbg=' . l:cterm_colors[1]
+  exe 'hi IndentGuidesEven guibg=' . l:gui_colors[0] . ' guifg=' . l:gui_colors[1] . ' ctermbg=' . l:cterm_colors[0] . ' ctermfg=' . l:cterm_colors[1]
+  exe 'hi IndentGuidesOdd  guibg=' . l:gui_colors[1] . ' guifg=' . l:gui_colors[0] . ' ctermbg=' . l:cterm_colors[1] . ' ctermfg=' . l:cterm_colors[0]
 endfunction
 
 "
@@ -134,8 +141,8 @@ function! indent_guides#gui_highlight_colors()
     let l:hi_even_bg = indent_guides#lighten_or_darken_color(l:hi_odd_bg)
 
     " define the new highlights
-    exe 'hi IndentGuidesOdd  guibg=' . l:hi_odd_bg
-    exe 'hi IndentGuidesEven guibg=' . l:hi_even_bg
+    exe 'hi IndentGuidesOdd  guibg=' . l:hi_odd_bg . ' guifg=' . l:hi_even_bg
+    exe 'hi IndentGuidesEven guibg=' . l:hi_even_bg . ' guifg=' . l:hi_odd_bg
   end
 endfunction
 
@@ -175,7 +182,11 @@ endfunction
 " plugin is enabled.
 "
 function! indent_guides#init_script_vars()
-  let s:indent_size = &l:shiftwidth
+  if &l:shiftwidth > 0 && &l:expandtab
+    let s:indent_size = &l:shiftwidth
+  else
+    let s:indent_size = &l:tabstop
+  endif
   let s:guide_size  = indent_guides#calculate_guide_size()
   let s:hi_normal   = indent_guides#capture_highlight('Normal')
 
@@ -232,7 +243,7 @@ endfunction
 " Captures and returns the output of highlight group definitions.
 "
 " Example: indent_guides#capture_highlight('normal')
-" Returns: 'Normal xxx guifg=#323232 guibg=#ffffff
+" Returns: 'Normal xxx guifg=#323232 guibg=#ffffff'
 "
 function! indent_guides#capture_highlight(group_name)
   redir => l:output
@@ -260,4 +271,16 @@ function! indent_guides#indent_highlight_pattern(indent_pattern, column_start, i
   let l:pattern .= a:indent_pattern . '*\%' . (a:column_start + a:indent_size) . 'v'
   let l:pattern .= '\ze'
   return l:pattern
+endfunction
+
+"
+" Detect if any of the buffer filetypes should be excluded.
+"
+function! indent_guides#exclude_filetype()
+  for ft in split(&ft, '\.')
+    if index(g:indent_guides_exclude_filetypes, ft) > -1
+      return 1
+    end
+  endfor
+  return 0
 endfunction
