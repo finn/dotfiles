@@ -63,6 +63,7 @@ endif
 " turn on filetype detection and syntax highlighting
 syntax enable
 filetype plugin indent on
+colorscheme one
 set background=dark
 
 """ text formatting
@@ -155,25 +156,9 @@ command! -bang -complete=buffer -nargs=? BD Bdelete<bang> <args>
 " shorten updatetime for gitgutter
 set updatetime=250
 
-" color scheme
-if ( has('gui_running') )
-  " onedark in gui
-  colorscheme onedark
-elseif ( &t_Co == 256 )
-  " solarized in terminal
-  let g:solarized_termcolors=256
-  colorscheme solarized
-endif
-
 " TODO taglist config
 
 " TODO NERDTree config
-
-" NERDTree tabs config
-map <Leader>n <plug>NERDTreeTabsToggle<CR>
-" always focus file pane on startup
-let g:nerdtree_tabs_smart_startup_focus = 2
-"let g:nerdtree_tabs_autoclose = 0
 
 " powerline
 " TODO re-enable once powerline isn't broken
