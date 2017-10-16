@@ -16,7 +16,9 @@ set -x GREP_OPTIONS '--color=auto'
 # set default email if not set (for git et al)
 set -q EMAIL; or set -x EMAIL finn@timeghost.net
 # fzf opts
+set -x FZF_DEFAULT_COMMAND 'rg --hidden -g "!.git/" --files'
 set -x FZF_DEFAULT_OPTS '--reverse --border --cycle --tabstop=4 --no-extended'
+set -x FZF_CTRL_T_COMMAND $FZF_DEFAULT_COMMAND
 
 ### aliases
 
