@@ -5,6 +5,11 @@ if test -d ~/bin
   set -U fish_user_paths ~/bin
 end
 
+# put macvim in path if it's present
+if test -d /Applications/MacVim.app/Contents/bin
+  set -x PATH /Applications/MacVim.app/Contents/bin $PATH
+end
+
 ### env
 
 # vim!
