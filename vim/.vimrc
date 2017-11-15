@@ -89,8 +89,6 @@ nnoremap <C-L> :nohlsearch<cr>:redraw!<cr>
 " TODO do these apply to :s// where I care about them?
 "nnoremap / /\v
 "vnoremap / /\v
-" g for global flag by default
-set gdefault
 
 """ movement, visuals
 " don't jump to first char when paging
