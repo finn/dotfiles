@@ -37,6 +37,11 @@
 	prompt = false
 [pack]
 	threads = 0
+[difftool "launchp4merge"]
+	cmd = /Applications/p4merge.app/Contents/Resources/launchp4merge "$LOCAL" "$REMOTE"
+	keepTemporaries = false
+	trustExitCode = false
+	keepBackup = false
 [mergetool "launchp4merge"]
 	cmd = /Applications/p4merge.app/Contents/Resources/launchp4merge "$BASE" "$LOCAL" "$REMOTE" "$MERGED"
 	keepTemporaries = false
