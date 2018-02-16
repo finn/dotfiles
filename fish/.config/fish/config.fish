@@ -5,15 +5,10 @@ if test -d ~/bin
   set -U fish_user_paths ~/bin
 end
 
-# put macvim in path if it's present
-if test -d /Applications/MacVim.app/Contents/bin
-  set -x PATH /Applications/MacVim.app/Contents/bin $PATH
-end
-
 ### env
 
 # vim!
-set -x EDITOR nvim
+set -x EDITOR vim
 # terminal colors
 set -x CLICOLOR 1
 # color in grep
@@ -36,7 +31,12 @@ alias ll 'ls -l'
 alias la 'ls -A'
 alias ls 'ls -CF'
 
-alias nview 'nvim -R'
+if test -e /usr/local/bin/nvim
+  alias vi 'nvim'
+  alias vim 'nvim'
+  alias view 'nvim -R'
+  alias nview 'nvim -R'
+end
 
 # load plenv for custom perls
 if test -d ~/.plenv/bin
