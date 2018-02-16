@@ -52,3 +52,6 @@ if [ -n "$BASH_VERSION" ]; then
         . "$HOME/.bashrc"
     fi
 fi
+export PATH="/usr/local/bin:$PATH"
+export PATH="/buzzfeed/local/bin:$PATH"
+export PATH="/buzzfeed/local/perl5/bin:$PATH"
