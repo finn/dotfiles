@@ -8,46 +8,48 @@ A dark Vim/Neovim color scheme for the GUI and 16/256/true-color terminals, base
 
 1. Install the theme using your Vim plug-in manager of choice (or manually, by placing `colors/onedark.vim` in your `~/.vim/colors/` directory and `autoload/onedark.vim` in your `~/.vim/autoload/` directory.)
 
+   The theme also supports being installed as a Vim 8 package. Simply clone this repository into `~/.vim/pack/*/opt/` (so that the local path to this README would end up being `~/.vim/pack/*/opt/onedark.vim/README.md`) and add `packadd! onedark.vim` to your `~/.vimrc`. (The `*` in the path can be any value; see `:help packages` for more information.)
+
 2. If you use Vim in a terminal, do the following to test whether your terminal emulator supports [24-bit/"true" color](https://gist.github.com/XVilka/8346728), then add relevant `~/.vimrc` configuration if so:
 
-    _Note: GUI (non-terminal) Vim will always display 24-bit color regardless of the configuration done in this step._
+   _Note: GUI (non-terminal) Vim will always display 24-bit color regardless of the configuration done in this step._
 
-    Run the following snippet in your shell:
+   Run the following snippet in your shell:
 
-    ```shell
-    printf "\x1b[38;2;255;100;0mTRUECOLOR\x1b[0m\n"
-    ```
+   ```shell
+   printf "\x1b[38;2;255;100;0mTRUECOLOR\x1b[0m\n"
+   ```
 
-    If your terminal emulator **does NOT display the word `TRUECOLOR` in red**, it does not support 24-bit color. If you don't want to switch to a different terminal emulator that [supports 24-bit color](https://gist.github.com/XVilka/8346728), **proceed to step 3**. (After installation, the [`g:onedark_termcolors` option](#options) may interest you.)
+   If your terminal emulator **does NOT display the word `TRUECOLOR` in red**, it does not support 24-bit color. If you don't want to switch to a different terminal emulator that [supports 24-bit color](https://gist.github.com/XVilka/8346728), **proceed to step 3**. (After installation, the [`g:onedark_termcolors` option](#options) may interest you.)
 
-    If your terminal emulator displays the word `TRUECOLOR` **in red**, it supports 24-bit color, and you should add the following lines to your `~/.vimrc` to enable 24-bit color terminal support inside Vim.
+   If your terminal emulator displays the word `TRUECOLOR` **in red**, it supports 24-bit color, and you should add the following lines to your `~/.vimrc` to enable 24-bit color terminal support inside Vim.
 
-    (If you use [tmux](https://tmux.github.io/), be sure to view the tmux-related notes in the first few lines.)
+   (If you use [tmux](https://tmux.github.io/), be sure to view the tmux-related notes in the first few lines.)
 
-    ```vim
-    "Use 24-bit (true-color) mode in Vim/Neovim when outside tmux.
-    "If you're using tmux version 2.2 or later, you can remove the outermost $TMUX check and use tmux's 24-bit color support
-    "(see < http://sunaku.github.io/tmux-24bit-color.html#usage > for more information.)
-    if (empty($TMUX))
-      if (has("nvim"))
-        "For Neovim 0.1.3 and 0.1.4 < https://github.com/neovim/neovim/pull/2198 >
-        let $NVIM_TUI_ENABLE_TRUE_COLOR=1
-      endif
-      "For Neovim > 0.1.5 and Vim > patch 7.4.1799 < https://github.com/vim/vim/commit/61be73bb0f965a895bfb064ea3e55476ac175162 >
-      "Based on Vim patch 7.4.1770 (`guicolors` option) < https://github.com/vim/vim/commit/8a633e3427b47286869aa4b96f2bfc1fe65b25cd >
-      " < https://github.com/neovim/neovim/wiki/Following-HEAD#20160511 >
-      if (has("termguicolors"))
-        set termguicolors
-      endif
-    endif
-    ```
+   ```vim
+   "Use 24-bit (true-color) mode in Vim/Neovim when outside tmux.
+   "If you're using tmux version 2.2 or later, you can remove the outermost $TMUX check and use tmux's 24-bit color support
+   "(see < http://sunaku.github.io/tmux-24bit-color.html#usage > for more information.)
+   if (empty($TMUX))
+     if (has("nvim"))
+       "For Neovim 0.1.3 and 0.1.4 < https://github.com/neovim/neovim/pull/2198 >
+       let $NVIM_TUI_ENABLE_TRUE_COLOR=1
+     endif
+     "For Neovim > 0.1.5 and Vim > patch 7.4.1799 < https://github.com/vim/vim/commit/61be73bb0f965a895bfb064ea3e55476ac175162 >
+     "Based on Vim patch 7.4.1770 (`guicolors` option) < https://github.com/vim/vim/commit/8a633e3427b47286869aa4b96f2bfc1fe65b25cd >
+     " < https://github.com/neovim/neovim/wiki/Following-HEAD#20160511 >
+     if (has("termguicolors"))
+       set termguicolors
+     endif
+   endif
+   ```
 
-3. Add the following to your `~/.vimrc` (below any lines you may have added in step 2):
+3. Add the following to your `~/.vimrc` (below any lines you may have added in steps 1 and 2):
 
-    ```vim
-    syntax on
-    colorscheme onedark
-    ```
+   ```vim
+   syntax on
+   colorscheme onedark
+   ```
 
 4. Installing the [sheerun/vim-polyglot](https://github.com/sheerun/vim-polyglot) plug-in is recommended for improved syntax highlighting for various languages, but is not required.
 
@@ -150,9 +152,35 @@ If all comments look like the one in the screenshot above, you have enabled ital
 
 ### Customizing onedark.vim's look without forking the repository
 
-onedark.vim exposes a function called `onedark#set_highlight` that you can call from within your `~/.vimrc` in order to customize the look of onedark.vim by overriding its defaults.
+onedark.vim exposes `onedark#extend_highlight` and `onedark#set_highlight` functions that you can call from within your `~/.vimrc` in order to customize the look of onedark.vim.
 
-The function's first argument should be the name of a highlight group, and its second argument should be style data.
+#### `onedark#extend_highlight`
+
+`onedark#extend_highlight` allows you to customize individual aspects of onedark.vim's existing highlight groups, overriding only the keys you provide. (To completely redefine/override an existing highlight group, see `onedark#set_highlight` below.)
+
+`onedark#extend_highlight`'s first argunment should be the name of a highlight group, and its second argument should be **partial** style data.
+
+Place the following lines **before** the `colorscheme onedark` line in your `~/.vimrc`, then change the example overrides to suit your needs:
+
+```vim
+if (has("autocmd"))
+  augroup colorextend
+    autocmd!
+    " Make `Function`s bold in GUI mode
+    autocmd ColorScheme * call onedark#extend_highlight("Function", { "gui": "bold" })
+    " Override the `Statement` foreground color in 256-color mode
+    autocmd ColorScheme * call onedark#extend_highlight("Statement", { "fg": { "cterm": 128 } })
+    " Override the `Identifier` background color in GUI mode
+    autocmd ColorScheme * call onedark#extend_highlight("Identifier", { "bg": { "gui": "#333333" } })
+  augroup END
+endif
+```
+
+#### `onedark#set_highlight`
+
+`onedark#set_highlight` allows you to completely redefine/override highlight groups of your choosing.
+
+`onedark#set_highlight`'s first argument should be the name of a highlight group, and its second argument should be **complete** style data.
 
 For example, to remove the background color only when running in terminals (outside GUI mode and for use in transparent terminals,) place the following lines **before** the `colorscheme onedark` line in your `~/.vimrc`:
 
@@ -163,12 +191,17 @@ For example, to remove the background color only when running in terminals (outs
 " `cterm` is the color code used in 256-color mode
 " `cterm16` is the color code used in 16-color mode
 if (has("autocmd") && !has("gui_running"))
-  let s:white = { "gui": "#ABB2BF", "cterm": "145", "cterm16" : "7" }
-  autocmd ColorScheme * call onedark#set_highlight("Normal", { "fg": s:white }) " No `bg` setting
-end
+  augroup colorset
+    autocmd!
+    let s:white = { "gui": "#ABB2BF", "cterm": "145", "cterm16" : "7" }
+    autocmd ColorScheme * call onedark#set_highlight("Normal", { "fg": s:white }) " `bg` will not be styled since there is no `bg` setting
+  augroup END
+endif
 ```
 
-You can also override a color across all highlights by adding the color definitions to the `g:onedark_color_overrides` dictionary in your `~/.vimrc` like so:
+#### Global color overrides
+
+You can override colors across all highlights by adding color definitions to the `g:onedark_color_overrides` dictionary in your `~/.vimrc` like so:
 
 ```vim
 let g:onedark_color_overrides = {
