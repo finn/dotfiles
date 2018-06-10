@@ -4,7 +4,7 @@
 
 require 'shellwords'
 
-COMMAND = %[(highlight -O ansi -l {} || coderay {} || cat {}) 2> /dev/null]
+COMMAND = %[(highlight -O ansi -l {} || coderay {} || rougify {} || cat {}) 2> /dev/null]
 ANSI    = /\x1b\[[0-9;]*m/
 REVERSE = "\x1b[7m"
 RESET   = "\x1b[m"
@@ -18,7 +18,11 @@ end
 
 usage if ARGV.empty?
 
-file, center = ARGV.first.split(':')
+file, center, extra = ARGV.first.split(':')
+if ARGV.first =~ /^[A-Z]:\\/
+  file << ':' + center
+  center = extra
+end
 usage unless file
 
 path = File.expand_path(file)
@@ -33,9 +37,13 @@ if `file --mime "#{file}"` =~ /binary/
 end
 
 center = (center || 0).to_i
-height = File.readable?('/dev/tty') ? `stty size < /dev/tty`.split.first.to_i : 40
-height /= 2 if split
-height -= 2 # preview border
+if ENV['LINES']
+  height = ENV['LINES'].to_i
+else
+  height = File.readable?('/dev/tty') ? `stty size < /dev/tty`.split.first.to_i : 40
+  height /= 2 if split
+  height -= 2 # preview border
+end
 offset = [1, center - height / 3].max
 
 IO.popen(['sh', '-c', COMMAND.gsub('{}', Shellwords.shellescape(path))]) do |io|

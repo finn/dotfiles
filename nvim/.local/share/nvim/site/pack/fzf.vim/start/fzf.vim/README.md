@@ -29,12 +29,30 @@ selector with fzf.
 
 fzf is an independent command-line program and thus requires an external
 terminal emulator when on GVim. You may or may not like the experience. Also
-note that fzf currently does not compile on Windows.
+note that Windows support is experimental at the moment.
 
 Installation
 ------------
 
-Using [vim-plug](https://github.com/junegunn/vim-plug):
+fzf.vim depends on the basic Vim plugin of [the main fzf
+repository][fzf-main], which means you need to **set up both "fzf" and
+"fzf.vim" on Vim**. To learn more about fzf/Vim integration, see
+[README-VIM][README-VIM].
+
+[fzf-main]: https://github.com/junegunn/fzf
+[README-VIM]: https://github.com/junegunn/fzf/blob/master/README-VIM.md
+
+### Using [vim-plug](https://github.com/junegunn/vim-plug)
+
+If you already installed fzf using [Homebrew](https://brew.sh/), the following
+should suffice:
+
+```vim
+Plug '/usr/local/opt/fzf'
+Plug 'junegunn/fzf.vim'
+```
+
+But if you want to install fzf as well using vim-plug:
 
 ```vim
 Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
@@ -43,8 +61,6 @@ Plug 'junegunn/fzf.vim'
 
 - `dir` and `do` options are not mandatory
 - Use `./install --bin` instead if you don't need fzf outside of Vim
-- If you installed fzf using Homebrew, the following should suffice:
-    - `Plug '/usr/local/opt/fzf' | Plug 'junegunn/fzf.vim'`
 - Make sure to use Vim 7.4 or above
 
 Commands
@@ -93,6 +109,10 @@ pathogen#helptags()`. [↩](#a1))
 
 #### Global options
 
+See [README-VIM.md][readme-vim] of the main fzf repository for details.
+
+[readme-vim]: https://github.com/junegunn/fzf/blob/master/README-VIM.md#configuration
+
 ```vim
 " This is the default extra key bindings
 let g:fzf_action = {
@@ -107,6 +127,7 @@ let g:fzf_layout = { 'down': '~40%' }
 " In Neovim, you can set up fzf window using a Vim command
 let g:fzf_layout = { 'window': 'enew' }
 let g:fzf_layout = { 'window': '-tabnew' }
+let g:fzf_layout = { 'window': '10split enew' }
 
 " Customize fzf colors to match your color scheme
 let g:fzf_colors =
@@ -117,6 +138,7 @@ let g:fzf_colors =
   \ 'bg+':     ['bg', 'CursorLine', 'CursorColumn'],
   \ 'hl+':     ['fg', 'Statement'],
   \ 'info':    ['fg', 'PreProc'],
+  \ 'border':  ['fg', 'Ignore'],
   \ 'prompt':  ['fg', 'Conditional'],
   \ 'pointer': ['fg', 'Exception'],
   \ 'marker':  ['fg', 'Keyword'],
@@ -133,12 +155,6 @@ let g:fzf_history_dir = '~/.local/share/fzf-history'
 #### Command-local options
 
 ```vim
-" [Files] Extra options for fzf
-"   e.g. File preview using Highlight
-"        (http://www.andre-simon.de/doku/highlight/en/highlight.html)
-let g:fzf_files_options =
-  \ '--preview "(highlight -O ansi {} || cat {}) 2> /dev/null | head -'.&lines.'"'
-
 " [Buffers] Jump to the existing window if possible
 let g:fzf_buffers_jump = 1
 
@@ -160,7 +176,9 @@ You can use autoload functions to define your own commands.
 " Command for git grep
 " - fzf#vim#grep(command, with_column, [options], [fullscreen])
 command! -bang -nargs=* GGrep
-  \ call fzf#vim#grep('git grep --line-number '.shellescape(<q-args>), 0, <bang>0)
+  \ call fzf#vim#grep(
+  \   'git grep --line-number '.shellescape(<q-args>), 0,
+  \   { 'dir': systemlist('git rev-parse --show-toplevel')[0] }, <bang>0)
 
 " Override Colors command. You can safely do this in your .vimrc as fzf.vim
 " will not override existing commands.
@@ -169,8 +187,10 @@ command! -bang Colors
 
 " Augmenting Ag command using fzf#vim#with_preview function
 "   * fzf#vim#with_preview([[options], preview window, [toggle keys...]])
-"   * Preview script requires Ruby
-"   * Install Highlight or CodeRay to enable syntax highlighting
+"     * For syntax-highlighting, Ruby and any of the following tools are required:
+"       - Highlight: http://www.andre-simon.de/doku/highlight/en/highlight.php
+"       - CodeRay: http://coderay.rubychan.de/
+"       - Rouge: https://github.com/jneen/rouge
 "
 "   :Ag  - Start fzf with hidden preview window that can be enabled with "?" key
 "   :Ag! - Start fzf in fullscreen and display the preview window above
@@ -187,6 +207,10 @@ command! -bang -nargs=* Rg
   \   <bang>0 ? fzf#vim#with_preview('up:60%')
   \           : fzf#vim#with_preview('right:50%:hidden', '?'),
   \   <bang>0)
+
+" Likewise, Files command with preview window
+command! -bang -nargs=? -complete=dir Files
+  \ call fzf#vim#files(<q-args>, fzf#vim#with_preview(), <bang>0)
 ```
 
 Mappings
@@ -245,7 +269,7 @@ following exceptions:
     - Or a function to extract completion prefix
 - Both `source` and `options` can be given as funcrefs that take the
   completion prefix as the argument and return the final value
-- `sink` or `sink*` are not allowed
+- `sink` or `sink*` are ignored
 
 #### Reducer example
 
@@ -261,8 +285,23 @@ inoremap <expr> <c-x><c-s> fzf#complete({
   \ 'left':    20})
 ```
 
-Status line (neovim)
---------------------
+Status line of terminal buffer
+------------------------------
+
+When fzf starts in a terminal buffer (see [fzf/README-VIM.md][termbuf]), you
+may want to customize the statusline of the containing buffer.
+
+[termbuf]: https://github.com/junegunn/fzf/blob/master/README-VIM.md#fzf-inside-terminal-buffer
+
+### Hide statusline
+
+```vim
+autocmd! FileType fzf
+autocmd  FileType fzf set laststatus=0 noshowmode noruler
+  \| autocmd BufLeave <buffer> set laststatus=2 showmode ruler
+```
+
+### Custom statusline
 
 ```vim
 function! s:fzf_statusline()

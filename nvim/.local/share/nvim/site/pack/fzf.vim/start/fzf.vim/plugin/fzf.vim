@@ -23,8 +23,7 @@
 
 let s:cpo_save = &cpo
 set cpo&vim
-
-let g:fzf#vim#default_layout = {'down': '~40%'}
+let s:is_win = has('win32') || has('win64')
 
 function! s:defs(commands)
   let prefix = get(g:, 'fzf_command_prefix', '')
@@ -78,7 +77,7 @@ function! fzf#complete(...)
   return call('fzf#vim#complete', a:000)
 endfunction
 
-if has('nvim') && get(g:, 'fzf_nvim_statusline', 1)
+if (has('nvim') || has('terminal') && has('patch-8.0.995')) && (get(g:, 'fzf_statusline', 1) || get(g:, 'fzf_nvim_statusline', 1))
   function! s:fzf_restore_colors()
     if exists('#User#FzfStatusLine')
       doautocmd User FzfStatusLine
@@ -96,7 +95,7 @@ if has('nvim') && get(g:, 'fzf_nvim_statusline', 1)
     endif
   endfunction
 
-  function! s:fzf_nvim_term()
+  function! s:fzf_vim_term()
     if get(w:, 'airline_active', 0)
       let w:airline_disabled = 1
       autocmd BufWinLeave <buffer> let w:airline_disabled = 0
@@ -109,7 +108,7 @@ if has('nvim') && get(g:, 'fzf_nvim_statusline', 1)
 
   augroup _fzf_statusline
     autocmd!
-    autocmd FileType fzf call s:fzf_nvim_term()
+    autocmd FileType fzf call s:fzf_vim_term()
   augroup END
 endif
 
@@ -125,9 +124,14 @@ augroup fzf_buffers
 augroup END
 
 inoremap <expr> <plug>(fzf-complete-word)        fzf#vim#complete#word()
-inoremap <expr> <plug>(fzf-complete-path)        fzf#vim#complete#path("find . -path '*/\.*' -prune -o -print \| sed '1d;s:^..::'")
-inoremap <expr> <plug>(fzf-complete-file)        fzf#vim#complete#path("find . -path '*/\.*' -prune -o -type f -print -o -type l -print \| sed 's:^..::'")
-inoremap <expr> <plug>(fzf-complete-file-ag)     fzf#vim#complete#path("ag -l -g ''")
+if s:is_win
+  inoremap <expr> <plug>(fzf-complete-path)      fzf#vim#complete#path('dir /s/b')
+  inoremap <expr> <plug>(fzf-complete-file)      fzf#vim#complete#path('dir /s/b/a:-d')
+else
+  inoremap <expr> <plug>(fzf-complete-path)      fzf#vim#complete#path("find . -path '*/\.*' -prune -o -print \| sed '1d;s:^..::'")
+  inoremap <expr> <plug>(fzf-complete-file)      fzf#vim#complete#path("find . -path '*/\.*' -prune -o -type f -print -o -type l -print \| sed 's:^..::'")
+endif
+inoremap <expr> <plug>(fzf-complete-file-ag)     fzf#vim#complete#path('ag -l -g ""')
 inoremap <expr> <plug>(fzf-complete-line)        fzf#vim#complete#line()
 inoremap <expr> <plug>(fzf-complete-buffer-line) fzf#vim#complete#buffer_line()
 
