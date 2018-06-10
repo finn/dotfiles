@@ -7,7 +7,7 @@ if has("win32")
 endif
 
 " pathogen for plugin bundles
-execute pathogen#infect()
+"execute pathogen#infect()
 
 " vim not vi
 " XXX nvim: on by default?
