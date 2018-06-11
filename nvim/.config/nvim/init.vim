@@ -74,7 +74,6 @@ endif
 syntax enable
 " XXX nvim: on by default?
 filetype plugin indent on
-set background=dark
 
 """ text formatting
 " XXX nvim: on by default?
@@ -164,17 +163,10 @@ command! -bang -complete=buffer -nargs=? BD Bdelete<bang> <args>
 " shorten updatetime for gitgutter
 set updatetime=250
 
-""" plugin settings
+" default to dark
+set background=dark
 
-" color scheme
-if ( has('gui_running') )
-    " onedark in gui
-    colorscheme onedark
-elseif ( &t_Co == 256 )
-    " solarized in terminal
-    let g:solarized_termcolors=256
-    colorscheme solarized
-endif
+""" plugin settings
 
 " TODO taglist config
 
@@ -236,14 +228,13 @@ let g:markdown_fenced_languages = [
 " yankring
 let g:yankring_history_file = '.vim_yankring_history'
 
-" ctrlp
-let g:ctrlp_map = '<C-J>'
-let g:ctrlp_cmd = 'CtrlP'
-
 " XXX nvim: not available
 "set fuoptions=maxvert
 
 " TODO alias :Trim to :TrailerTrim
+
+" TODO alias <C-T> to FZF
+" TODO get FZF to work off of current directory/project root instead of file
 
 " TODO ?
 " errorbells
