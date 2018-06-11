@@ -46,7 +46,7 @@ set showbreak=↳
 set display+=lastline
 " the whitespace indicators
 set listchars=precedes:$,extends:$,tab:»·,trail:·,eol:¬,nbsp:×
-" TODO deprecate in favor of airline?
+" XXX deprecated ie favor of airline
 " fancy statusline with file encoding and BOM
 if has('statusline')
   set statusline=%<%f\ %h%m%r%=%{\"[\".&ff.\"]\ \"}%{\"[\".(&fenc==\"\"?&enc:&fenc).((exists(\"+bomb\")\ &&\ &bomb)?\",B\":\"\").\"]\ \"}%k\ %-14.(%l,%c%V%)\ %P
