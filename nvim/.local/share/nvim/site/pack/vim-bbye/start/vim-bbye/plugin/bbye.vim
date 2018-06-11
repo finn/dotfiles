@@ -1,17 +1,17 @@
 if exists("g:loaded_bbye") || &cp | finish | endif
 let g:loaded_bbye = 1
 
-function! s:bdelete(bang, buffer_name)
+function! s:bdelete(action, bang, buffer_name)
 	let buffer = s:str2bufnr(a:buffer_name)
 	let w:bbye_back = 1
 
 	if buffer < 0
-		return s:warn("E516: No buffers were deleted. No match for ".a:buffer_name)
+		return s:error("E516: No buffers were deleted. No match for ".a:buffer_name)
 	endif
 
 	if getbufvar(buffer, "&modified") && empty(a:bang)
 		let error = "E89: No write since last change for buffer "
-		return s:warn(error . buffer . " (add ! to override)")
+		return s:error(error . buffer . " (add ! to override)")
 	endif
 
 	" If the buffer is set to delete and it contains changes, we can't switch
@@ -35,7 +35,7 @@ function! s:bdelete(bang, buffer_name)
 		" If found a new buffer for this window, mission accomplished:
 		if bufnr("%") != buffer | continue | endif
 
-		call s:new(a:bang) 
+		call s:new(a:bang)
 	endfor
 
 	" Because tabbars and other appearing/disappearing windows change
@@ -45,15 +45,18 @@ function! s:bdelete(bang, buffer_name)
 
 	" If it hasn't been already deleted by &bufhidden, end its pains now.
 	" Unless it previously was an unnamed buffer and :enew returned it again.
-	if bufexists(buffer) && buffer != bufnr("%")
-		exe "bdelete" . a:bang . " " . buffer
+	"
+	" Using buflisted() over bufexists() because bufhidden=delete causes the
+	" buffer to still _exist_ even though it won't be :bdelete-able.
+	if buflisted(buffer) && buffer != bufnr("%")
+		exe a:action . a:bang . " " . buffer
 	endif
 endfunction
 
 function! s:str2bufnr(buffer)
 	if empty(a:buffer)
 		return bufnr("%")
-	elseif a:buffer =~ '^\d\+$'
+	elseif a:buffer =~# '^\d\+$'
 		return bufnr(str2nr(a:buffer))
 	else
 		return bufnr(a:buffer)
@@ -74,11 +77,15 @@ function! s:new(bang)
 endfunction
 
 " Using the built-in :echoerr prints a stacktrace, which isn't that nice.
-function! s:warn(msg)
+function! s:error(msg)
 	echohl ErrorMsg
 	echomsg a:msg
 	echohl NONE
+	let v:errmsg = a:msg
 endfunction
 
 command! -bang -complete=buffer -nargs=? Bdelete
-	\ :call s:bdelete(<q-bang>, <q-args>)
+	\ :call s:bdelete("bdelete", <q-bang>, <q-args>)
+
+command! -bang -complete=buffer -nargs=? Bwipeout
+	\ :call s:bdelete("bwipeout", <q-bang>, <q-args>)
