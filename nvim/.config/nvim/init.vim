@@ -2,9 +2,11 @@
 "set verbose=9
 
 " use ~/.vim in windows too
-if has("win32")
+if has('win32')
   set runtimepath^=~/.vim
 endif
+
+execute pathogen#infect()
 
 """ files
 " no backup or swap files, thanks
@@ -44,9 +46,10 @@ set showbreak=↳
 set display+=lastline
 " the whitespace indicators
 set listchars=precedes:$,extends:$,tab:»·,trail:·,eol:¬,nbsp:×
+" TODO deprecate in favor of airline?
 " fancy statusline with file encoding and BOM
-if has("statusline")
-    set statusline=%<%f\ %h%m%r%=%{\"[\".&ff.\"]\ \"}%{\"[\".(&fenc==\"\"?&enc:&fenc).((exists(\"+bomb\")\ &&\ &bomb)?\",B\":\"\").\"]\ \"}%k\ %-14.(%l,%c%V%)\ %P
+if has('statusline')
+  set statusline=%<%f\ %h%m%r%=%{\"[\".&ff.\"]\ \"}%{\"[\".(&fenc==\"\"?&enc:&fenc).((exists(\"+bomb\")\ &&\ &bomb)?\",B\":\"\").\"]\ \"}%k\ %-14.(%l,%c%V%)\ %P
 endif
 " syntax highlighting
 syntax enable
@@ -105,10 +108,11 @@ autocmd BufEnter * silent! lcd %:p:h
 com -nargs=? -complete=file W w <args>
 " map :E to :e for typos
 com -nargs=? -complete=file E e <args>
+" TODO gui only?
 " ctrl-tab and ctrl-shift-tab cycle tabs
 if (v:version >= 700)
-    noremap <C-Tab> gt
-    noremap <C-S-Tab> gT
+  noremap <C-Tab> gt
+  noremap <C-S-Tab> gT
 endif
 " get rid of help when you hit f1 instead of esc
 inoremap <F1> <ESC>

@@ -12,15 +12,17 @@ colorscheme one
 
 """ plugin settings
 
+" TODO gate this and only map when plugin is present
 " incsearch
-map /  <Plug>(incsearch-forward)
-map ?  <Plug>(incsearch-backward)
-map g/ <Plug>(incsearch-stay)
+"map /  <Plug>(incsearch-forward)
+"map ?  <Plug>(incsearch-backward)
+"map g/ <Plug>(incsearch-stay)
 
 " TODO taglist config
 
 " TODO NERDTree config
 
+" TODO gate this and only map when plugin is present
 " NERDTree tabs config
 map <Leader>n <plug>NERDTreeTabsToggle<CR>
 " always focus file pane on startup
