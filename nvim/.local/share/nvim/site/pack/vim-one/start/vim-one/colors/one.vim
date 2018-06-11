@@ -28,7 +28,7 @@ if !exists('g:one_allow_italics')
   let g:one_allow_italics = 0
 endif
 
-if has('gui_running') || &t_Co == 88 || &t_Co == 256
+if has('gui_running') || has('termguicolors') || &t_Co == 88 || &t_Co == 256
   " functions
   " returns an approximate grey index for the given grey level
 
@@ -230,7 +230,7 @@ if has('gui_running') || &t_Co == 88 || &t_Co == 256
   fun <sid>X(group, fg, bg, attr)
     let l:attr = a:attr
     if g:one_allow_italics == 0 && l:attr ==? 'italic'
-        let l:attr= 'none'
+      let l:attr= 'none'
     endif
 
     let l:bg = ""
@@ -261,7 +261,9 @@ if has('gui_running') || &t_Co == 88 || &t_Co == 256
 
 
   " Color definition --------------------------------------------------------{{{
+  let s:dark = 0
   if &background ==# 'dark'
+    let s:dark = 1
     let s:mono_1 = 'abb2bf'
     let s:mono_2 = '828997'
     let s:mono_3 = '5c6370'
@@ -519,6 +521,8 @@ if has('gui_running') || &t_Co == 88 || &t_Co == 256
   call <sid>X('elixirAtom',              s:hue_1,   '', '')
   call <sid>X('elixirBlockDefinition',   s:hue_3,   '', '')
   call <sid>X('elixirModuleDeclaration', s:hue_6,   '', '')
+  call <sid>X('elixirInclude',           s:hue_5,   '', '')
+  call <sid>X('elixirOperator',          s:hue_6,   '', '')
   " }}}
 
   " Git and git related plugins highlighting --------------------------------{{{
@@ -560,6 +564,21 @@ if has('gui_running') || &t_Co == 88 || &t_Co == 256
   call <sid>X('goUnsignedInts',        s:hue_1, '', '')
   " }}}
 
+  " Haskell highlighting ----------------------------------------------------{{{
+  call <sid>X('haskellDeclKeyword',    s:hue_2, '', '')
+  call <sid>X('haskellType',           s:hue_4, '', '')
+  call <sid>X('haskellWhere',          s:hue_5, '', '')
+  call <sid>X('haskellImportKeywords', s:hue_2, '', '')
+  call <sid>X('haskellOperators',      s:hue_5, '', '')
+  call <sid>X('haskellDelimiter',      s:hue_2, '', '')
+  call <sid>X('haskellIdentifier',     s:hue_6, '', '')
+  call <sid>X('haskellKeyword',        s:hue_5, '', '')
+  call <sid>X('haskellNumber',         s:hue_1, '', '')
+  call <sid>X('haskellString',         s:hue_1, '', '')
+  "}}}
+
+
+  
   " HTML highlighting -------------------------------------------------------{{{
   call <sid>X('htmlArg',            s:hue_6,  '', '')
   call <sid>X('htmlTagName',        s:hue_5,  '', '')
@@ -637,6 +656,8 @@ if has('gui_running') || &t_Co == 88 || &t_Co == 256
   call <sid>X('jsonNoQuotesError',        s:hue_5,   '', 'reverse' )
   call <sid>X('jsonNumError',             s:hue_5,   '', 'reverse' )
   call <sid>X('jsonString',               s:hue_4,   '', ''        )
+  call <sid>X('jsonBoolean',              s:hue_3,   '', ''        )
+  call <sid>X('jsonNumber',               s:hue_6,   '', ''        )
   call <sid>X('jsonStringSQError',        s:hue_5,   '', 'reverse' )
   call <sid>X('jsonSemicolonError',       s:hue_5,   '', 'reverse' )
   " }}}
@@ -825,10 +846,14 @@ if has('gui_running') || &t_Co == 88 || &t_Co == 256
 
 endif
 "}}}
-  " Public API --------------------------------------------------------------{{{
-  function! one#highlight(group, fg, bg, attr)
-    call <sid>X(a:group, a:fg, a:bg, a:attr)
-  endfunction
-  "}}}
+" Public API --------------------------------------------------------------{{{
+function! one#highlight(group, fg, bg, attr)
+  call <sid>X(a:group, a:fg, a:bg, a:attr)
+endfunction
+"}}}
+
+if exists('s:dark') && s:dark
+  set background=dark
+endif
 
 " vim: set fdl=0 fdm=marker:
