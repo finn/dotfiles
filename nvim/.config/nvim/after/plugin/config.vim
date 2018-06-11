@@ -12,22 +12,15 @@ colorscheme one
 
 """ plugin settings
 
-" TODO gate this and only map when plugin is present
 " incsearch
-"map /  <Plug>(incsearch-forward)
-"map ?  <Plug>(incsearch-backward)
-"map g/ <Plug>(incsearch-stay)
+" TODO gate these and only map when plugin is present
+map /  <Plug>(incsearch-forward)
+map ?  <Plug>(incsearch-backward)
+map g/ <Plug>(incsearch-stay)
 
 " TODO taglist config
 
 " TODO NERDTree config
-
-" TODO gate this and only map when plugin is present
-" NERDTree tabs config
-map <Leader>n <plug>NERDTreeTabsToggle<CR>
-" always focus file pane on startup
-let g:nerdtree_tabs_smart_startup_focus = 2
-"let g:nerdtree_tabs_autoclose = 0
 
 " tcomment
 " always put comment string in the first column
