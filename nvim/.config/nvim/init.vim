@@ -7,7 +7,7 @@ if has('win32')
 endif
 
 " add plugins under 'bundle' to runtimepath
-" add fzf vim integraiton to runtimepath
+" add fzf vim integration to runtimepath
 execute pathogen#infect('bundle/{}', '/usr/local/opt/fzf')
 
 "" vim config
