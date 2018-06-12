@@ -6,7 +6,11 @@ if has('win32')
   set runtimepath^=~/.vim
 endif
 
-execute pathogen#infect()
+" add plugins under 'bundle' to runtimepath
+" add fzf vim integraiton to runtimepath
+execute pathogen#infect('bundle/{}', '/usr/local/opt/fzf')
+
+"" vim config
 
 """ files
 " no backup or swap files, thanks
@@ -52,7 +56,7 @@ if has('statusline')
   set statusline=%<%f\ %h%m%r%=%{\"[\".&ff.\"]\ \"}%{\"[\".(&fenc==\"\"?&enc:&fenc).((exists(\"+bomb\")\ &&\ &bomb)?\",B\":\"\").\"]\ \"}%k\ %-14.(%l,%c%V%)\ %P
 endif
 " syntax highlighting
-syntax enable
+syntax on
 filetype plugin indent on
 
 """ text formatting
