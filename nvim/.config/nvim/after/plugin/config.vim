@@ -13,10 +13,13 @@ colorscheme one
 """ plugin settings
 
 " incsearch
+if exists(':IncSearchNoreMap')
+  map /  <Plug>(incsearch-forward)
+  map ?  <Plug>(incsearch-backward)
+  map g/ <Plug>(incsearch-stay)
+endif
+
 " TODO gate these and only map when plugin is present
-map /  <Plug>(incsearch-forward)
-map ?  <Plug>(incsearch-backward)
-map g/ <Plug>(incsearch-stay)
 
 " TODO taglist config
 
