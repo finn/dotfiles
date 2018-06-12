@@ -51,6 +51,7 @@ if has('statusline')
   set statusline=%<%f\ %h%m%r%=%{\"[\".&ff.\"]\ \"}%{\"[\".(&fenc==\"\"?&enc:&fenc).((exists(\"+bomb\")\ &&\ &bomb)?\",B\":\"\").\"]\ \"}%k\ %-14.(%l,%c%V%)\ %P
 endif
 " syntax highlighting
+" (if makes sure this only happens once)
 if !exists('g:syntax_on')
   syntax enable
 endif
@@ -127,6 +128,9 @@ command! -bang -complete=buffer -nargs=? BD Bdelete<bang> <args>
 
 " shorten updatetime for gitgutter
 set updatetime=250
+
+" don't store options/mappings/global values for local
+set sessionoptions-=options
 
 " TODO ?
 " errorbells
