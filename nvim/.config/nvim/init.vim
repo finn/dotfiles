@@ -104,8 +104,6 @@ set wildmode=list:longest,full
 set wildignorecase
 
 """ autocmds and remaps
-" set path to directory of file being edited
-autocmd BufEnter * silent! lcd %:p:h
 " map :W to :w for typos
 com -nargs=? -complete=file W w <args>
 " map :E to :e for typos

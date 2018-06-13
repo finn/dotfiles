@@ -71,6 +71,12 @@ let g:markdown_fenced_languages = [
 " yankring
 let g:yankring_history_file = '.vim_yankring_history'
 
+" vim-rooter
+" change to file's directory for non-project files
+let g:rooter_change_directory_for_non_project_files = 'current'
+" change directory for the current window only
+let g:rooter_use_lcd = 1
+
 " TODO alias :Trim to :TrailerTrim
 
 " TODO alias <C-T> to FZF
@@ -81,3 +87,4 @@ let g:yankring_history_file = '.vim_yankring_history'
 " TODO beautify / tidying plugin
 
 " TODO fancy powerline fonts for airline?
+"
