@@ -14,6 +14,8 @@ set nowritebackup
 set noswapfile
 " write files before :next, :make, etc.
 set autowrite
+" reload changed files
+set autoread
 " allow hidden (non-saved) buffers
 set hidden
 " always default to unix style files
