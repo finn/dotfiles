@@ -16,6 +16,9 @@ set noswapfile
 set autowrite
 " reload changed files
 set autoread
+" XXX workaround to fix autoread in term in neovim (apparently going to be
+" fixed for real in 0.3.2?)
+au FocusGained * :checktime
 " allow hidden (non-saved) buffers
 set hidden
 " always default to unix style files
