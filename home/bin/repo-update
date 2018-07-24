@@ -1,0 +1,17 @@
+#!/bin/bash
+
+set -u
+set -e
+#set -x
+
+for d in */; do
+  echo "### ${d}"
+  if [[ -d "${d}/.git" ]]; then
+    branch=$(cd "${d}"; git rev-parse --abbrev-ref HEAD)
+    echo "branch: ${branch}"
+    (cd "${d}"; git fetch --all)
+    if [[ 'master' = "${branch}" ]]; then
+      (cd "${d}"; git pull)
+    fi
+  fi
+done
