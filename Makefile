@@ -14,6 +14,7 @@ STOW_PKGS += ack
 STOW_PKGS += bash
 STOW_PKGS += fish
 STOW_PKGS += git
+STOW_PKGS += hammerspoon
 STOW_PKGS += home
 STOW_PKGS += nvim
 STOW_PKGS += perl
