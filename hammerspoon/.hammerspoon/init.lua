@@ -70,7 +70,7 @@ hs.hotkey.bind({"cmd", "alt", "ctrl"}, "Right", function()
 end)
 
 -- center window on screen
-hs.hotkey.bind({"cmd", "alt", "ctrl"}, "'", function()
+hs.hotkey.bind({"cmd", "alt", "ctrl"}, "return", function()
   local win = hs.window.focusedWindow()
   local screen = win:screen()
 
@@ -80,7 +80,7 @@ hs.hotkey.bind({"cmd", "alt", "ctrl"}, "'", function()
 end)
 
 -- maximize window on screen
-hs.hotkey.bind({"cmd", "alt", "ctrl"}, "return", function()
+hs.hotkey.bind({"cmd", "alt", "ctrl"}, "space", function()
   local win = hs.window.focusedWindow()
   local f = win:frame()
   local screen = win:screen()
