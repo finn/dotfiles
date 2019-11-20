@@ -51,3 +51,11 @@ eval (python -m virtualfish ^/dev/null)
 if test -e ~/.iterm2_shell_integration.fish
   source ~/.iterm2_shell_integration.fish
 end
+
+# go
+set -x GOPATH "$HOME/go"
+set -x PATH "$GOPATH/bin:$PATH"
+
+if test -x /usr/local/bin/rbenv
+  status --is-interactive; and source (rbenv init -|psub)
+end
