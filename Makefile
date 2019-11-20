@@ -19,6 +19,7 @@ STOW_PKGS += home
 STOW_PKGS += nvim
 STOW_PKGS += perl
 STOW_PKGS += pip
+STOW_PKGS += rubocop
 STOW_PKGS += tmux
 STOW_PKGS += vim
 STOW_PKGS += zsh
