@@ -1,7 +1,7 @@
 "============================================================================
-"File:        solc.vim
-"Description: Solidity syntax checker - using solc
-"Maintainer:  Jacob Cholewa <jacob@cholewa.dk>
+"File:        golangci_lint.vim
+"Description: Check go syntax using 'golangci-lint'
+"Maintainer:  Hiroshi Ioka <elvis@lnmpy.com>
 "License:     This program is free software. It comes without any warranty,
 "             to the extent permitted by applicable law. You can redistribute
 "             it and/or modify it under the terms of the Do What The Fuck You
@@ -10,29 +10,32 @@
 "
 "============================================================================
 
-if exists('g:loaded_syntastic_solidity_solc_checker')
+if exists('g:loaded_syntastic_go_golangci_lint_checker')
     finish
 endif
-let g:loaded_syntastic_solidity_solc_checker = 1
+let g:loaded_syntastic_go_golangci_lint_checker = 1
 
 let s:save_cpo = &cpo
 set cpo&vim
 
-function! SyntaxCheckers_solidity_solc_GetLocList() dict
-    let makeprg = self.makeprgBuild({})
+function! SyntaxCheckers_go_golangci_lint_GetLocList() dict
+    let makeprg = self.makeprgBuild({ 'args_before':  'run' })
 
     let errorformat =
-        \ '%f:%l:%c: %trror: %m,' .
-        \ '%f:%l:%c: %tarning: %m'
+        \ '%f:%l:%c: %m,' .
+        \ '%-G%.%#'
 
     return SyntasticMake({
         \ 'makeprg': makeprg,
-        \ 'errorformat': errorformat })
+        \ 'errorformat': errorformat,
+        \ 'defaults': {'type': 'e'},
+        \ 'subtype': 'Style' })
 endfunction
 
 call g:SyntasticRegistry.CreateAndRegisterChecker({
-    \ 'filetype': 'solidity',
-    \ 'name': 'solc'})
+    \ 'filetype': 'go',
+    \ 'name': 'golangci_lint',
+    \ 'exec': 'golangci-lint' })
 
 let &cpo = s:save_cpo
 unlet s:save_cpo

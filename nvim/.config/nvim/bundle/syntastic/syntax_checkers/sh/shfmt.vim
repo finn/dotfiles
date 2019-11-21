@@ -1,7 +1,7 @@
 "============================================================================
-"File:        solc.vim
-"Description: Solidity syntax checker - using solc
-"Maintainer:  Jacob Cholewa <jacob@cholewa.dk>
+"File:        shfmt.vim
+"Description: Syntax checking plugin for syntastic
+"Maintainer:  LCD 47 <lcd047 at gmail dot com>
 "License:     This program is free software. It comes without any warranty,
 "             to the extent permitted by applicable law. You can redistribute
 "             it and/or modify it under the terms of the Do What The Fuck You
@@ -10,29 +10,29 @@
 "
 "============================================================================
 
-if exists('g:loaded_syntastic_solidity_solc_checker')
+if exists('g:loaded_syntastic_sh_shfmt_checker')
     finish
 endif
-let g:loaded_syntastic_solidity_solc_checker = 1
+let g:loaded_syntastic_sh_shfmt_checker = 1
 
 let s:save_cpo = &cpo
 set cpo&vim
 
-function! SyntaxCheckers_solidity_solc_GetLocList() dict
+function! SyntaxCheckers_sh_shfmt_GetLocList() dict
     let makeprg = self.makeprgBuild({})
 
     let errorformat =
-        \ '%f:%l:%c: %trror: %m,' .
-        \ '%f:%l:%c: %tarning: %m'
+        \ '%f:%l:%c: %m'
 
     return SyntasticMake({
         \ 'makeprg': makeprg,
-        \ 'errorformat': errorformat })
+        \ 'errorformat': errorformat,
+        \ 'returns': [0, 1] })
 endfunction
 
 call g:SyntasticRegistry.CreateAndRegisterChecker({
-    \ 'filetype': 'solidity',
-    \ 'name': 'solc'})
+    \ 'filetype': 'sh',
+    \ 'name': 'shfmt'})
 
 let &cpo = s:save_cpo
 unlet s:save_cpo
