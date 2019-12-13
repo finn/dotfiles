@@ -69,7 +69,26 @@ let g:markdown_fenced_languages = [
             \ ]
 
 " yankring
-let g:yankring_history_file = '.vim_yankring_history'
+"let g:yankring_history_file = '.vim_yankring_history'
+
+" miniyank
+" To remap 'p' 'autoput' mapping should be used.
+" This will put the same text as unmapped 'p', and supports 'xp' and 'clipboard=unnamed[plus]'
+map p <Plug>(miniyank-autoput)
+map P <Plug>(miniyank-autoPut)
+" 'startput' will directly put the most recent item in the shared history:
+map <leader>p <Plug>(miniyank-startput)
+map <leader>P <Plug>(miniyank-startPut)
+" Right after a put, use 'cycle' to go through history:
+"map <leader>n <Plug>(miniyank-cycle)
+map <C-n> <Plug>(miniyank-cycle)
+" Stepped too far? You can cycle back to more recent items using:
+"map <leader>N <Plug>(miniyank-cycleback)
+map <C-p> <Plug>(miniyank-cycleback)
+" Maybe the register type was wrong? Well, you can change it after putting:
+map <leader>c <Plug>(miniyank-tochar)
+map <leader>l <Plug>(miniyank-toline)
+map <leader>b <Plug>(miniyank-toblock)
 
 " vim-rooter
 " change to file's directory for non-project files
@@ -87,4 +106,6 @@ let g:rooter_use_lcd = 1
 " TODO beautify / tidying plugin
 
 " TODO fancy powerline fonts for airline?
-"
+
+
+kjlkjlk
