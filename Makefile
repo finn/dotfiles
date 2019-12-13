@@ -16,6 +16,7 @@ STOW_PKGS += fish
 STOW_PKGS += git
 STOW_PKGS += hammerspoon
 STOW_PKGS += home
+STOW_PKGS += mailmate
 STOW_PKGS += nvim
 STOW_PKGS += perl
 STOW_PKGS += pip
