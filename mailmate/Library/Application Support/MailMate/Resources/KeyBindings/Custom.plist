@@ -1,7 +1,19 @@
+// Shortcut    Code    Description
+//  a           a      -
+// ⌃a          ^a      Control-a
+// ⌥a          ~a      Option-a
+// ⇧a           A      Shift-a
+// ⌘a          @a      Command-a
+//
+// In addition to the above, $ can be used to bind to the shift key for
+// non-letter-keys and # can be used for the numeric key pad.
+//
+// Note that the order of multiple modifiers is important.
+// They must be in this order: #^~$@.
 {
     "i" = "loadImagesOnce:";
     "9" = "markAsNotJunk:";
-    "@M" = "toggleOnlineStateOfAllAccounts:";
+    "^@N" = "toggleOnlineStateOfAllAccounts:";
 
     // remove command-enter to send
     "@\U000A" = ""; // ⌘+return
