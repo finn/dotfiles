@@ -106,6 +106,3 @@ let g:rooter_use_lcd = 1
 " TODO beautify / tidying plugin
 
 " TODO fancy powerline fonts for airline?
-
-
-kjlkjlk
