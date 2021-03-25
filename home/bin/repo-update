@@ -7,14 +7,14 @@ set -e
 for d in */; do
   echo "### ${d}"
   if [[ -d "${d}/.git" ]]; then
-    (cd "${d}"; git fetch --all)
+    (cd "${d}"; git fetch --all --prune)
     branch=$(cd "${d}"; git symbolic-ref --short HEAD)
     commit=$(cd "${d}"; git rev-list -n 1 --all)
     commit_count=$(cd "${d}"; git rev-list --all --count)
     echo "branch: ${branch}"
     echo "commit: ${commit}"
     echo "commit_count: ${commit_count}"
-    if [[ 'master' = "${branch}" &&
+    if [[ "${branch}" =~ ^(master|main)$ &&
           -n "$commit" &&
           $commit_count -gt 0
        ]]; then
