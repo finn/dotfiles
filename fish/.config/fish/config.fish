@@ -38,9 +38,8 @@ if test -e /usr/local/bin/nvim
   alias nview 'nvim -R'
 end
 
-# load plenv for custom perls
-if test -d ~/.plenv/bin
-  set -x PATH ~/.plenv/bin $PATH
+# load plenv (from brew) for custom perls
+if type -q plenv;
   status --is-interactive; and source (plenv init -|psub)
 end
 
