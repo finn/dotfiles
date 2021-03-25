@@ -62,3 +62,5 @@
 	process = git-lfs filter-process
 [rerere]
 	enabled = true
+[includeIf "gitdir:~/Documents/work/"]
+	path = ~/Documents/work/.gitconfig
