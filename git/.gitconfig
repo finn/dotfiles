@@ -1,12 +1,12 @@
 [user]
 	name = Finn Smith
+	email = finn@users.noreply.github.com
 [github]
 	user = finn
 [core]
 	excludesfile = ~/.git.core.excludesfile
 	whitespace = space-before-tab,trailing-space,cr-at-eol
 	ignorecase = false
-	pager = less -R
 [alias]
 	st = status
 	sb = status -s -b
