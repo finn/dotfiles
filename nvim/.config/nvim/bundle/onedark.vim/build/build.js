@@ -1,22 +1,9 @@
 #!/usr/bin/env node
 
 const _ = require('lodash') // ships with termcolors; only used because of termcolors customization
-const doT = require('doT')
 const termcolors = require('termcolors')
 const { readFileSync, writeFileSync } = require('fs')
 const { resolve } = require('path')
-
-doT.templateSettings = {
-	evaluate:    /<%([\s\S]+?)%>/g,
-	interpolate: /<%=([\s\S]+?)%>/g,
-	encode:      /<%!([\s\S]+?)%>/g,
-	use:         /<%#([\s\S]+?)%>/g,
-	define:      /<%##\s*([\w.$]+)\s*(:|=)([\s\S]+?)#%>/g,
-	conditional: /<%\?(\?)?\s*([\s\S]*?)\s*%>/g,
-	iterate:     /<%~\s*(?:%>|([\s\S]+?)\s*:\s*([\w$]+)\s*(?::\s*([\w$]+))?\s*%>)/g,
-	varname: 'it',
-	strip: false, // preserve whitespace
-}
 
 const baseColors = Object.freeze({
 	red: { gui: '#E06C75', cterm: '204', cterm16: '1' }, // alternate cterm: 168
@@ -77,7 +64,7 @@ Object.keys(templateMap).forEach(templateFilename => {
 	// Compile the template
 	let template
 	try {
-		template = doT.template(templateText)
+		template = _.template(templateText)
 	} catch (e) {
 		handleError(`Error compiling template ${templatePath}`, e)
 	}
@@ -116,10 +103,17 @@ try {
 	const xresources = readFileSync(resolve(__dirname, '../term/One Dark.Xresources'), 'utf8')
 	const terminalPalette = termcolors.xresources.import(xresources)
 
-	let itermTemplate, terminalAppTemplate
+	let alacrittyTemplate, itermTemplate, kittyTemplate, terminalAppTemplate
 
 	// Compile custom terminal color templates based on ones that ship with termcolors
 	try {
+		alacrittyTemplate = termcolors.export(
+			readFileSync(resolve(__dirname, 'templates/One Dark.alacritty')),
+			_.partialRight(_.mapValues, function (color) {
+				return color.toHex().slice(1)
+			})
+		)
+
 		itermTemplate = termcolors.export(
 			// From termcolors/lib/formats/iterm.js
 			readFileSync(resolve(__dirname, 'templates/One Dark.itermcolors')),
@@ -128,10 +122,17 @@ try {
 			})
 		)
 
+		kittyTemplate = termcolors.export(
+			readFileSync(resolve(__dirname, 'templates/One Dark.kitty')),
+			_.partialRight(_.mapValues, function (color) {
+				return color.toHex().slice(1)
+			})
+		)
+
 		// From termcolors/lib/formats/terminal-app.js
 		const code = [
-			new Buffer('62706c6973743030d40102030405061516582476657273696f6e58246f626a65637473592461726368697665725424746f7012000186a0a307080f55246e756c6cd3090a0b0c0d0e554e535247425c4e53436f6c6f7253706163655624636c6173734f1027', 'hex'),
-			new Buffer('0010018002d2101112135a24636c6173736e616d655824636c6173736573574e53436f6c6f72a21214584e534f626a6563745f100f4e534b657965644172636869766572d1171854726f6f74800108111a232d32373b41484e5b628c8e9095a0a9b1b4bdcfd2d700000000000001010000000000000019000000000000000000000000000000d9', 'hex')
+			Buffer.from('62706c6973743030d40102030405061516582476657273696f6e58246f626a65637473592461726368697665725424746f7012000186a0a307080f55246e756c6cd3090a0b0c0d0e554e535247425c4e53436f6c6f7253706163655624636c6173734f1027', 'hex'),
+			Buffer.from('0010018002d2101112135a24636c6173736e616d655824636c6173736573574e53436f6c6f72a21214584e534f626a6563745f100f4e534b657965644172636869766572d1171854726f6f74800108111a232d32373b41484e5b628c8e9095a0a9b1b4bdcfd2d700000000000001010000000000000019000000000000000000000000000000d9', 'hex')
 		]
 
 		terminalAppTemplate = termcolors.export(
@@ -143,7 +144,7 @@ try {
 					return n.toFixed(10).toString()
 				}).join(' ')
 				var output = code[0].toString('binary') + srgb + code[1].toString('binary')
-				output = (new Buffer(output, 'binary')).toString('base64')
+				output = (Buffer.from(output, 'binary')).toString('base64')
 				return output.match(/.{1,68}/g).join('\n\t')
 			})
 		)
@@ -153,7 +154,9 @@ try {
 	}
 
 	try {
+		writeFileSync(resolve(__dirname, '../term/One Dark.alacritty'), alacrittyTemplate(terminalPalette))
 		writeFileSync(resolve(__dirname, '../term/One Dark.itermcolors'), itermTemplate(terminalPalette))
+		writeFileSync(resolve(__dirname, '../term/One Dark.kitty'), kittyTemplate(terminalPalette))
 		writeFileSync(resolve(__dirname, '../term/One Dark.terminal'), terminalAppTemplate(terminalPalette))
 	} catch (e) {
 		handleError('Error writing terminal color file', e)
