@@ -1,5 +1,7 @@
-if !exists('g:polyglot_disabled') || index(g:polyglot_disabled, 'livescript') == -1
-  
+if has_key(g:polyglot_is_disabled, 'livescript')
+  finish
+endif
+
 " Language:    LiveScript
 " Maintainer:  George Zahariev
 " URL:         http://github.com/gkz/vim-ls
@@ -74,5 +76,3 @@ augroup LiveScriptUpdateMakePrg
     autocmd BufFilePost,BufWritePost          call s:UpdateMakePrg()
   endif
 augroup END
-
-endif

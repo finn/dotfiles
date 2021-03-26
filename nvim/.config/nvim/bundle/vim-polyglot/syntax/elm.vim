@@ -1,23 +1,34 @@
-if !exists('g:polyglot_disabled') || index(g:polyglot_disabled, 'elm') == -1
-  
-" syntax highlighting for Elm (http://elm-lang.org/)
+if has_key(g:polyglot_is_disabled, 'elm')
+  finish
+endif
+
+" syntax highlighting for Elm (https://elm-lang.org/)
 
 if exists('b:current_syntax')
   finish
 endif
 
 " Keywords
-syn keyword elmConditional else if of then
+syn keyword elmConditional else if of then case
 syn keyword elmAlias alias
 syn keyword elmTypedef contained type port
 syn keyword elmImport exposing as import module where
 
 " Operators
-syn match elmOperator contained "\([-!#$%`&\*\+./<=>\?@\\^|~:]\|\<_\>\)"
+" elm/core
+syn match elmOperator contained "\(<|\||>\|||\|&&\|==\|/=\|<=\|>=\|++\|::\|+\|-\|*\|/\|//\|^\|<>\|>>\|<<\|<\|>\|%\)"
+" elm/parser
+syn match elmOperator contained "\(|.\||=\)"
+" elm/url
+syn match elmOperator contained "\(</>\|<?>\)"
 
 " Types
-syn match elmType "\<[A-Z][0-9A-Za-z_'-]*"
+syn match elmType "\<[A-Z][0-9A-Za-z_-]*"
 syn keyword elmNumberType number
+
+" Modules
+syn match elmModule "\<\([A-Z][0-9A-Za-z_'-\.]*\)\+\.[A-Za-z]"me=e-2
+syn match elmModule "^\(module\|import\)\s\+[A-Z][0-9A-Za-z_'-\.]*\(\s\+as\s\+[A-Z][0-9A-Za-z_'-\.]*\)\?\(\s\+exposing\)\?" contains=elmImport
 
 " Delimiters
 syn match elmDelimiter  "[,;]"
@@ -38,12 +49,19 @@ syn region elmString start="\"" skip="\\\"" end="\"" contains=elmStringEscape,@s
 syn region elmTripleString start="\"\"\"" skip="\\\"" end="\"\"\"" contains=elmStringEscape,@spell
 syn match elmChar "'[^'\\]'\|'\\.'\|'\\u[0-9a-fA-F]\{4}'"
 
+" Lambda
+syn region elmLambdaFunc start="\\"hs=s+1 end="->"he=e-2
+
+" Debug
+syn match elmDebug "Debug.\(log\|todo\|toString\)"
+
 " Numbers
-syn match elmInt "-\?\<\d\+\>\|0[xX][0-9a-fA-F]\+\>"
-syn match elmFloat "\(\<\d\+\.\d\+\>\)"
+syn match elmInt "-\?\<\d\+\>"
+syn match elmFloat "-\?\(\<\d\+\.\d\+\>\)"
 
 " Identifiers
-syn match elmTopLevelDecl "^\s*[a-zA-Z][a-zA-z0-9_]*\('\)*\s\+:\s\+" contains=elmOperator
+syn match elmTopLevelDecl "^\s*[a-zA-Z][a-zA-z0-9_]*\('\)*\s\+:\(\r\n\|\r\|\n\|\s\)\+" contains=elmOperator
+syn match elmFuncName /^\l\w*/
 
 " Folding
 syn region elmTopLevelTypedef start="type" end="\n\(\n\n\)\@=" contains=ALL fold
@@ -52,6 +70,7 @@ syn region elmCaseBlock matchgroup=elmCaseBlockDefinition start="^\z\(\s\+\)\<ca
 syn region elmCaseItemBlock start="^\z\(\s\+\).\+->$" end="^\z1\@!\W\@=" end="\(\n\n\z1\@!\)\@=" end="\(\n\z1\S\)\@=" contains=ALL fold
 syn region elmLetBlock matchgroup=elmLetBlockDefinition start="\<let\>" end="\<in\>" contains=ALL fold
 
+hi def link elmFuncName Function
 hi def link elmCaseBlockDefinition Conditional
 hi def link elmCaseBlockItemDefinition Conditional
 hi def link elmLetBlockDefinition TypeDef
@@ -73,11 +92,12 @@ hi def link elmImport Include
 hi def link elmConditional Conditional
 hi def link elmAlias Delimiter
 hi def link elmOperator Operator
-hi def link elmType Identifier
+hi def link elmType Type
 hi def link elmNumberType Identifier
+hi def link elmLambdaFunc Function
+hi def link elmDebug Debug
+hi def link elmModule Type
 
 syn sync minlines=500
 
 let b:current_syntax = 'elm'
-
-endif

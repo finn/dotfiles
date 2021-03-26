@@ -1,5 +1,7 @@
-if !exists('g:polyglot_disabled') || index(g:polyglot_disabled, 'puppet') == -1
-  
+if has_key(g:polyglot_is_disabled, 'puppet')
+  finish
+endif
+
 " Language:     Puppet
 " Maintainer:   Voxpupuli
 " URL:          https://github.com/voxpupuli/vim-puppet
@@ -40,7 +42,7 @@ syn match puppetStringEscape "\%(\\M-\\C-\|\\C-\\M-\|\\M-\\c\|\\c\\M-\|\\c\|\\C-
 syn match puppetQuoteEscape  "\\[\\']" contained display
 
 syn region puppetInterpolation   matchgroup=puppetInterpolationDelimiter start="${" end="}" contained contains=ALLBUT,@puppetNotTop
-syn match  puppetInterpolation   "$\w\+"                        display contained contains=puppetInterpolationDelimiter,puppetVariable
+syn match  puppetInterpolation   "$\%(::\)\?\w\+"                        display contained contains=puppetInterpolationDelimiter,puppetVariable
 syn match  puppetInterpolationDelimiter "$\ze\$\w\+"            display contained
 syn match  puppetInterpolation   "$\$\%(-\w\|\W\)"              display contained contains=puppetInterpolationDelimiter,puppetVariable,puppetInvalidVariable
 syn match  puppetInterpolationDelimiter "$\ze\$\%(-\w\|\W\)"    display contained
@@ -436,5 +438,3 @@ HiLink puppetComment              Comment
 delcommand HiLink
 
 let b:current_syntax = "puppet"
-
-endif

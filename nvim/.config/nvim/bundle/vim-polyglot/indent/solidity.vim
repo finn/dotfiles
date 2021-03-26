@@ -1,5 +1,7 @@
-if !exists('g:polyglot_disabled') || index(g:polyglot_disabled, 'solidity') == -1
-  
+if has_key(g:polyglot_is_disabled, 'solidity')
+  finish
+endif
+
 " Vim indent file
 " Language: Solidity
 " Acknowledgement: Based off of vim-javascript
@@ -439,5 +441,3 @@ endfunction
 
 let &cpo = s:cpo_save
 unlet s:cpo_save
-
-endif

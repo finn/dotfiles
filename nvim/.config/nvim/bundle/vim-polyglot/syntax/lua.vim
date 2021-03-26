@@ -1,5 +1,7 @@
-if !exists('g:polyglot_disabled') || index(g:polyglot_disabled, 'lua') == -1
-  
+if has_key(g:polyglot_is_disabled, 'lua')
+  finish
+endif
+
 " Vim syntax file
 " Language: Lua
 " URL: https://github.com/tbastos/vim-lua
@@ -12,6 +14,11 @@ if !exists("main_syntax")
   endif
   let main_syntax = 'lua'
 endif
+
+if exists('g:lua_syntax_fancynotequal') && !has('conceal')
+  unlet g:lua_syntax_fancynotequal
+endif
+
 
 syntax sync fromstart
 
@@ -40,7 +47,11 @@ syntax region luaBracket transparent matchgroup=luaBrackets start="\[" end="\]" 
 syntax match  luaComma ","
 syntax match  luaSemiCol ";"
 if !exists('g:lua_syntax_nosymboloperator')
-  syntax match luaSymbolOperator "[#<>=~^&|*/%+-]\|\.\."
+  if exists('g:lua_syntax_fancynotequal')
+    syntax match luaNotEqOperator "\V~=" conceal cchar=≠
+    setlocal conceallevel=2
+  endi
+  syntax match luaSymbolOperator "[#<>=~^&|*/%+-]\|\.\." contains=luaNotEqOperator
 endi
 syntax match  luaEllipsis "\.\.\."
 
@@ -229,6 +240,7 @@ if version >= 508 || !exists("did_lua_syn_inits")
   HiLink luaLocal            Type
   HiLink luaNumber           Number
   HiLink luaSymbolOperator   luaOperator
+  HiLink luaNotEqOperator    luaOperator
   HiLink luaOperator         Operator
   HiLink luaRepeat           Repeat
   HiLink luaSemiCol          Delimiter
@@ -240,12 +252,14 @@ if version >= 508 || !exists("did_lua_syn_inits")
   HiLink luaStringSpecial    SpecialChar
   HiLink luaErrHand          Exception
 
+  if exists('g:lua_syntax_fancynotequal')
+    hi! link Conceal luaOperator
+  endi
+
   delcommand HiLink
 end
 
 let b:current_syntax = "lua"
 if main_syntax == 'lua'
   unlet main_syntax
-endif
-
 endif

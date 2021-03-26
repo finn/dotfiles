@@ -1,5 +1,7 @@
-if !exists('g:polyglot_disabled') || index(g:polyglot_disabled, 'julia') == -1
-  
+if has_key(g:polyglot_is_disabled, 'julia')
+  finish
+endif
+
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Support for LaTex-to-Unicode conversion as in the Julia REPL "
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -13,6 +15,9 @@ function! s:L2U_Setup()
   if !has_key(b:, "l2u_enabled")
     let b:l2u_enabled = 0
   endif
+  if !has_key(b:, "l2u_autodetect_enable")
+    let b:l2u_autodetect_enable = 1
+  endif
 
   " Did we install the L2U tab mappings?
   if !has_key(b:, "l2u_tab_set")
@@ -20,6 +25,9 @@ function! s:L2U_Setup()
   endif
   if !has_key(b:, "l2u_cmdtab_set")
     let b:l2u_cmdtab_set = 0
+  endif
+  if !has_key(b:, "l2u_keymap_set")
+    let b:l2u_keymap_set = 0
   endif
 
   " Did we activate the L2U as-you-type substitutions?
@@ -76,11 +84,7 @@ function! s:L2U_SetupGlobal()
   " A hack to forcibly get out of completion mode: feed
   " this string with feedkeys()
   if has("win32") || has("win64")
-    if has("gui_running")
-      let s:l2u_esc_sequence = "\u0006"
-    else
-      let s:l2u_esc_sequence = "\u0006\b"
-    endif
+    let s:l2u_esc_sequence = "\u0006"
   else
     let s:l2u_esc_sequence = "\u0091\b"
   end
@@ -93,8 +97,12 @@ endfunction
 " Each time the filetype changes, we may need to enable or
 " disable the LaTeX-to-Unicode functionality
 function! LaTeXtoUnicode#Refresh()
-
   call s:L2U_Setup()
+
+  " skip if manually overridden
+  if !b:l2u_autodetect_enable
+    return ''
+  endif
 
   " by default, LaTeX-to-Unicode is only active on julia files
   let file_types = s:L2U_file_type_regex(get(g:, "latex_to_unicode_file_types", "julia"))
@@ -102,25 +110,26 @@ function! LaTeXtoUnicode#Refresh()
 
   if match(&filetype, file_types) < 0 || match(&filetype, file_types_blacklist) >= 0
     if b:l2u_enabled
-      call LaTeXtoUnicode#Disable()
+      call LaTeXtoUnicode#Disable(1)
     else
-      return
+      return ''
     endif
   elseif !b:l2u_enabled
-    call LaTeXtoUnicode#Enable()
+    call LaTeXtoUnicode#Enable(1)
   endif
-
 endfunction
 
-function! LaTeXtoUnicode#Enable()
+function! LaTeXtoUnicode#Enable(...)
+  let auto_set = a:0 > 0 ? a:1 : 0
 
   if b:l2u_enabled
-    return
+    return ''
   end
 
   call s:L2U_ResetLastCompletionInfo()
 
   let b:l2u_enabled = 1
+  let b:l2u_autodetect_enable = auto_set
 
   " If we're editing the first file upon opening vim, this will only init the
   " command line mode mapping, and the full initialization will be performed by
@@ -128,18 +137,18 @@ function! LaTeXtoUnicode#Enable()
   " Otherwise, if we're opening a file from within a running vim session, this
   " will actually initialize all the LaTeX-to-Unicode substitutions.
   call LaTeXtoUnicode#Init()
-
-  return
-
+  return ''
 endfunction
 
-function! LaTeXtoUnicode#Disable()
+function! LaTeXtoUnicode#Disable(...)
+  let auto_set = a:0 > 0 ? a:1 : 0
   if !b:l2u_enabled
-    return
+    return ''
   endif
   let b:l2u_enabled = 0
+  let b:l2u_autodetect_enable = auto_set
   call LaTeXtoUnicode#Init()
-  return
+  return ''
 endfunction
 
 " Translate old options to their new equivalents
@@ -247,7 +256,6 @@ function! LaTeXtoUnicode#omnifunc(findstart, base)
     endif
     let b:l2u_in_fallback = 0
     " set info for the callback
-    let b:l2u_tab_completing = 1
     let b:l2u_found_completion = 1
     " analyse current line
     let col1 = col('.')
@@ -376,6 +384,7 @@ function! LaTeXtoUnicode#Tab()
   endif
   " reset the in_fallback info
   let b:l2u_in_fallback = 0
+  let b:l2u_tab_completing = 1
   " temporary change to completeopt to use the `longest` setting, which is
   " probably the only one which makes sense given that the goal of the
   " completion is to substitute the final string
@@ -384,7 +393,8 @@ function! LaTeXtoUnicode#Tab()
   set completeopt-=noinsert
   " invoke omnicompletion; failure to perform LaTeX-to-Unicode completion is
   " handled by the CompleteDone autocommand.
-  return "\<C-X>\<C-O>"
+  call feedkeys("\<C-X>\<C-O>", 'n')
+  return ""
 endfunction
 
 " This function is called at every CompleteDone event, and is meant to handle
@@ -409,8 +419,8 @@ function! LaTeXtoUnicode#FallbackCallback()
   return
 endfunction
 
-" This is the function which is mapped to <S-Tab> in command-line mode
-function! LaTeXtoUnicode#CmdTab()
+" This is the function that performs the substitution in command-line mode
+function! LaTeXtoUnicode#CmdTab(trigger)
   " first stage
   " analyse command line
   let col1 = getcmdpos() - 1
@@ -419,7 +429,12 @@ function! LaTeXtoUnicode#CmdTab()
   let b:l2u_singlebslash = (match(l[0:col1-1], '\\$') >= 0)
   " completion not found
   if col0 == -1
-    return l
+    if a:trigger == &wildchar
+      call feedkeys(nr2char(a:trigger), 'nt') " fall-back to the default wildchar
+    elseif a:trigger == char2nr("\<S-Tab>")
+      call feedkeys("\<S-Tab>", 'nt') " fall-back to the default <S-Tab>
+    endif
+    return ''
   endif
   let base = l[col0 : col1-1]
   " search for matches
@@ -428,43 +443,41 @@ function! LaTeXtoUnicode#CmdTab()
   for k in keys(g:l2u_symbols_dict)
     if k ==# base
       let exact_match = 1
-    endif
-    if len(k) >= len(base) && k[0 : len(base)-1] ==# base
+      break
+    elseif len(k) >= len(base) && k[0 : len(base)-1] ==# base
       call add(partmatches, k)
     endif
   endfor
-  if len(partmatches) == 0
-    return l
-  endif
-  " exact matches are replaced with Unicode
-  if exact_match
-    let unicode = g:l2u_symbols_dict[base]
-    if col0 > 0
-      let pre = l[0 : col0 - 1]
-    else
-      let pre = ''
+  if !exact_match && len(partmatches) == 0
+    " no matches, call fallbacks
+    if a:trigger == &wildchar
+      call feedkeys(nr2char(a:trigger), 'nt') " fall-back to the default wildchar
+    elseif a:trigger == char2nr("\<S-Tab>")
+      call feedkeys("\<S-Tab>", 'nt') " fall-back to the default <S-Tab>
     endif
-    let posdiff = col1-col0 - len(unicode)
-    call setcmdpos(col1 - posdiff + 1)
-    return pre . unicode . l[col1 : -1]
-  endif
-  " no exact match: complete with the longest common prefix
-  let common = s:L2U_longest_common_prefix(partmatches)
-  if col0 > 0
-    let pre = l[0 : col0 - 1]
+  elseif exact_match
+    " exact matches are replaced with Unicode
+    let unicode = g:l2u_symbols_dict[base]
+    call feedkeys(repeat("\b", len(base)) . unicode, 'nt')
   else
-    let pre = ''
+    " no exact match: complete with the longest common prefix
+    let common = s:L2U_longest_common_prefix(partmatches)
+    call feedkeys(common[len(base):], 'nt')
   endif
-  let posdiff = col1-col0 - len(common)
-  call setcmdpos(col1 - posdiff + 1)
-  return pre . common . l[col1 : -1]
+  return ''
 endfunction
 
 " Setup the L2U tab mapping
 function! s:L2U_SetTab(wait_insert_enter)
   if !b:l2u_cmdtab_set && get(g:, "latex_to_unicode_tab", 1) && b:l2u_enabled
-    cmap <buffer> <S-Tab> <Plug>L2UCmdTab
-    cnoremap <buffer> <Plug>L2UCmdTab <C-\>eLaTeXtoUnicode#CmdTab()<CR>
+    let b:l2u_cmdtab_keys = get(g:, "latex_to_unicode_cmd_mapping", ['<Tab>','<S-Tab>'])
+    if type(b:l2u_cmdtab_keys) != type([]) " avoid using v:t_list for backward compatibility
+      let b:l2u_cmdtab_keys = [b:l2u_cmdtab_keys]
+    endif
+    for k in b:l2u_cmdtab_keys
+      exec 'let trigger = char2nr("'.(k[0] == '<' ? '\' : '').k.'")'
+      exec 'cnoremap <buffer><expr> '.k.' LaTeXtoUnicode#CmdTab('.trigger.')'
+    endfor
     let b:l2u_cmdtab_set = 1
   endif
   if b:l2u_tab_set
@@ -500,7 +513,9 @@ endfunction
 " Revert the LaTeX-to-Unicode tab mapping settings
 function! s:L2U_UnsetTab()
   if b:l2u_cmdtab_set
-    cunmap <buffer> <S-Tab>
+    for k in b:l2u_cmdtab_keys
+      exec 'cunmap <buffer> '.k
+    endfor
     let b:l2u_cmdtab_set = 0
   endif
   if !b:l2u_tab_set
@@ -593,6 +608,21 @@ function! s:L2U_UnsetAutoSub()
   let b:l2u_autosub_set = 0
 endfunction
 
+function! s:L2U_SetKeymap()
+  if !b:l2u_keymap_set && get(g:, "latex_to_unicode_keymap", 0) && b:l2u_enabled
+    setlocal keymap=latex2unicode
+    let b:l2u_keymap_set = 1
+  endif
+endfunction
+
+function! s:L2U_UnsetKeymap()
+  if !b:l2u_keymap_set
+    return
+  endif
+  setlocal keymap=
+  let b:l2u_keymap_set = 0
+endfunction
+
 " Initialization. Can be used to re-init when global settings have changed.
 function! LaTeXtoUnicode#Init(...)
   let wait_insert_enter = a:0 > 0 ? a:1 : 1
@@ -605,9 +635,12 @@ function! LaTeXtoUnicode#Init(...)
 
   call s:L2U_UnsetTab()
   call s:L2U_UnsetAutoSub()
+  call s:L2U_UnsetKeymap()
 
   call s:L2U_SetTab(wait_insert_enter)
   call s:L2U_SetAutoSub(wait_insert_enter)
+  call s:L2U_SetKeymap()
+  return ''
 endfunction
 
 function! LaTeXtoUnicode#Toggle()
@@ -619,7 +652,5 @@ function! LaTeXtoUnicode#Toggle()
     call LaTeXtoUnicode#Enable()
     echo "LaTeX-to-Unicode enabled"
   endif
-  return
+  return ''
 endfunction
-
-endif

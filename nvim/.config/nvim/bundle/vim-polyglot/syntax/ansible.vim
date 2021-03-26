@@ -1,5 +1,7 @@
-if !exists('g:polyglot_disabled') || index(g:polyglot_disabled, 'ansible') == -1
-  
+if has_key(g:polyglot_is_disabled, 'ansible')
+  finish
+endif
+
 " Vim syntax file
 " Language: Ansible YAML/Jinja templates
 " Maintainer: Dave Honneffer <pearofducks@gmail.com>
@@ -26,7 +28,7 @@ endif
 syn cluster jinjaSLSBlocks add=jinjaTagBlock,jinjaVarBlock,jinjaComment
 " https://github.com/mitsuhiko/jinja2/blob/6b7c0c23/ext/Vim/jinja.vim
 syn region jinjaTagBlock matchgroup=jinjaTagDelim start=/{%-\?/ end=/-\?%}/ containedin=ALLBUT,jinjaTagBlock,jinjaVarBlock,jinjaRaw,jinjaString,jinjaNested,jinjaComment,@jinjaSLSBlocks
-syn region jinjaVarBlock matchgroup=jinjaVarDelim start=/{{-\?/ end=/-\?}}/ containedin=ALLBUT,jinjaTagBlock,jinjaVarBlock,jinjaRaw,jinjaString,jinjaNested,jinjaComment,@jinjaSLSBlocks
+syn region jinjaVarBlock matchgroup=jinjaVarDelim start=/{{-\?/ end=/-\?}}/ containedin=ALLBUT,yamlComment,jinjaTagBlock,jinjaVarBlock,jinjaRaw,jinjaString,jinjaNested,jinjaComment,@jinjaSLSBlocks
 syn region jinjaComment matchgroup=jinjaCommentDelim start="{#" end="#}" containedin=ALLBUT,jinjaTagBlock,jinjaVarBlock,jinjaString,@jinjaSLSBlocks
 highlight link jinjaVariable Constant
 highlight link jinjaVarDelim Delimiter
@@ -62,7 +64,7 @@ fun! s:attribute_highlight(attributes)
   elseif a:attributes =~ 'd'
     highlight link ansible_attributes Comment
   else
-    highlight link ansible_attributes Structure
+    highlight default link ansible_attributes Structure
   endif
 endfun
 
@@ -77,12 +79,12 @@ if exists("g:ansible_name_highlight")
   if g:ansible_name_highlight =~ 'd'
     highlight link ansible_name Comment
   else
-    highlight link ansible_name Underlined
+    highlight default link ansible_name Underlined
   endif
 endif
 
 execute 'syn keyword ansible_debug_keywords debug containedin='.s:yamlKey.' contained'
-highlight link ansible_debug_keywords Debug
+highlight default link ansible_debug_keywords Debug
 
 if exists("g:ansible_extra_keywords_highlight")
   execute 'syn keyword ansible_extra_special_keywords register always_run changed_when failed_when no_log args vars delegate_to ignore_errors containedin='.s:yamlKey.' contained'
@@ -93,16 +95,21 @@ execute 'syn keyword ansible_normal_keywords include include_tasks import_tasks 
 if exists("g:ansible_normal_keywords_highlight")
   execute 'highlight link ansible_normal_keywords '.g:ansible_normal_keywords_highlight
 else
-  highlight link ansible_normal_keywords Statement
+  highlight default link ansible_normal_keywords Statement
 endif
 
 execute 'syn match ansible_with_keywords "\vwith_.+" containedin='.s:yamlKey.' contained'
 if exists("g:ansible_with_keywords_highlight")
   execute 'highlight link ansible_with_keywords '.g:ansible_with_keywords_highlight
 else
-  highlight link ansible_with_keywords Statement
+  highlight default link ansible_with_keywords Statement
+endif
+
+execute 'syn keyword ansible_with_keywords loop containedin='.s:yamlKey.' contained'
+if exists("g:ansible_with_keywords_highlight")
+  execute 'highlight link ansible_with_keywords '.g:ansible_with_keywords_highlight
+else
+  highlight default link ansible_with_keywords Statement
 endif
 
 let b:current_syntax = "ansible"
-
-endif

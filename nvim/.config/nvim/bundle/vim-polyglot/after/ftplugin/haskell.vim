@@ -1,6 +1,6 @@
-if !exists('g:polyglot_disabled') || index(g:polyglot_disabled, 'haskell') == -1
-  
+if has_key(g:polyglot_is_disabled, 'haskell')
+  finish
+endif
+
 setlocal comments=s1fl:{-,mb:\ \ ,ex:-},:--
 setlocal iskeyword+='
-
-endif

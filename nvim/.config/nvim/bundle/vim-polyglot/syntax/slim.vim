@@ -1,5 +1,7 @@
-if !exists('g:polyglot_disabled') || index(g:polyglot_disabled, 'slim') == -1
-  
+if has_key(g:polyglot_is_disabled, 'slim')
+  finish
+endif
+
 " Vim syntax file
 " Language: Slim
 " Maintainer: Andrew Stone <andy@stonean.com>
@@ -43,7 +45,8 @@ syn match slimTag           "\w\+[><]*"         contained contains=htmlTagName n
 syn match slimIdChar        "#{\@!"        contained nextgroup=slimId
 syn match slimId            "\%(\w\|-\)\+" contained nextgroup=@slimComponent
 syn match slimClassChar     "\."           contained nextgroup=slimClass
-syn match slimClass         "\%(\w\|-\)\+" contained nextgroup=@slimComponent
+syn match slimClass         "\%(\w\|-\|\/\|:\(\w\|-\)\+\)\+" contained nextgroup=@slimComponent
+
 syn match slimInlineTagChar "\s*:\s*"      contained nextgroup=slimTag,slimClassChar,slimIdChar
 
 syn region slimWrappedAttrs matchgroup=slimWrappedAttrsDelimiter start="\s*{\s*" skip="}\s*\""  end="\s*}\s*"  contained contains=slimAttr nextgroup=slimRuby
@@ -73,6 +76,7 @@ syn region slimJavascriptFilter matchgroup=slimFilter start="^\z(\s*\)javascript
 syn region slimCoffeeFilter matchgroup=slimFilter start="^\z(\s*\)coffee:\s*$" end="^\%(\z1 \| *$\)\@!" contains=@coffeeAll,slimInterpolation keepend
 syn region slimCSSFilter matchgroup=slimFilter start="^\z(\s*\)css:\s*$" end="^\%(\z1 \| *$\)\@!" contains=@htmlCss,slimInterpolation keepend
 syn region slimSassFilter matchgroup=slimFilter start="^\z(\s*\)sass:\s*$" end="^\%(\z1 \| *$\)\@!" contains=@hamlSassTop
+syn region slimRubyFilter matchgroup=slimFilter start="^\z(\s*\)ruby:\s*$" end="^\%(\z1 \| *$\)\@!" contains=@slimRubyTop keepend
 
 syn region slimRuby matchgroup=slimRubyOutputChar start="\s*[=]\==[']\=" skip="\%\(,\s*\|\\\)$" end="$" contained contains=@slimRubyTop keepend
 syn region slimRuby matchgroup=slimRubyChar       start="\s*-"           skip="\%\(,\s*\|\\\)$" end="$" contained contains=@slimRubyTop keepend
@@ -109,5 +113,3 @@ hi def link slimInlineTagChar             Delimiter
 hi def link slimFilter                    PreProc
 
 let b:current_syntax = "slim"
-
-endif

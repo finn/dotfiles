@@ -1,5 +1,7 @@
-if !exists('g:polyglot_disabled') || index(g:polyglot_disabled, 'thrift') == -1
-  
+if has_key(g:polyglot_is_disabled, 'thrift')
+  finish
+endif
+
 " Vim syntax file
 " Language: Thrift
 " Maintainer: Martin Smith <martin@facebook.com>
@@ -40,7 +42,8 @@ syn region thriftComment start="/\*" end="\*/" contains=thriftTodo,@Spell
 syn match thriftComment "//.\{-}\(?>\|$\)\@="
 
 " String
-syn region thriftStringDouble matchgroup=None start=+"+  end=+"+
+syn region  thriftString start=+"+ skip=+\\"+ end=+"+
+syn region  thriftString start=+'+ skip=+\\'+ end=+'+
 
 " Number
 syn match thriftNumber "-\=\<\d\+\>" contained
@@ -55,7 +58,6 @@ syn keyword thriftBasicTypes void bool byte string binary
 syn keyword thriftBasicTypes i16 i32 i64 double
 syn keyword thriftType map list set
 syn keyword thriftClass union struct exception enum
-syn region  thriftString start=+"+ end=+"+
 
 " Special
 syn match thriftNumber "\d\+:"
@@ -91,12 +93,9 @@ if version >= 508 || !exists("did_thrift_syn_inits")
   HiLink   thriftStatement    Statement
   HiLink   thriftInclude      Include
   HiLink   thriftClass        Type
-  HiLink   thriftString       String
 
   delcommand HiLink
 endif
 
 let b:current_syntax = "thrift"
 
-
-endif

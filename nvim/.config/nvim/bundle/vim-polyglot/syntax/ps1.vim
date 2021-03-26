@@ -1,5 +1,7 @@
-if !exists('g:polyglot_disabled') || index(g:polyglot_disabled, 'powershell') == -1
-  
+if has_key(g:polyglot_is_disabled, 'powershell')
+  finish
+endif
+
 " Vim syntax file
 " Language:           Windows PowerShell
 " Maintainer:         Peter Provost <peter@provost.org>
@@ -59,16 +61,24 @@ syn match ps1Constant +\$^+
 syn keyword ps1Keyword class define from using var
 
 " Function declarations
-syn keyword ps1Keyword function nextgroup=ps1FunctionDeclaration skipwhite
-syn keyword ps1Keyword filter nextgroup=ps1FunctionDeclaration skipwhite
-syn keyword ps1Keyword workflow nextgroup=ps1FunctionDeclaration skipwhite
-syn keyword ps1Keyword configuration nextgroup=ps1FunctionDeclaration skipwhite
-syn keyword ps1Keyword class nextgroup=ps1FunctionDeclaration skipwhite
-syn keyword ps1Keyword enum nextgroup=ps1FunctionDeclaration skipwhite
-syn match ps1FunctionDeclaration /\w\+\(-\w\+\)*/ contained
+syn keyword ps1Keyword function nextgroup=ps1Function skipwhite
+syn keyword ps1Keyword filter nextgroup=ps1Function skipwhite
+syn keyword ps1Keyword workflow nextgroup=ps1Function skipwhite
+syn keyword ps1Keyword configuration nextgroup=ps1Function skipwhite
+syn keyword ps1Keyword class nextgroup=ps1Function skipwhite
+syn keyword ps1Keyword enum nextgroup=ps1Function skipwhite
 
-" Function invocations
-syn match ps1FunctionInvocation /\w\+\(-\w\+\)\+/
+" Function declarations and invocations
+syn match ps1Cmdlet /\v(add|clear|close|copy|enter|exit|find|format|get|hide|join|lock|move|new|open|optimize|pop|push|redo|remove|rename|reset|search|select|Set|show|skip|split|step|switch|undo|unlock|watch)(-\w+)+/ contained
+syn match ps1Cmdlet /\v(connect|disconnect|read|receive|send|write)(-\w+)+/ contained
+syn match ps1Cmdlet /\v(backup|checkpoint|compare|compress|convert|convertfrom|convertto|dismount|edit|expand|export|group|import|initialize|limit|merge|mount|out|publish|restore|save|sync|unpublish|update)(-\w+)+/ contained
+syn match ps1Cmdlet /\v(debug|measure|ping|repair|resolve|test|trace)(-\w+)+/ contained
+syn match ps1Cmdlet /\v(approve|assert|build|complete|confirm|deny|deploy|disable|enable|install|invoke|register|request|restart|resume|start|stop|submit|suspend|uninstall|unregister|wait)(-\w+)+/ contained
+syn match ps1Cmdlet /\v(block|grant|protect|revoke|unblock|unprotect)(-\w+)+/ contained
+syn match ps1Cmdlet /\v(use)(-\w+)+/ contained
+
+" Other functions
+syn match ps1Function /\w\+\(-\w\+\)\+/ contains=ps1Cmdlet
 
 " Type declarations
 syn match ps1Type /\[[a-z_][a-z0-9_.,\[\]]\+\]/
@@ -76,7 +86,7 @@ syn match ps1Type /\[[a-z_][a-z0-9_.,\[\]]\+\]/
 " Variable references
 syn match ps1ScopeModifier /\(global:\|local:\|private:\|script:\)/ contained
 syn match ps1Variable /\$\w\+\(:\w\+\)\?/ contains=ps1ScopeModifier
-syn match ps1Variable /\${\w\+\(:\w\+\)\?}/ contains=ps1ScopeModifier
+syn match ps1Variable /\${\w\+\(:\?[[:alnum:]_()]\+\)\?}/ contains=ps1ScopeModifier
 
 " Operators
 syn keyword ps1Operator -eq -ne -ge -gt -lt -le -like -notlike -match -notmatch -replace -split -contains -notcontains
@@ -133,6 +143,9 @@ syn match ps1BuiltIn "$\%(args\|error\|foreach\|home\|input\)\>"
 syn match ps1BuiltIn "$\%(match\(es\)\?\|myinvocation\|host\|lastexitcode\)\>"
 syn match ps1BuiltIn "$\%(ofs\|shellid\|stacktrace\)\>"
 
+" Named Switch
+syn match ps1Label /\s-\w\+/
+
 " Folding blocks
 if !exists('g:ps1_nofold_blocks')
 	syn region ps1Block start=/{/ end=/}/ transparent fold
@@ -164,8 +177,8 @@ if version >= 508 || !exists("did_ps1_syn_inits")
 	HiLink ps1Escape SpecialChar
 	HiLink ps1InterpolationDelimiter Delimiter
 	HiLink ps1Conditional Conditional
-	HiLink ps1FunctionDeclaration Function
-	HiLink ps1FunctionInvocation Function
+	HiLink ps1Cmdlet Function
+	HiLink ps1Function Identifier
 	HiLink ps1Variable Identifier
 	HiLink ps1Boolean Boolean
 	HiLink ps1Constant Constant
@@ -175,15 +188,14 @@ if version >= 508 || !exists("did_ps1_syn_inits")
 	HiLink ps1Comment Comment
 	HiLink ps1CommentTodo Todo
 	HiLink ps1CommentDoc Tag
-	HiLink ps1CDocParam Todo
+	HiLink ps1CDocParam Identifier
 	HiLink ps1Operator Operator
 	HiLink ps1Repeat Repeat
 	HiLink ps1RepeatAndCmdlet Repeat
 	HiLink ps1Keyword Keyword
 	HiLink ps1KeywordAndCmdlet Keyword
+	HiLink ps1Label Label
 	delcommand HiLink
 endif
 
 let b:current_syntax = "ps1"
-
-endif

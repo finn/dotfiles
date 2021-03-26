@@ -1,5 +1,7 @@
-if !exists('g:polyglot_disabled') || index(g:polyglot_disabled, 'purescript') == -1
-  
+if has_key(g:polyglot_is_disabled, 'purescript')
+  finish
+endif
+
 " syntax highlighting for purescript
 "
 " Heavily modified version of the purescript syntax
@@ -110,7 +112,7 @@ syn match purescriptForall "∀"
 
 " Keywords
 syn keyword purescriptConditional if then else
-syn keyword purescriptStatement do case of in
+syn keyword purescriptStatement do case of in ado
 syn keyword purescriptLet let
 syn keyword purescriptWhere where
 syn match purescriptStructure "\<\(data\|newtype\|type\|kind\)\>"
@@ -217,5 +219,3 @@ highlight def link purescriptType Type
 highlight def link purescriptComment Comment
 
 let b:current_syntax = "purescript"
-
-endif

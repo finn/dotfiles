@@ -1,5 +1,5 @@
-if !exists('g:polyglot_disabled') || index(g:polyglot_disabled, 'nginx') == -1
-  
-setlocal commentstring=#\ %s
-
+if has_key(g:polyglot_is_disabled, 'nginx')
+  finish
 endif
+
+setlocal commentstring=#\ %s

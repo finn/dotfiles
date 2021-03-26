@@ -1,5 +1,7 @@
-if !exists('g:polyglot_disabled') || index(g:polyglot_disabled, 'caddyfile') == -1
-  
+if has_key(g:polyglot_is_disabled, 'caddyfile')
+  finish
+endif
+
 " Language:	    Caddyfile
 " Author:	    Josh Glendenning <josh@isobit.io>
 
@@ -24,5 +26,3 @@ else
 	let g:NERDCustomDelimiters = {'caddyfile': s:delimiters}
 endif
 unlet s:delimiters
-
-endif

@@ -1,5 +1,7 @@
-if !exists('g:polyglot_disabled') || index(g:polyglot_disabled, 'dart') == -1
-  
+if has_key(g:polyglot_is_disabled, 'dart')
+  finish
+endif
+
 if exists('b:did_ftplugin')
   finish
 endif
@@ -27,7 +29,6 @@ let &l:errorformat =
 
 setlocal includeexpr=dart#resolveUri(v:fname)
 setlocal isfname+=:
+setlocal iskeyword+=$
 
 let b:undo_ftplugin = 'setl et< fo< sw< sts< com< cms< inex< isf<'
-
-endif

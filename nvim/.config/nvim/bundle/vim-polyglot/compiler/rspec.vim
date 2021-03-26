@@ -1,5 +1,7 @@
-if !exists('g:polyglot_disabled') || index(g:polyglot_disabled, 'ruby') == -1
-  
+if has_key(g:polyglot_is_disabled, 'ruby')
+  finish
+endif
+
 " Vim compiler file
 " Language:		RSpec
 " Maintainer:		Tim Pope <vimNOSPAM@tpope.org>
@@ -26,6 +28,7 @@ CompilerSet errorformat=
     \%E%f:%l:in\ `%*[^']':\ %m,
     \%-Z\ \ \ \ \ %\\+\#\ %f:%l:%.%#,
     \%E\ \ \ \ \ Failure/Error:\ %m,
+    \%E\ \ \ \ \ Failure/Error:,
     \%C\ \ \ \ \ %m,
     \%C%\\s%#,
     \%-G%.%#
@@ -34,5 +37,3 @@ let &cpo = s:cpo_save
 unlet s:cpo_save
 
 " vim: nowrap sw=2 sts=2 ts=8:
-
-endif

@@ -1,5 +1,7 @@
-if !exists('g:polyglot_disabled') || index(g:polyglot_disabled, 'scss') == -1
-  
+if has_key(g:polyglot_is_disabled, 'scss')
+  finish
+endif
+
 " Vim syntax file
 " Language:    SCSS (Sassy CSS)
 " Author:      Daniel Hofstetter (daniel.hofstetter@42dh.com)
@@ -48,8 +50,9 @@ syn cluster scssSelectors contains=@comment,cssSelectorOp,cssTagName,cssPseudoCl
 
 syn match scssProperty "\([[:alnum:]-]\)\+\s*\(:\)\@=" contained contains=css.*Prop,cssVendor containedin=cssMediaBlock nextgroup=scssAttribute,scssAttributeWithNestedDefinition
 syn match scssAttribute ":[^;]*\ze\(;\|}\)" contained contains=css.*Attr,cssValue.*,cssColor,cssFunction,cssString.*,cssURL,scssFunction,scssInterpolation,scssVariable
+syn match scssSemicolon ";" containedin=scssDefinition,scssNestedDefinition
 
-syn match scssAttributeWithNestedDefinition ": [^#]*{\@=" nextgroup=scssNestedDefinition contained contains=css.*Attr,cssValue.*,scssVariable
+syn match scssAttributeWithNestedDefinition ": [^#"]*{\@=" nextgroup=scssNestedDefinition contained contains=css.*Attr,cssValue.*,scssVariable
 syn region scssNestedDefinition matchgroup=cssBraces start="{" end="}" contained contains=@comment,scssProperty,scssNestedProperty
 
 " CSS properties from https://developer.mozilla.org/en-US/docs/Web/CSS/Reference
@@ -216,10 +219,9 @@ hi def link scssImport    Include
 hi def link scssTodo      Todo
 hi def link scssAtRoot    Keyword
 hi def link scssMapParens Delimiter
+hi def link scssSemicolon Delimiter
 
 let b:current_syntax = "scss"
 if main_syntax == 'scss'
   unlet main_syntax
-endif
-
 endif

@@ -1,5 +1,7 @@
-if !exists('g:polyglot_disabled') || index(g:polyglot_disabled, 'elixir') == -1
-  
+if has_key(g:polyglot_is_disabled, 'elixir')
+  finish
+endif
+
 if exists('current_compiler')
     finish
 endif
@@ -9,7 +11,10 @@ if exists(":CompilerSet") != 2
     command -nargs=* CompilerSet setlocal <args>
 endif
 
-CompilerSet errorformat=%A%t%*[^:]:\ %m,%C%f:%l:\ %m,%C%f:%l,%Z
-CompilerSet makeprg=mix
+CompilerSet makeprg=mix\ compile
+CompilerSet errorformat=
+            \%Wwarning:\ %m,
+            \%C%f:%l,%Z,
+            \%E==\ Compilation\ error\ in\ file\ %f\ ==,
+            \%C**\ (%\\w%\\+)\ %f:%l:\ %m,%Z
 
-endif

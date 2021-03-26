@@ -1,5 +1,5 @@
-if !exists('g:polyglot_disabled') || index(g:polyglot_disabled, 'raml') == -1
-  
-set ts=2 sts=2 sw=2 et
-
+if has_key(g:polyglot_is_disabled, 'raml')
+  finish
 endif
+
+set ts=2 sts=2 sw=2 et

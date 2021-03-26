@@ -1,5 +1,7 @@
-if !exists('g:polyglot_disabled') || index(g:polyglot_disabled, 'scala') == -1
-  
+if has_key(g:polyglot_is_disabled, 'scala')
+  finish
+endif
+
 " Vim indent file
 " Language         : Scala (http://scala-lang.org/)
 " Original Author  : Stefan Matthias Aust
@@ -19,7 +21,10 @@ if exists("*GetScalaIndent")
   finish
 endif
 
-let s:defMatcher = '\%(\%(private\|protected\)\%(\[[^\]]*\]\)\?\s\+\|abstract\s\+\|override\s\+\)*\<def\>'
+let s:annotationMatcher = '@[A-Za-z._]\+\s\+'
+let s:modifierMatcher = s:annotationMatcher . '\|\%(private\|protected\)\%(\[[^\]]*\]\)\?\s\+\|abstract\s\+\|override\s\+\|final\s\+'
+let s:defMatcher = '\%(' . s:modifierMatcher . '\)*\<def\>'
+let s:valMatcher = '\%(' . s:modifierMatcher . '\|lazy\s\+\)*\<va[lr]\>'
 let s:funcNameMatcher = '\w\+'
 let s:typeSpecMatcher = '\%(\s*\[\_[^\]]*\]\)'
 let s:defArgMatcher = '\%((\_.\{-})\)'
@@ -183,7 +188,7 @@ function! scala#NumberOfBraceGroups(line)
 endfunction
 
 function! scala#MatchesIncompleteDefValr(line)
-  if a:line =~ '^\s*\%(' . s:defMatcher . '\|\<va[lr]\>\).*[=({]\s*$'
+  if a:line =~ '^\s*\%(' . s:defMatcher . '\|' . s:valMatcher . '\).*[=({]\s*$'
     return 1
   else
     return 0
@@ -433,7 +438,7 @@ function! GetScalaIndent()
   " If 'val', 'var', 'def' end with =, this is a one-line block
   if (prevline =~ '^\s*\<\%(\%(}\?\s*else\s\+\)\?if\|for\|while\)\>.*[)=]\s*$' && scala#NumberOfBraceGroups(prevline) <= 1)
         \ || prevline =~ '^\s*' . s:defMatcher . '.*=\s*$'
-        \ || prevline =~ '^\s*\<va[lr]\>.*[=]\s*$'
+        \ || prevline =~ '^\s*' . s:valMatcher . '.*[=]\s*$'
         \ || prevline =~ '^\s*\%(}\s*\)\?\<else\>\s*$'
         \ || prevline =~ '=\s*$'
     call scala#ConditionalConfirm("4")
@@ -603,5 +608,3 @@ endfunction
 
 " vim:set sw=2 sts=2 ts=8 et:
 " vim600:fdm=marker fdl=1 fdc=0:
-
-endif

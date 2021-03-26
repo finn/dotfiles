@@ -1,10 +1,12 @@
-if !exists('g:polyglot_disabled') || index(g:polyglot_disabled, 'erlang') == -1
-  
+if has_key(g:polyglot_is_disabled, 'erlang')
+  finish
+endif
+
 " Vim syntax file
 " Language:     Erlang (http://www.erlang.org)
 " Maintainer:   Csaba Hoch <csaba.hoch@gmail.com>
 " Contributor:  Adam Rutkowski <hq@mtod.org>
-" Last Update:  2017-Mar-05
+" Last Update:  2020-May-26
 " License:      Vim license
 " URL:          https://github.com/vim-erlang/vim-erlang-runtime
 
@@ -46,7 +48,7 @@ setlocal iskeyword+=$,@-@
 
 " Comments
 syn match erlangComment           '%.*$' contains=erlangCommentAnnotation,erlangTodo
-syn match erlangCommentAnnotation ' \@<=@\%(clear\|docfile\|end\|headerfile\|todo\|TODO\|type\|author\|copyright\|doc\|reference\|see\|since\|title\|version\|deprecated\|hidden\|private\|equiv\|spec\|throws\)' contained
+syn match erlangCommentAnnotation ' \@<=@\%(clear\|docfile\|end\|headerfile\|todo\|TODO\|type\|author\|copyright\|doc\|reference\|see\|since\|title\|version\|deprecated\|hidden\|param\|private\|equiv\|spec\|throws\)' contained
 syn match erlangCommentAnnotation /`[^']*'/ contained
 syn keyword erlangTodo            TODO FIXME XXX contained
 
@@ -94,7 +96,7 @@ syn match erlangBitType '\%(\/\%(\s\|\n\|%.*\n\)*\)\@<=\%(integer\|float\|binary
 
 " Constants and Directives
 syn match erlangUnknownAttribute '^\s*-\%(\s\|\n\|%.*\n\)*\l[[:alnum:]_@]*' contains=erlangComment
-syn match erlangAttribute '^\s*-\%(\s\|\n\|%.*\n\)*\%(behaviou\=r\|compile\|export\(_type\)\=\|file\|import\|module\|author\|copyright\|doc\|vsn\|on_load\)\>' contains=erlangComment
+syn match erlangAttribute '^\s*-\%(\s\|\n\|%.*\n\)*\%(behaviou\=r\|compile\|export\(_type\)\=\|file\|import\|module\|author\|copyright\|doc\|vsn\|on_load\|optional_callbacks\)\>' contains=erlangComment
 syn match erlangInclude   '^\s*-\%(\s\|\n\|%.*\n\)*\%(include\|include_lib\)\>' contains=erlangComment
 syn match erlangRecordDef '^\s*-\%(\s\|\n\|%.*\n\)*record\>' contains=erlangComment
 syn match erlangDefine    '^\s*-\%(\s\|\n\|%.*\n\)*\%(define\|undef\)\>' contains=erlangComment
@@ -119,7 +121,7 @@ syn keyword erlangBIF garbage_collect get get_keys group_leader contained
 syn keyword erlangBIF halt hd integer_to_binary integer_to_list contained
 syn keyword erlangBIF iolist_to_binary iolist_size is_alive contained
 syn keyword erlangBIF is_atom is_binary is_bitstring is_boolean contained
-syn keyword erlangBIF is_float is_function is_integer is_list is_map contained
+syn keyword erlangBIF is_float is_function is_integer is_list is_map is_map_key contained
 syn keyword erlangBIF is_number is_pid is_port is_process_alive contained
 syn keyword erlangBIF is_record is_reference is_tuple length link contained
 syn keyword erlangBIF list_to_atom list_to_binary contained
@@ -261,5 +263,3 @@ let &cpo = s:cpo_save
 unlet s:cpo_save
 
 " vim: sw=2 et
-
-endif

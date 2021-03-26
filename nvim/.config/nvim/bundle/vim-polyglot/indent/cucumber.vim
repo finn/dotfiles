@@ -1,9 +1,11 @@
-if !exists('g:polyglot_disabled') || index(g:polyglot_disabled, 'cucumber') == -1
-  
+if has_key(g:polyglot_is_disabled, 'cucumber')
+  finish
+endif
+
 " Vim indent file
 " Language:	Cucumber
 " Maintainer:	Tim Pope <vimNOSPAM@tpope.org>
-" Last Change:	2013 May 30
+" Last Change:	2017 Jun 13
 
 if exists("b:did_indent")
   finish
@@ -29,7 +31,7 @@ function! GetCucumberIndent()
   let line  = getline(prevnonblank(v:lnum-1))
   let cline = getline(v:lnum)
   let nline = getline(nextnonblank(v:lnum+1))
-  let sw = exists('*shiftwidth') ? shiftwidth() : &sw
+  let sw = exists('*shiftwidth') ? shiftwidth() : shiftwidth()
   let syn = s:syn(prevnonblank(v:lnum-1))
   let csyn = s:syn(v:lnum)
   let nsyn = s:syn(nextnonblank(v:lnum+1))
@@ -75,5 +77,3 @@ function! GetCucumberIndent()
 endfunction
 
 " vim:set sts=2 sw=2:
-
-endif

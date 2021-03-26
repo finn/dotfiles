@@ -1,5 +1,7 @@
-if !exists('g:polyglot_disabled') || index(g:polyglot_disabled, 'git') == -1
-  
+if has_key(g:polyglot_is_disabled, 'git')
+  finish
+endif
+
 " Vim filetype plugin
 " Language:	git config file
 " Maintainer:	Tim Pope <vimNOSPAM@tpope.org>
@@ -15,5 +17,3 @@ setlocal formatoptions-=t formatoptions+=croql
 setlocal comments=:#,:; commentstring=;\ %s
 
 let b:undo_ftplugin = "setl fo< com< cms<"
-
-endif

@@ -1,10 +1,6 @@
-if !exists('g:polyglot_disabled') || index(g:polyglot_disabled, 'ansible') == -1
-  
-" Slow yaml highlighting workaround
-if exists('+regexpengine') && ('&regexpengine' == 0)
-  setlocal regexpengine=1
+if has_key(g:polyglot_is_disabled, 'ansible')
+  finish
 endif
+
 set isfname+=@-@
 set path+=./../templates,./../files,templates,files
-
-endif

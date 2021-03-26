@@ -1,5 +1,7 @@
-if !exists('g:polyglot_disabled') || index(g:polyglot_disabled, 'arduino') == -1
-  
+if has_key(g:polyglot_is_disabled, 'arduino')
+  finish
+endif
+
 " Vim syntax file
 " Language:    Arduino
 " Maintainer:  Sudar <sudar@sudarmuthu.com>
@@ -51,7 +53,7 @@ endif
 	syn keyword arduinoFunc Wire1
 "}}}
 "C:/Program Files (x86)/Arduino\lib\keywords.txt{{{
-	syn keyword arduinoConstant HIGH LOW INPUT INPUT_PULLUP OUTPUT DEC BIN HEX OCT PI
+	syn keyword arduinoConstant HIGH LOW INPUT INPUT_PULLUP INPUT_PULLDOWN OUTPUT DEC BIN HEX OCT PI
 	syn keyword arduinoConstant HALF_PI TWO_PI LSBFIRST MSBFIRST CHANGE FALLING RISING DEFAULT EXTERNAL INTERNAL
 	syn keyword arduinoConstant INTERNAL1V1 INTERNAL2V56
 	syn keyword arduinoType boolean break byte case char class const continue default do
@@ -166,5 +168,3 @@ hi def link arduinoType Type
 hi def link arduinoConstant Constant
 hi def link arduinoFunc Function
 hi def link arduinoIdentifier Identifier
-
-endif

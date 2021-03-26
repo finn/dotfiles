@@ -1,5 +1,7 @@
-if !exists('g:polyglot_disabled') || index(g:polyglot_disabled, 'nginx') == -1
-  
+if has_key(g:polyglot_is_disabled, 'nginx')
+  finish
+endif
+
 " Vim syntax file
 " Language: nginx.conf
 " Maintainer: Chris Aumann <me@chr4.org>
@@ -300,12 +302,15 @@ syn keyword ngxDirective large_client_header_buffers
 syn keyword ngxDirective least_conn
 syn keyword ngxDirective least_time
 syn keyword ngxDirective limit_conn
+syn keyword ngxDirective limit_conn_dry_run
 syn keyword ngxDirective limit_conn_log_level
 syn keyword ngxDirective limit_conn_status
 syn keyword ngxDirective limit_conn_zone
+syn keyword ngxDirective limit_except
 syn keyword ngxDirective limit_rate
 syn keyword ngxDirective limit_rate_after
 syn keyword ngxDirective limit_req
+syn keyword ngxDirective limit_req_dry_run
 syn keyword ngxDirective limit_req_log_level
 syn keyword ngxDirective limit_req_status
 syn keyword ngxDirective limit_req_zone
@@ -558,6 +563,7 @@ syn keyword ngxDirective ssl_protocols nextgroup=ngxSSLProtocol,ngxSSLProtocolDe
 syn match ngxSSLProtocol 'TLSv1' contained nextgroup=ngxSSLProtocol,ngxSSLProtocolDeprecated skipwhite
 syn match ngxSSLProtocol 'TLSv1\.1' contained nextgroup=ngxSSLProtocol,ngxSSLProtocolDeprecated skipwhite
 syn match ngxSSLProtocol 'TLSv1\.2' contained nextgroup=ngxSSLProtocol,ngxSSLProtocolDeprecated skipwhite
+syn match ngxSSLProtocol 'TLSv1\.3' contained nextgroup=ngxSSLProtocol,ngxSSLProtocolDeprecated skipwhite
 
 " Do not enable highlighting of insecure protocols if sslecure is loaded
 if !exists('g:loaded_sslsecure')
@@ -2304,5 +2310,3 @@ hi link ngxGzipOn Error
 hi link ngxSSLCipherInsecure Error
 
 hi link ngxThirdPartyLuaBlock Function
-
-endif

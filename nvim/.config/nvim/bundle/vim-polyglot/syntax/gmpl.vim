@@ -1,5 +1,7 @@
-if !exists('g:polyglot_disabled') || index(g:polyglot_disabled, 'gmpl') == -1
-  
+if has_key(g:polyglot_is_disabled, 'gmpl')
+  finish
+endif
+
 " Vim syntax file
 " Language: GMPL
 " Maintainer: Mark Mba Wright
@@ -118,5 +120,3 @@ hi def link gmplType Type
 hi def link gmplLabel Keyword
 hi def link gmplString String
 hi def link gmplStringToken Special 
-
-endif

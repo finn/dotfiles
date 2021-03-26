@@ -1,9 +1,11 @@
-if !exists('g:polyglot_disabled') || index(g:polyglot_disabled, 'sbt') == -1
-  
+if has_key(g:polyglot_is_disabled, 'sbt')
+  finish
+endif
+
 " Vim syntax file
-" Language:     sbt
-" Maintainer:   Derek Wyatt <derek@{myfirstname}{mylastname}.org>
-" Last Change:  2013 Oct 20
+" Language:    sbt
+" Maintainer:  Steven Dobay <stevendobay at protonmail.com>
+" Last Change: 2017.04.30
 
 if exists("b:current_syntax")
   finish
@@ -17,7 +19,6 @@ syn match sbtStringEscape "\\[nrfvb\\\"]" contained
 
 syn match sbtIdentitifer "^\S\+\ze\s*\(:=\|++=\|+=\|<<=\|<+=\)"
 syn match sbtBeginningSeq "^[Ss]eq\>"
-syn match sbtAddPlugin "^addSbtPlugin\>"
 
 syn match sbtSpecial "\(:=\|++=\|+=\|<<=\|<+=\)"
 
@@ -28,10 +29,8 @@ syn region sbtDocComment start="/\*\*" end="\*/" keepend
 hi link sbtString String
 hi link sbtIdentitifer Keyword
 hi link sbtBeginningSeq Keyword
-hi link sbtAddPlugin Keyword
 hi link sbtSpecial Special
 hi link sbtComment Comment
 hi link sbtLineComment Comment
 hi link sbtDocComment Comment
 
-endif

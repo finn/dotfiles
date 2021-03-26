@@ -1,31 +1,33 @@
-if !exists('g:polyglot_disabled') || index(g:polyglot_disabled, 'nim') == -1
-  
+if has_key(g:polyglot_is_disabled, 'nim')
+  finish
+endif
+
 " For version 5.x: Clear all syntax items
 " For version 6.x: Quit when a syntax file was already loaded
-if version < 600
+if v:version < 600
   syntax clear
-elseif exists("b:current_syntax")
+elseif exists('b:current_syntax')
   finish
 endif
 
 " Keep user-supplied options
-if !exists("nim_highlight_numbers")
+if !exists('nim_highlight_numbers')
   let nim_highlight_numbers = 1
 endif
-if !exists("nim_highlight_builtins")
+if !exists('nim_highlight_builtins')
   let nim_highlight_builtins = 1
 endif
-if !exists("nim_highlight_exceptions")
+if !exists('nim_highlight_exceptions')
   let nim_highlight_exceptions = 1
 endif
-if !exists("nim_highlight_space_errors")
+if !exists('nim_highlight_space_errors')
   let nim_highlight_space_errors = 1
 endif
-if !exists("nim_highlight_special_vars")
+if !exists('nim_highlight_special_vars')
   let nim_highlight_special_vars = 1
 endif
 
-if exists("nim_highlight_all")
+if exists('nim_highlight_all')
   let nim_highlight_numbers      = 1
   let nim_highlight_builtins     = 1
   let nim_highlight_exceptions   = 1
@@ -40,14 +42,14 @@ syn keyword nimKeyword       bind block break
 syn keyword nimKeyword       case cast concept const continue converter
 syn keyword nimKeyword       defer discard distinct div do
 syn keyword nimKeyword       elif else end enum except export
-syn keyword nimKeyword       finally for from func
+syn keyword nimKeyword       finally for from
 syn keyword nimKeyword       generic
 syn keyword nimKeyword       if import in include interface is isnot iterator
 syn keyword nimKeyword       let
 syn keyword nimKeyword       mixin using mod
 syn keyword nimKeyword       nil not notin
 syn keyword nimKeyword       object of or out
-syn keyword nimKeyword       proc method macro template nextgroup=nimFunction skipwhite
+syn keyword nimKeyword       proc func method macro template nextgroup=nimFunction skipwhite
 syn keyword nimKeyword       ptr
 syn keyword nimKeyword       raise ref return
 syn keyword nimKeyword       shared shl shr static
@@ -158,8 +160,8 @@ syn sync match nimSync grouphere NONE "):$"
 syn sync maxlines=200
 syn sync minlines=2000
 
-if version >= 508 || !exists("did_nim_syn_inits")
-  if version <= 508
+if v:version >= 508 || !exists('did_nim_syn_inits')
+  if v:version <= 508
     let did_nim_syn_inits = 1
     command -nargs=+ HiLink hi link <args>
   else
@@ -202,7 +204,5 @@ if version >= 508 || !exists("did_nim_syn_inits")
   delcommand HiLink
 endif
 
-let b:current_syntax = "nim"
+let b:current_syntax = 'nim'
 
-
-endif

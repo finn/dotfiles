@@ -1,5 +1,7 @@
-if !exists('g:polyglot_disabled') || index(g:polyglot_disabled, 'livescript') == -1
-  
+if has_key(g:polyglot_is_disabled, 'livescript')
+  finish
+endif
+
 " Language:    LiveScript "
 " Maintainer:  George Zahariev
 " URL:         http://github.com/gkz/vim-ls
@@ -135,6 +137,4 @@ highlight default link lsSpaceError Error
 
 if !exists('b:current_syntax')
   let b:current_syntax = 'livescript'
-endif
-
 endif

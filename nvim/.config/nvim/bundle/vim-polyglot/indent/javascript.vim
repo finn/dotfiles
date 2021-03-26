@@ -1,5 +1,7 @@
-if !exists('g:polyglot_disabled') || index(g:polyglot_disabled, 'javascript') == -1
-  
+if has_key(g:polyglot_is_disabled, 'javascript')
+  finish
+endif
+
 " Vim indent file
 " Language: Javascript
 " Maintainer: Chris Paul ( https://github.com/bounceme )
@@ -394,7 +396,9 @@ function GetJavascriptIndent()
       if idx != -1
         call s:GetPair(['\[','(','{'][idx],'])}'[idx],'bW','s:SkipFunc()')
       elseif getline(v:lnum) !~ '^\S' && s:stack[-1] =~? 'block\|^jsobject$'
-        call s:GetPair('{','}','bW','s:SkipFunc()')
+        if !s:GetPair('{','}','bW','s:SkipFunc()') && s:stack[-1] ==# 'jsObject'
+          return indent(l:lnum)
+        endif
       else
         call s:AlternatePair()
       endif
@@ -475,5 +479,3 @@ endfunction
 
 let &cpo = s:cpo_save
 unlet s:cpo_save
-
-endif

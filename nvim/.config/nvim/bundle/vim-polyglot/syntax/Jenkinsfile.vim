@@ -1,19 +1,21 @@
-if !exists('g:polyglot_disabled') || index(g:polyglot_disabled, 'jenkins') == -1
-  
+if has_key(g:polyglot_is_disabled, 'jenkins')
+  finish
+endif
+
 runtime syntax/groovy.vim
 syn keyword jenkinsfileBuiltInVariable currentBuild
 
-syn keyword jenkinsfileSection pipeline agent stages steps
+syn keyword jenkinsfileSection pipeline agent stages steps post
 
-syn keyword jenkinsfileDirective environment options parameters triggers stage tools input when
+syn keyword jenkinsfileDirective environment options parameters triggers stage tools input when libraries
 
 syn keyword jenkinsfileOption contained buildDiscarder disableConcurrentBuilds overrideIndexTriggers skipDefaultCheckout nextgroup=jenkinsfileOptionParams
 syn keyword jenkinsfileOption contained skipStagesAfterUnstable checkoutToSubdirectory timeout retry timestamps nextgroup=jenkinsfileOptionParams
-syn region  jenkinsfileOptionParams contained start="(" end=")" transparent contains=@groovyTop
+syn region  jenkinsfileOptionParams contained start='(' end=')' transparent contains=@groovyTop
 syn match   jenkinsfileOptionO /[a-zA-Z]\+([^)]*)/ contains=jenkinsfileOption,jenkinsfileOptionParams transparent containedin=groovyParenT1
 
 syn keyword jenkinsfileCoreStep checkout
-syn keyword jenkinsfileCoreStep docker skipwhite nextgroup=jenkinsFileDockerConfigBlock
+syn keyword jenkinsfileCoreStep docker dockerfile skipwhite nextgroup=jenkinsFileDockerConfigBlock
 syn keyword jenkinsfileCoreStep node
 syn keyword jenkinsfileCoreStep scm
 syn keyword jenkinsfileCoreStep sh
@@ -24,10 +26,10 @@ syn keyword jenkinsfileCoreStep step
 syn keyword jenkinsfileCoreStep tool
 
 " TODO: These should probably be broken out.
-syn keyword jenkinsfileCoreStep post always changed failure success unstable aborted 
+syn keyword jenkinsfileCoreStep always changed failure success unstable aborted unsuccessful regression fixed cleanup
 
-syn region  jenkinsFileDockerConfigBlock contained start="{" end="}" contains=groovyString,jenkinsfileDockerKeyword transparent
-syn keyword jenkinsFileDockerKeyword contained image args dockerfile additionalBuildArgs
+syn region  jenkinsFileDockerConfigBlock contained start='{' end='}' contains=groovyString,jenkinsfileDockerKeyword transparent
+syn keyword jenkinsFileDockerKeyword contained image args additionalBuildArgs label registryUrl registryCredentialsId alwaysPull filename dir
 
 syn keyword jenkinsfilePipelineStep Applitools ArtifactoryGradleBuild Consul MavenDescriptorStep OneSky VersionNumber
 syn keyword jenkinsfilePipelineStep ViolationsToBitbucketServer ViolationsToGitHub ViolationsToGitLab _OcAction _OcContextInit
@@ -112,8 +114,8 @@ syn keyword jenkinsfilePipelineStep walk waptProReport warnings whitesource winR
 syn keyword jenkinsfilePipelineStep withCredentials withDockerContainer withDockerRegistry withDockerServer withEnv withKafkaLog
 syn keyword jenkinsfilePipelineStep withKubeConfig withMaven withNPM withPod withPythonEnv withSCM withSandbox withSonarQubeEnv
 syn keyword jenkinsfilePipelineStep withTypetalk wrap writeFile writeJSON writeMavenPom writeProperties writeXml writeYaml
-syn keyword jenkinsfilePipelineStep ws xUnitImporter xUnitUploader xldCreatePackage xldDeploy xldPublishPackage xlrCreateRelease
-syn keyword jenkinsfilePipelineStep xrayScanBuild zip
+syn keyword jenkinsfilePipelineStep ws xUnitImporter xUnitUploader xunit xldCreatePackage xldDeploy xldPublishPackage
+syn keyword jenkinsfilePipelineStep xlrCreateRelease xrayScanBuild zip
 
 hi link jenkinsfileSection           Statement
 hi link jenkinsfileDirective         jenkinsfileSection
@@ -123,6 +125,6 @@ hi link jenkinsfilePipelineStep      Include
 hi link jenkinsfileBuiltInVariable   Identifier
 hi link jenkinsFileDockerKeyword     jenkinsfilePipelineStep
 
-let b:current_syntax = "Jenkinsfile"
+let b:current_syntax = 'Jenkinsfile'
 
-endif
+" vim:set et sw=0 ts=2 ft=vim tw=78:
