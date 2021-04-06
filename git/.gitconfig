@@ -64,3 +64,5 @@
 	enabled = true
 [includeIf "gitdir:~/Documents/work/"]
 	path = ~/Documents/work/.gitconfig
+[includeIf "gitdir:~/git"]
+	path = ~/git/.gitconfig
