@@ -1,3 +1,0 @@
-# vim: filetype=sh
-
-complete -f -X '!*.@(sqlite|sql)' sqlite3 sqlite
