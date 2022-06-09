@@ -5,6 +5,10 @@ fish_add_path "~/bin"
 
 ### env
 
+# brew
+if test -x /opt/homebrew/bin/brew
+  eval (/opt/homebrew/bin/brew shellenv)
+end
 # vim!
 set -x EDITOR vim
 # terminal colors
