@@ -1,9 +1,7 @@
 ### PATH
 
 # prepend ~/bin to PATH
-if test -d ~/bin
-  set -U fish_user_paths ~/bin
-end
+fish_add_path "~/bin"
 
 ### env
 
@@ -44,7 +42,7 @@ if type -q plenv;
 end
 
 # load virtualfish if it's present
-eval (python -m virtualfish ^/dev/null)
+#eval (python -m virtualfish ^/dev/null)
 
 # iterm2 shell integration
 if test -e ~/.iterm2_shell_integration.fish
@@ -53,8 +51,11 @@ end
 
 # go
 set -x GOPATH "$HOME/go"
-set -x PATH "$GOPATH/bin:$PATH"
+fish_add_path "$GOPATH/bin"
 
 if test -x /usr/local/bin/rbenv
   status --is-interactive; and source (rbenv init -|psub)
 end
+
+# k8s
+fish_add_path "$HOME/.krew/bin"
