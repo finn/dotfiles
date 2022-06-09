@@ -7,7 +7,6 @@ STOW_FLAGS =
 DOTFILES_DIR = $(dir $(realpath $(lastword $(MAKEFILE_LIST))))
 
 DIRS += $(HOME)/bin
-DIRS += $(HOME)/.zshrc.d
 DIRS += $(HOME)/.bashrc.d
 
 STOW_PKGS += ack
@@ -23,7 +22,6 @@ STOW_PKGS += pip
 STOW_PKGS += rubocop
 STOW_PKGS += tmux
 STOW_PKGS += vim
-STOW_PKGS += zsh
 
 .PHONY : all dirs stow $(STOW_PKGS)
 
