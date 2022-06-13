@@ -142,4 +142,4 @@ set updatetime=250
 " wildignore
 
 """ lua config
-luafile nvim.lua
+lua require('config')
