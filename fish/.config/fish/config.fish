@@ -33,7 +33,7 @@ alias ll 'ls -l'
 alias la 'ls -A'
 alias ls 'ls -CF'
 
-if test -e /usr/local/bin/nvim
+if test -e /opt/homebrew/bin/nvim
   alias vi 'nvim'
   alias vim 'nvim'
   alias view 'nvim -R'
