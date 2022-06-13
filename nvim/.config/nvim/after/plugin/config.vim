@@ -7,69 +7,57 @@ set background=dark
 " italics for colorscheme one/onedark
 let g:one_allow_italics = 1
 let g:onedark_terminal_italics = 1
-colorscheme one
-"colorscheme onedark
+"colorscheme one
+colorscheme onedark
 
 """ plugin settings
 
-" incsearch
-if exists(':IncSearchNoreMap')
-  map /  <Plug>(incsearch-forward)
-  map ?  <Plug>(incsearch-backward)
-  map g/ <Plug>(incsearch-stay)
-endif
-
 " TODO gate these and only map when plugin is present
 
-" TODO taglist config
+" TODO tagbar config
 
-" TODO NERDTree config
+"""   " tcomment
+"""   " always put comment string in the first column
+"""   let g:tcommentOptions = {'col': 1}
+"""   " redefine some commonish comment types to remove leading whitespace
+"""   let g:tcomment_types = {
+"""               \ 'apache':           '#%s',
+"""               \ 'cpp':              '//%s',
+"""               \ 'cfg':              '#%s',
+"""               \ 'conf':             '#%s',
+"""               \ 'crontab':          '#%s',
+"""               \ 'cs':               '//%s',
+"""               \ 'fstab':            '#%s',
+"""               \ 'gitcommit':        '#%s',
+"""               \ 'gitignore':        '#%s',
+"""               \ 'javaScript':       '//%s',
+"""               \ 'javascript':       '//%s',
+"""               \ 'java':             '//%s',
+"""               \ 'perl':             '#%s',
+"""               \ 'puppet':           '#%s',
+"""               \ 'python':           '#%s',
+"""               \ 'ruby':             '#%s',
+"""               \ 'ruby_3':           '###%s',
+"""               \ 'sh':               '#%s',
+"""               \ 'vim':              '"%s',
+"""               \ 'vim_3':            '"""%s',
+"""               \ 'yaml':             '#%s',
+"""               \ }
 
-" tcomment
-" always put comment string in the first column
-let g:tcommentOptions = {'col': 1}
-" redefine some commonish comment types to remove leading whitespace
-let g:tcomment_types = {
-            \ 'apache':           '#%s',
-            \ 'cpp':              '//%s',
-            \ 'cfg':              '#%s',
-            \ 'conf':             '#%s',
-            \ 'crontab':          '#%s',
-            \ 'cs':               '//%s',
-            \ 'fstab':            '#%s',
-            \ 'gitcommit':        '#%s',
-            \ 'gitignore':        '#%s',
-            \ 'javaScript':       '//%s',
-            \ 'javascript':       '//%s',
-            \ 'java':             '//%s',
-            \ 'perl':             '#%s',
-            \ 'puppet':           '#%s',
-            \ 'python':           '#%s',
-            \ 'ruby':             '#%s',
-            \ 'ruby_3':           '###%s',
-            \ 'sh':               '#%s',
-            \ 'vim':              '"%s',
-            \ 'vim_3':            '"""%s',
-            \ 'yaml':             '#%s',
-            \ }
-
-" markdown
-let g:markdown_fenced_languages = [
-            \ 'ruby',
-            \ 'perl',
-            \ 'python',
-            \ 'javascript',
-            \ 'html',
-            \ 'sql',
-            \ 'php',
-            \ 'css',
-            \ 'java',
-            \ 'cpp',
-            \ 'apache',
-            \ ]
-
-" yankring
-"let g:yankring_history_file = '.vim_yankring_history'
+"""   " markdown
+"""   let g:markdown_fenced_languages = [
+"""               \ 'ruby',
+"""               \ 'perl',
+"""               \ 'python',
+"""               \ 'javascript',
+"""               \ 'html',
+"""               \ 'sql',
+"""               \ 'php',
+"""               \ 'css',
+"""               \ 'java',
+"""               \ 'cpp',
+"""               \ 'apache',
+"""               \ ]
 
 " miniyank
 " To remap 'p' 'autoput' mapping should be used.
@@ -90,11 +78,11 @@ map <leader>c <Plug>(miniyank-tochar)
 map <leader>l <Plug>(miniyank-toline)
 map <leader>b <Plug>(miniyank-toblock)
 
-" vim-rooter
-" change to file's directory for non-project files
-let g:rooter_change_directory_for_non_project_files = 'current'
-" change directory for the current window only
-let g:rooter_use_lcd = 1
+"""   " vim-rooter
+"""   " change to file's directory for non-project files
+"""   let g:rooter_change_directory_for_non_project_files = 'current'
+"""   " change directory for the current window only
+"""   let g:rooter_use_lcd = 1
 
 " TODO alias :Trim to :TrailerTrim
 
@@ -106,3 +94,4 @@ let g:rooter_use_lcd = 1
 " TODO beautify / tidying plugin
 
 " TODO fancy powerline fonts for airline?
+

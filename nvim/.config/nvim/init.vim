@@ -1,9 +1,8 @@
 " XXX debug
 "set verbose=9
 
-" add plugins under 'bundle' to runtimepath
-" add fzf vim integration to runtimepath
-execute pathogen#infect('bundle/{}', '/usr/local/opt/fzf')
+" TODO add fzf vim integration to runtimepath
+"execute pathogen#infect('bundle/{}', '/usr/local/opt/fzf')
 
 """ (n)vim config
 
@@ -16,9 +15,6 @@ set noswapfile
 set autowrite
 " reload changed files
 set autoread
-" XXX workaround to fix autoread in term in neovim (apparently going to be
-" fixed for real in 0.3.2?)
-au FocusGained * :checktime
 " allow hidden (non-saved) buffers
 set hidden
 " always default to unix style files
@@ -50,11 +46,11 @@ set showbreak=↳
 set display+=lastline
 " the whitespace indicators
 set listchars=precedes:$,extends:$,tab:»·,trail:·,eol:¬,nbsp:×
-" XXX deprecated ie favor of airline
-" fancy statusline with file encoding and BOM
-if has('statusline')
-  set statusline=%<%f\ %h%m%r%=%{\"[\".&ff.\"]\ \"}%{\"[\".(&fenc==\"\"?&enc:&fenc).((exists(\"+bomb\")\ &&\ &bomb)?\",B\":\"\").\"]\ \"}%k\ %-14.(%l,%c%V%)\ %P
-endif
+"""   " XXX deprecated ie favor of airline
+"""   " fancy statusline with file encoding and BOM
+"""   if has('statusline')
+"""     set statusline=%<%f\ %h%m%r%=%{\"[\".&ff.\"]\ \"}%{\"[\".(&fenc==\"\"?&enc:&fenc).((exists(\"+bomb\")\ &&\ &bomb)?\",B\":\"\").\"]\ \"}%k\ %-14.(%l,%c%V%)\ %P
+"""   endif
 " syntax highlighting
 " (if makes sure this only happens once)
 if !exists('g:syntax_on')
@@ -132,9 +128,6 @@ command! -bang -complete=buffer -nargs=? BD Bdelete<bang> <args>
 " shorten updatetime for gitgutter
 set updatetime=250
 
-" don't store options/mappings/global values for local
-set sessionoptions-=options
-
 " TODO ?
 " errorbells
 " visualbells
@@ -147,3 +140,6 @@ set sessionoptions-=options
 " list
 " listchars
 " wildignore
+
+""" lua config
+luafile nvim.lua
