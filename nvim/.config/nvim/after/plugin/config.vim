@@ -1,8 +1,6 @@
 " XXX colorscheme after all plugins have loaded
 " (because some colorschemes are loaded as plugins)
-if (has('termguicolors'))
-  set termguicolors
-endif
+set termguicolors
 set background=dark
 " italics for colorscheme one/onedark
 let g:one_allow_italics = 1
@@ -94,4 +92,3 @@ map <leader>b <Plug>(miniyank-toblock)
 " TODO beautify / tidying plugin
 
 " TODO fancy powerline fonts for airline?
-
