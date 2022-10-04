@@ -1,7 +1,7 @@
 ### PATH
 
 # prepend ~/bin to PATH
-fish_add_path "~/bin"
+fish_add_path "$HOME/bin"
 
 ### env
 
@@ -63,3 +63,6 @@ end
 
 # k8s
 fish_add_path "$HOME/.krew/bin"
+
+# rust
+fish_add_path "$HOME/.cargo/bin"
