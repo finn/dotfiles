@@ -6,3 +6,4 @@ vim/.vim/bundle/*/doc/tags
 nvim/.config/nvim/.netrwhist
 nvim/.config/nvim/bundle/*/doc/tags
 fish/.config/fish/fishd.*
+fish/.config/fish/conf.d/*
