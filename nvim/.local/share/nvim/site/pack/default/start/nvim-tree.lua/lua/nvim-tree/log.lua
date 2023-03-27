@@ -1,5 +1,3 @@
-local uv = vim.loop
-
 local M = {
   config = nil,
   path = nil,
@@ -10,43 +8,64 @@ local M = {
 --- @param fmt string for string.format
 --- @vararg any arguments for string.format
 function M.raw(typ, fmt, ...)
-  if not M.path or not M.config.types[typ] and not M.config.types.all then
+  if not M.enabled(typ) then
     return
   end
 
   local line = string.format(fmt, ...)
   local file = io.open(M.path, "a")
-  io.output(file)
-  io.write(line)
-  io.close(file)
+  if file then
+    io.output(file)
+    io.write(line)
+    io.close(file)
+  end
 end
 
---- Write to log file via M.line
+---@class Profile
+---@field start number nanos
+---@field tag string
+
+--- Write profile start to log file
 --- START is prefixed
---- @return number nanos to pass to profile_end
+--- @param fmt string for string.format
+--- @vararg any arguments for string.format
+--- @return Profile to pass to profile_end
 function M.profile_start(fmt, ...)
-  if not M.path or not M.config.types.profile and not M.config.types.all then
-    return
+  local profile = {}
+  if M.enabled "profile" then
+    profile.start = vim.loop.hrtime()
+    profile.tag = string.format((fmt or "???"), ...)
+    M.line("profile", "START %s", profile.tag)
   end
-  M.line("profile", "START " .. (fmt or "???"), ...)
-  return uv.hrtime()
+  return profile
 end
 
---- Write to log file via M.line
+--- Write profile end to log file
 --- END is prefixed and duration in seconds is suffixed
---- @param start number nanos returned from profile_start
-function M.profile_end(start, fmt, ...)
-  if not M.path or not M.config.types.profile and not M.config.types.all then
-    return
+--- @param profile Profile returned from profile_start
+function M.profile_end(profile)
+  if M.enabled "profile" and type(profile) == "table" then
+    local millis = profile.start and math.modf((vim.loop.hrtime() - profile.start) / 1000000) or -1
+    M.line("profile", "END   %s %dms", profile.tag or "", millis)
   end
-  local millis = start and math.modf((uv.hrtime() - start) / 1000000) or -1
-  M.line("profile", "END   " .. (fmt or "???") .. "  " .. millis .. "ms", ...)
 end
 
--- Write to log file via M.raw
--- time and typ are prefixed and a trailing newline is added
+--- Write to log file
+--- time and typ are prefixed and a trailing newline is added
+--- @param typ string as per log.types config
+--- @param fmt string for string.format
+--- @vararg any arguments for string.format
 function M.line(typ, fmt, ...)
-  M.raw(typ, string.format("[%s] [%s] %s\n", os.date "%Y-%m-%d %H:%M:%S", typ, fmt), ...)
+  if M.enabled(typ) then
+    M.raw(typ, string.format("[%s] [%s] %s\n", os.date "%Y-%m-%d %H:%M:%S", typ, (fmt or "???")), ...)
+  end
+end
+
+--- Logging is enabled for typ or all
+--- @param typ string as per log.types config
+--- @return boolean
+function M.enabled(typ)
+  return M.path ~= nil and (M.config.types[typ] or M.config.types.all)
 end
 
 function M.setup(opts)
@@ -56,7 +75,7 @@ function M.setup(opts)
     if M.config.truncate then
       os.remove(M.path)
     end
-    print("nvim-tree.lua logging to " .. M.path)
+    require("nvim-tree.notify").debug("nvim-tree.lua logging to " .. M.path)
   end
 end
 

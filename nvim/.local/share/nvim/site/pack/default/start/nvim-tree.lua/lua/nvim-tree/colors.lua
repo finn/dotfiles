@@ -1,5 +1,3 @@
-local api = vim.api
-
 local M = {}
 
 local function get_color_from_hl(hl_name, fallback)
@@ -42,6 +40,7 @@ local function get_hl_groups()
     SpecialFile = { gui = "bold,underline", fg = colors.yellow },
     ImageFile = { gui = "bold", fg = colors.purple },
     OpenedFile = { gui = "bold", fg = colors.green },
+    ModifiedFile = { fg = colors.green },
 
     GitDirty = { fg = colors.dark_red },
     GitDeleted = { fg = colors.dark_red },
@@ -53,6 +52,8 @@ local function get_hl_groups()
     WindowPicker = { gui = "bold", fg = "#ededed", bg = "#4493c8" },
     LiveFilterPrefix = { gui = "bold", fg = colors.purple },
     LiveFilterValue = { gui = "bold", fg = "#fff" },
+
+    Bookmark = { fg = colors.green },
   }
 end
 
@@ -61,12 +62,15 @@ local function get_links()
     FolderName = "Directory",
     EmptyFolderName = "Directory",
     OpenedFolderName = "Directory",
+    OpenedFolderIcon = "NvimTreeFolderIcon",
+    ClosedFolderIcon = "NvimTreeFolderIcon",
     Normal = "Normal",
     NormalNC = "NvimTreeNormal",
     EndOfBuffer = "EndOfBuffer",
+    CursorLineNr = "CursorLineNr",
+    LineNr = "LineNr",
     CursorLine = "CursorLine",
-    VertSplit = "VertSplit",
-    WinSeparator = "NvimTreeVertSplit",
+    WinSeparator = "WinSeparator",
     CursorColumn = "CursorColumn",
     FileDirty = "NvimTreeGitDirty",
     FileNew = "NvimTreeGitNew",
@@ -74,6 +78,7 @@ local function get_links()
     FileMerge = "NvimTreeGitMerge",
     FileStaged = "NvimTreeGitStaged",
     FileDeleted = "NvimTreeGitDeleted",
+    FileIgnored = "NvimTreeGitIgnored",
     Popup = "Normal",
     GitIgnored = "Comment",
     StatusLine = "StatusLine",
@@ -83,17 +88,17 @@ local function get_links()
 end
 
 function M.setup()
-  local higlight_groups = get_hl_groups()
-  for k, d in pairs(higlight_groups) do
+  local highlight_groups = get_hl_groups()
+  for k, d in pairs(highlight_groups) do
     local gui = d.gui and " gui=" .. d.gui or ""
     local fg = d.fg and " guifg=" .. d.fg or ""
     local bg = d.bg and " guibg=" .. d.bg or ""
-    api.nvim_command("hi def NvimTree" .. k .. gui .. fg .. bg)
+    vim.api.nvim_command("hi def NvimTree" .. k .. gui .. fg .. bg)
   end
 
   local links = get_links()
   for k, d in pairs(links) do
-    api.nvim_command("hi def link NvimTree" .. k .. " " .. d)
+    vim.api.nvim_command("hi def link NvimTree" .. k .. " " .. d)
   end
 end
 

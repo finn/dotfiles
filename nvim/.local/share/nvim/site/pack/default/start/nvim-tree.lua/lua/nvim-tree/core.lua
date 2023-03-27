@@ -2,6 +2,7 @@ local events = require "nvim-tree.events"
 local explorer = require "nvim-tree.explorer"
 local live_filter = require "nvim-tree.live-filter"
 local view = require "nvim-tree.view"
+local log = require "nvim-tree.log"
 
 local M = {}
 
@@ -9,14 +10,17 @@ TreeExplorer = nil
 local first_init_done = false
 
 function M.init(foldername)
+  local profile = log.profile_start("core init %s", foldername)
+
   if TreeExplorer then
-    TreeExplorer:_clear_watchers()
+    TreeExplorer:destroy()
   end
   TreeExplorer = explorer.Explorer.new(foldername)
   if not first_init_done then
     events._dispatch_ready()
     first_init_done = true
   end
+  log.profile_end(profile)
 end
 
 function M.get_explorer()

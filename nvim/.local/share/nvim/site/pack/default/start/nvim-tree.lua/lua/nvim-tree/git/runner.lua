@@ -1,14 +1,14 @@
-local uv = vim.loop
 local log = require "nvim-tree.log"
 local utils = require "nvim-tree.utils"
+local notify = require "nvim-tree.notify"
 
 local Runner = {}
 Runner.__index = Runner
 
-function Runner:_parse_status_output(line)
-  local status = line:sub(1, 2)
-  -- removing `"` when git is returning special file status containing spaces
-  local path = line:sub(4, -2):gsub('^"', ""):gsub('"$', "")
+local timeouts = 0
+local MAX_TIMEOUTS = 5
+
+function Runner:_parse_status_output(status, path)
   -- replacing slashes if on windows
   if vim.fn.has "win32" == 1 then
     path = path:gsub("/", "\\")
@@ -16,15 +16,26 @@ function Runner:_parse_status_output(line)
   if #status > 0 and #path > 0 then
     self.output[utils.path_remove_trailing(utils.path_join { self.project_root, path })] = status
   end
-  return #line
 end
 
 function Runner:_handle_incoming_data(prev_output, incoming)
   if incoming and utils.str_find(incoming, "\n") then
     local prev = prev_output .. incoming
     local i = 1
+    local skip_next_line = false
     for line in prev:gmatch "[^\n]*\n" do
-      i = i + self:_parse_status_output(line)
+      if skip_next_line then
+        skip_next_line = false
+      else
+        local status = line:sub(1, 2)
+        local path = line:sub(4, -2)
+        if utils.str_find(status, "R") then
+          -- skip next line if it is a rename entry
+          skip_next_line = true
+        end
+        self:_parse_status_output(status, path)
+      end
+      i = i + #line
     end
 
     return prev:sub(i, -1)
@@ -38,21 +49,21 @@ function Runner:_handle_incoming_data(prev_output, incoming)
     self._parse_status_output(line)
   end
 
-  return nil
+  return ""
 end
 
 function Runner:_getopts(stdout_handle, stderr_handle)
   local untracked = self.list_untracked and "-u" or nil
   local ignored = (self.list_untracked and self.list_ignored) and "--ignored=matching" or "--ignored=no"
   return {
-    args = { "--no-optional-locks", "status", "--porcelain=v1", ignored, untracked },
+    args = { "--no-optional-locks", "status", "--porcelain=v1", "-z", ignored, untracked, self.path },
     cwd = self.project_root,
     stdio = { nil, stdout_handle, stderr_handle },
   }
 end
 
 function Runner:_log_raw_output(output)
-  if output and type(output) == "string" then
+  if log.enabled "git" and output and type(output) == "string" then
     log.raw("git", "%s", output)
     log.line("git", "done")
   end
@@ -60,9 +71,9 @@ end
 
 function Runner:_run_git_job()
   local handle, pid
-  local stdout = uv.new_pipe(false)
-  local stderr = uv.new_pipe(false)
-  local timer = uv.new_timer()
+  local stdout = vim.loop.new_pipe(false)
+  local stderr = vim.loop.new_pipe(false)
+  local timer = vim.loop.new_timer()
 
   local function on_finish(rc)
     self.rc = rc or 0
@@ -79,14 +90,14 @@ function Runner:_run_git_job()
       handle:close()
     end
 
-    pcall(uv.kill, pid)
+    pcall(vim.loop.kill, pid)
   end
 
   local opts = self:_getopts(stdout, stderr)
   log.line("git", "running job with timeout %dms", self.timeout)
-  log.line("git", "git %s", table.concat(opts.args, " "))
+  log.line("git", "git %s", table.concat(utils.array_remove_nils(opts.args), " "))
 
-  handle, pid = uv.spawn(
+  handle, pid = vim.loop.spawn(
     "git",
     opts,
     vim.schedule_wrap(function(rc)
@@ -107,6 +118,9 @@ function Runner:_run_git_job()
     if err then
       return
     end
+    if data then
+      data = data:gsub("%z", "\n")
+    end
     self:_log_raw_output(data)
     output_leftover = self:_handle_incoming_data(output_leftover, data)
   end
@@ -115,24 +129,26 @@ function Runner:_run_git_job()
     self:_log_raw_output(data)
   end
 
-  uv.read_start(stdout, vim.schedule_wrap(manage_stdout))
-  uv.read_start(stderr, vim.schedule_wrap(manage_stderr))
+  vim.loop.read_start(stdout, vim.schedule_wrap(manage_stdout))
+  vim.loop.read_start(stderr, vim.schedule_wrap(manage_stderr))
 end
 
 function Runner:_wait()
   local function is_done()
     return self.rc ~= nil
   end
+
   while not vim.wait(30, is_done) do
   end
 end
 
 -- This module runs a git process, which will be killed if it takes more than timeout which defaults to 400ms
 function Runner.run(opts)
-  local ps = log.profile_start("git job %s", opts.project_root)
+  local profile = log.profile_start("git job %s %s", opts.project_root, opts.path)
 
   local self = setmetatable({
     project_root = opts.project_root,
+    path = opts.path,
     list_untracked = opts.list_untracked,
     list_ignored = opts.list_ignored,
     timeout = opts.timeout or 400,
@@ -143,14 +159,25 @@ function Runner.run(opts)
   self:_run_git_job()
   self:_wait()
 
-  log.profile_end(ps, "git job %s", opts.project_root)
+  log.profile_end(profile)
 
   if self.rc == -1 then
-    log.line("git", "job timed out")
+    log.line("git", "job timed out  %s %s", opts.project_root, opts.path)
+    timeouts = timeouts + 1
+    if timeouts == MAX_TIMEOUTS then
+      notify.warn(
+        string.format(
+          "%d git jobs have timed out after %dms, disabling git integration. Try increasing git.timeout",
+          timeouts,
+          opts.timeout
+        )
+      )
+      require("nvim-tree.git").disable_git_integration()
+    end
   elseif self.rc ~= 0 then
-    log.line("git", "job failed with return code %d", self.rc)
+    log.line("git", "job fail rc %d %s %s", self.rc, opts.project_root, opts.path)
   else
-    log.line("git", "job success")
+    log.line("git", "job success    %s %s", opts.project_root, opts.path)
   end
 
   return self.output

@@ -1,7 +1,6 @@
-local uv = vim.loop
-
 local git = require "nvim-tree.git"
 local watch = require "nvim-tree.explorer.watch"
+local explorer_node = require "nvim-tree.explorer.node"
 
 local M = {}
 
@@ -12,46 +11,41 @@ local Explorer = {}
 Explorer.__index = Explorer
 
 function Explorer.new(cwd)
-  cwd = uv.fs_realpath(cwd or uv.cwd())
+  cwd = vim.loop.fs_realpath(cwd or vim.loop.cwd())
   local explorer = setmetatable({
     absolute_path = cwd,
     nodes = {},
-    watcher = watch.create_watcher(cwd),
     open = true,
   }, Explorer)
+  explorer.watcher = watch.create_watcher(explorer)
   explorer:_load(explorer)
   return explorer
 end
 
 function Explorer:_load(node)
   local cwd = node.link_to or node.absolute_path
-  local git_statuses = git.load_project_status(cwd)
-  M.explore(node, git_statuses)
+  local git_status = git.load_project_status(cwd)
+  M.explore(node, git_status)
 end
 
 function Explorer:expand(node)
   self:_load(node)
 end
 
-function Explorer.clear_watchers_for(root_node)
+function Explorer:destroy()
   local function iterate(node)
-    if node.watcher then
-      node.watcher:stop()
+    explorer_node.node_destroy(node)
+    if node.nodes then
       for _, child in pairs(node.nodes) do
-        if child.watcher then
-          iterate(child)
-        end
+        iterate(child)
       end
     end
   end
-  iterate(root_node)
-end
-
-function Explorer:_clear_watchers()
-  Explorer.clear_watchers_for(self)
+  iterate(self)
 end
 
 function M.setup(opts)
+  require("nvim-tree.explorer.node").setup(opts)
   require("nvim-tree.explorer.explore").setup(opts)
   require("nvim-tree.explorer.filters").setup(opts)
   require("nvim-tree.explorer.sorters").setup(opts)
