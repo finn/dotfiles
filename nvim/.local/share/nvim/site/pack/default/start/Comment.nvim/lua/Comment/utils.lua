@@ -1,21 +1,29 @@
 ---@mod comment.utils Utilities
 
+local F = require('Comment.ft')
 local A = vim.api
 
 local U = {}
 
----@alias CommentLines string[] List of lines inside the start and end index
+---Comment context
+---@class CommentCtx
+---@field ctype integer See |comment.utils.ctype|
+---@field cmode integer See |comment.utils.cmode|
+---@field cmotion integer See |comment.utils.cmotion|
+---@field range CommentRange
 
----@class CommentRange Range of the selection that needs to be commented
----@field srow number Starting row
----@field scol number Starting column
----@field erow number Ending row
----@field ecol number Ending column
+---Range of the selection that needs to be commented
+---@class CommentRange
+---@field srow integer Starting row
+---@field scol integer Starting column
+---@field erow integer Ending row
+---@field ecol integer Ending column
 
----@class CommentMode Comment modes - Can be manual or computed via operator-mode
----@field toggle number Toggle action
----@field comment number Comment action
----@field uncomment number Uncomment action
+---Comment modes - Can be manual or computed via operator-mode
+---@class CommentMode
+---@field toggle integer Toggle action
+---@field comment integer Comment action
+---@field uncomment integer Uncomment action
 
 ---An object containing comment modes
 ---@type CommentMode
@@ -25,29 +33,29 @@ U.cmode = {
     uncomment = 2,
 }
 
----@class CommentType Comment types
----@field line number Use linewise commentstring
----@field block number Use blockwise commentstring
+---Comment types
+---@class CommentType
+---@field linewise integer Use linewise commentstring
+---@field blockwise integer Use blockwise commentstring
 
 ---An object containing comment types
 ---@type CommentType
 U.ctype = {
-    line = 1,
-    block = 2,
+    linewise = 1,
+    blockwise = 2,
 }
 
----@class CommentMotion Comment motion types
----@field private _ number Compute from vim mode. See |OpMode|
----@field line number Line motion (ie. `gc2j`)
----@field char number Character/left-right motion (ie. `gc2j`)
----@field block number Visual operator-pending motion
----@field v number Visual motion
----@field V number Visual-line motion
+---Comment motion types
+---@class CommentMotion
+---@field line integer Line motion (ie. 'gc2j')
+---@field char integer Character/left-right motion (ie. 'gc2w')
+---@field block integer Visual operator-pending motion
+---@field v integer Visual motion (ie. 'v3jgc')
+---@field V integer Visual-line motion (ie. 'V10kgc')
 
 ---An object containing comment motions
 ---@type CommentMotion
 U.cmotion = {
-    _ = 0,
     line = 1,
     char = 2,
     block = 3,
@@ -55,53 +63,34 @@ U.cmotion = {
     V = 5,
 }
 
+---@private
 ---Check whether the line is empty
----@param ln string
+---@param iter string|string[]
 ---@return boolean
-function U.is_empty(ln)
-    return #ln == 0
+function U.is_empty(iter)
+    return #iter == 0
 end
 
----Takes out the leading indent from lines
----@param s string
----@return string string Indent chars
----@return number string Length of the indent chars
-function U.grab_indent(s)
-    local _, len, indent = s:find('^(%s*)')
-    return indent, len
+---@private
+---Helper to get padding character
+---@param flag boolean
+---@return string string
+function U.get_pad(flag)
+    return flag and ' ' or ''
 end
 
----Helper to get padding character and regex pattern
----NOTE: Use a function for conditional padding
----@param flag boolean|fun():boolean
----@return string string Padding chars
----@return string string Padding pattern
-function U.get_padding(flag)
-    if not U.is_fn(flag) then
-        return '', ''
-    end
-    return ' ', '%s?'
+---@private
+---Helper to get padding pattern
+---@param flag boolean
+---@return string string
+function U.get_padpat(flag)
+    return flag and '%s?' or ''
 end
 
--- FIXME This prints `a` in i_CTRL-o
----Moves the cursor and enters INSERT mode
----@param row number Starting row
----@param col number Ending column
-function U.move_n_insert(row, col)
-    A.nvim_win_set_cursor(0, { row, col })
-    A.nvim_feedkeys('a', 'ni', true)
-end
-
----Convert the string to a escaped string, if given
----@param str string
----@return string|boolean
-function U.escape(str)
-    return str and vim.pesc(str)
-end
-
+---@private
 ---Call a function if exists
----@param fn function Wanna be function
----@return boolean|string
+---@param fn unknown|fun(...):unknown Wanna be function
+---@return unknown
 function U.is_fn(fn, ...)
     if type(fn) == 'function' then
         return fn(...)
@@ -109,17 +98,18 @@ function U.is_fn(fn, ...)
     return fn
 end
 
+---@private
 ---Check if the given line is ignored or not with the given pattern
 ---@param ln string Line to be ignored
 ---@param pat string Lua regex
 ---@return boolean
 function U.ignore(ln, pat)
-    return pat and ln:find(pat) ~= nil
+    return pat and string.find(ln, pat) ~= nil
 end
 
 ---Get region for line movement or visual selection
 ---NOTE: Returns the current line region, if `opmode` is not given.
----@param opmode? OpMode
+---@param opmode? OpMotion
 ---@return CommentRange
 function U.get_region(opmode)
     if not opmode then
@@ -127,26 +117,18 @@ function U.get_region(opmode)
         return { srow = row, scol = 0, erow = row, ecol = 0 }
     end
 
-    local m = A.nvim_buf_get_mark
-    local buf = 0
-    local sln, eln
-
-    if string.match(opmode, '[vV]') then
-        sln, eln = m(buf, '<'), m(buf, '>')
-    else
-        sln, eln = m(buf, '['), m(buf, ']')
-    end
+    local marks = string.match(opmode, '[vV]') and { '<', '>' } or { '[', ']' }
+    local sln, eln = A.nvim_buf_get_mark(0, marks[1]), A.nvim_buf_get_mark(0, marks[2])
 
     return { srow = sln[1], scol = sln[2], erow = eln[1], ecol = eln[2] }
 end
 
 ---Get lines from the current position to the given count
----@param count number
----@return CommentLines
+---@param count integer Probably 'vim.v.count'
+---@return string[] #List of lines
 ---@return CommentRange
 function U.get_count_lines(count)
-    local pos = A.nvim_win_get_cursor(0)
-    local srow = pos[1]
+    local srow = unpack(A.nvim_win_get_cursor(0))
     local erow = (srow + count) - 1
     local lines = A.nvim_buf_get_lines(0, srow - 1, erow, false)
 
@@ -155,7 +137,7 @@ end
 
 ---Get lines from a NORMAL/VISUAL mode
 ---@param range CommentRange
----@return CommentLines
+---@return string[] #List of lines
 function U.get_lines(range)
     -- If start and end is same, then just return the current line
     if range.srow == range.erow then
@@ -166,100 +148,229 @@ function U.get_lines(range)
 end
 
 ---Validates and unwraps the given commentstring
----@param cstr string
----@return string|boolean
----@return string|boolean
+---@param cstr string See 'commentstring'
+---@return string string Left side of the commentstring
+---@return string string Right side of the commentstring
 function U.unwrap_cstr(cstr)
-    local lcs, rcs = cstr:match('(.*)%%s(.*)')
+    local left, right = string.match(cstr, '(.*)%%s(.*)')
 
-    if not (lcs or rcs) then
-        return vim.notify(
-            ("[Comment] Invalid commentstring - %q. Run ':h commentstring' for help."):format(cstr),
-            vim.log.levels.ERROR
-        )
-    end
+    assert(
+        (left or right),
+        { msg = string.format('Invalid commentstring for %s! Read `:h commentstring` for help.', vim.bo.filetype) }
+    )
 
-    -- Return false if a part is empty, otherwise trim it
-    -- Bcz it is better to deal with boolean rather than checking empty string length everywhere
-    return not U.is_empty(lcs) and vim.trim(lcs), not U.is_empty(rcs) and vim.trim(rcs)
+    return vim.trim(left), vim.trim(right)
 end
 
----Unwraps the commentstring by taking it from the following places
----     1. pre_hook (optionally a string can be returned)
----     2. ft_table (extra commentstring table in the plugin)
----     3. commentstring (already set or added in pre_hook)
+---Parses commentstring from the following places in the respective order
+---  1. pre_hook - commentstring returned from the function
+---  2. ft.lua - commentstring table bundled with the plugin
+---  3. commentstring - Neovim's native. See 'commentstring'
 ---@param cfg CommentConfig
 ---@param ctx CommentCtx
 ---@return string string Left side of the commentstring
 ---@return string string Right side of the commentstring
 function U.parse_cstr(cfg, ctx)
     -- 1. We ask `pre_hook` for a commentstring
-    local cstr = U.is_fn(cfg.pre_hook, ctx)
+    local inbuilt = U.is_fn(cfg.pre_hook, ctx)
         -- 2. Calculate w/ the help of treesitter
-        or require('Comment.ft').calculate(ctx)
-        -- 3. Last resort to use native commentstring
-        or vim.bo.commentstring
+        or F.calculate(ctx)
 
-    return U.unwrap_cstr(cstr)
+    assert(inbuilt or (ctx.ctype ~= U.ctype.blockwise), {
+        msg = vim.bo.filetype .. " doesn't support block comments!",
+    })
+
+    -- 3. Last resort to use native commentstring
+    return U.unwrap_cstr(inbuilt or vim.bo.commentstring)
 end
 
----Converts the given string into a commented string
----@param ln string String that needs to be commented
----@param lcs string Left side of the commentstring
----@param rcs string Right side of the commentstring
----@param padding string Padding chars b/w comment and line
----@param min_indent? string Minimum indent to use with multiple lines
----@return string string Commented string
-function U.comment_str(ln, lcs, rcs, padding, min_indent)
-    if U.is_empty(ln) then
-        return (min_indent or '') .. ((lcs or '') .. (rcs or ''))
+---Returns a closure which is used to do comments
+---
+---If given {string[]} to the closure then it will do blockwise comment
+---else linewise comment will be done with the given {string}
+---@param left string Left side of the commentstring
+---@param right string Right side of the commentstring
+---@param padding boolean Is padding enabled?
+---@param scol? integer Starting column
+---@param ecol? integer Ending column
+---@param tabbed? boolean Using tab indentation
+---@return fun(line: string|string[]):string|string[]
+function U.commenter(left, right, padding, scol, ecol, tabbed)
+    local pad = U.get_pad(padding)
+    local ll = U.is_empty(left) and left or (left .. pad)
+    local rr = U.is_empty(right) and right or (pad .. right)
+    local empty = string.rep(tabbed and '\t' or ' ', scol or 0) .. left .. right
+    local is_lw = scol and not ecol
+
+    return function(line)
+        ------------------
+        -- for linewise --
+        ------------------
+        if is_lw then
+            if U.is_empty(line) then
+                return empty
+            end
+            -- line == 0 -> start from 0 col
+            if scol == 0 then
+                return (ll .. line .. rr)
+            end
+            local first = string.sub(line --[[@as string]], 0, scol)
+            local last = string.sub(line --[[@as string]], scol + 1, -1)
+            return first .. ll .. last .. rr
+        end
+
+        -------------------
+        -- for blockwise --
+        -------------------
+        if type(line) == 'table' then
+            local first, last = line[1], line[#line]
+            -- If both columns are given then we can assume it's a partial block
+            if scol and ecol then
+                local sfirst = string.sub(first, 0, scol)
+                local slast = string.sub(first, scol + 1, -1)
+                local efirst = string.sub(last, 0, ecol + 1)
+                local elast = string.sub(last, ecol + 2, -1)
+                line[1] = sfirst .. ll .. slast
+                line[#line] = efirst .. rr .. elast
+            else
+                line[1] = U.is_empty(first) and left or string.gsub(first, '^(%s*)', '%1' .. vim.pesc(ll))
+                line[#line] = U.is_empty(last) and right or (last .. rr)
+            end
+            return line
+        end
+
+        --------------------------------
+        -- for current-line blockwise --
+        --------------------------------
+        -- SOURCE: https://github.com/numToStr/Comment.nvim/issues/224
+        if ecol > #line then
+            return ll .. line .. rr
+        end
+        local first = string.sub(line, 0, scol)
+        local mid = string.sub(line, scol + 1, ecol + 1)
+        local last = string.sub(line, ecol + 2, -1)
+        return first .. ll .. mid .. rr .. last
     end
-
-    local indent, chars = ln:match('^(%s*)(.*)')
-
-    local lcs_new = lcs and lcs .. padding or ''
-    local rcs_new = rcs and padding .. rcs or ''
-
-    local pos = #(min_indent or indent)
-    local l_indent = indent:sub(0, pos) .. lcs_new .. indent:sub(pos + 1)
-
-    return l_indent .. chars .. rcs_new
 end
 
----Converts the given string into a uncommented string
----@param ln string Line that needs to be uncommented
----@param lcs_esc string (Escaped) Left side of the commentstring
----@param rcs_esc string (Escaped) Right side of the commentstring
----@param pp string Padding pattern. See |U.get_padding|
----@return string string Uncommented string
-function U.uncomment_str(ln, lcs_esc, rcs_esc, pp)
-    local ll = lcs_esc and lcs_esc .. pp or ''
-    local rr = rcs_esc and rcs_esc .. '$?' or ''
+---Returns a closure which is used to uncomment a line
+---
+---If given {string[]} to the closure then it will block uncomment
+---else linewise uncomment will be done with the given {string}
+---@param left string Left side of the commentstring
+---@param right string Right side of the commentstring
+---@param padding boolean Is padding enabled?
+---@param scol? integer Starting column
+---@param ecol? integer Ending column
+---@return fun(line: string|string[]):string|string[]
+function U.uncommenter(left, right, padding, scol, ecol)
+    local pp, plen = U.get_padpat(padding), padding and 1 or 0
+    local left_len, right_len = #left + plen, #right + plen
+    local ll = U.is_empty(left) and left or vim.pesc(left) .. pp
+    local rr = U.is_empty(right) and right or pp .. vim.pesc(right)
+    local is_lw = not (scol and scol)
+    local pattern = is_lw and '^(%s*)' .. ll .. '(.-)' .. rr .. '$' or ''
 
-    local indent, chars = ln:match('(%s*)' .. ll .. '(.*)' .. rr)
+    return function(line)
+        -------------------
+        -- for blockwise --
+        -------------------
+        if type(line) == 'table' then
+            local first, last = line[1], line[#line]
+            -- If both columns are given then we can assume it's a partial block
+            if scol and ecol then
+                local sfirst = string.sub(first, 0, scol)
+                local slast = string.sub(first, scol + left_len + 1, -1)
+                local efirst = string.sub(last, 0, ecol - right_len + 1)
+                local elast = string.sub(last, ecol + 2, -1)
+                line[1] = sfirst .. slast
+                line[#line] = efirst .. elast
+            else
+                line[1] = string.gsub(first, '^(%s*)' .. ll, '%1')
+                line[#line] = string.gsub(last, rr .. '$', '')
+            end
+            return line
+        end
 
-    -- If the line (after cstring) is empty then just return ''
-    -- bcz when uncommenting multiline this also doesn't preserve leading whitespace as the line was previously empty
-    if U.is_empty(chars) then
-        return ''
+        ------------------
+        -- for linewise --
+        ------------------
+        if is_lw then
+            local a, b, c = string.match(line, pattern)
+            -- When user tries to uncomment when there is nothing to uncomment. See #221
+            assert(a and b, { msg = 'Nothing to uncomment!' })
+            -- If there is nothing after LHS then just return ''
+            -- bcz the line previously (before comment) was empty
+            return U.is_empty(b) and b or a .. b .. (c or '')
+        end
+
+        --------------------------------
+        -- for current-line blockwise --
+        --------------------------------
+        -- SOURCE: https://github.com/numToStr/Comment.nvim/issues/224
+        if ecol > #line then
+            return string.sub(line, scol + left_len + 1, #line - right_len)
+        end
+        local first = string.sub(line, 0, scol)
+        local mid = string.sub(line, scol + left_len + 1, ecol - right_len + 1)
+        local last = string.sub(line, ecol + 2, -1)
+        return first .. mid .. last
     end
-
-    -- When padding is enabled then trim one trailing space char
-    return indent .. chars:gsub(pp .. '$', '')
 end
 
 ---Check if the given string is commented or not
----@param lcs_esc string (Escaped) Left side of the commentstring
----@param rcs_esc string (Escaped) Right side of the commentstring
----@param pp string Padding pattern. See |U.get_padding|
----@return fun(line:string):boolean
-function U.is_commented(lcs_esc, rcs_esc, pp)
-    local ll = lcs_esc and '^%s*' .. lcs_esc .. pp or ''
-    local rr = rcs_esc and pp .. rcs_esc .. '$' or ''
+---
+---If given {string[]} to the closure, it will check the first and last line
+---with LHS and RHS of commentstring respectively else it will check the given
+---line with LHS and RHS (if given) of the commenstring
+---@param left string Left side of the commentstring
+---@param right string Right side of the commentstring
+---@param padding boolean Is padding enabled?
+---@param scol? integer Starting column
+---@param ecol? integer Ending column
+---@return fun(line: string|string[]):boolean
+function U.is_commented(left, right, padding, scol, ecol)
+    local pp = U.get_padpat(padding)
+    local ll = U.is_empty(left) and left or '^%s*' .. vim.pesc(left) .. pp
+    local rr = U.is_empty(right) and right or pp .. vim.pesc(right) .. '$'
+    local pattern = ll .. '.-' .. rr
+    local is_full = scol == nil or ecol == nil
 
     return function(line)
-        return line:find(ll .. '(.-)' .. rr)
+        -------------------
+        -- for blockwise --
+        -------------------
+        if type(line) == 'table' then
+            local first, last = line[1], line[#line]
+            if is_full then
+                return (string.find(first, ll) and string.find(last, rr)) ~= nil
+            end
+            return (string.find(string.sub(first, scol + 1, -1), ll) and string.find(string.sub(last, 0, ecol + 1), rr))
+                ~= nil
+        end
+
+        ------------------
+        -- for linewise --
+        ------------------
+        if is_full then
+            return string.find(line, pattern) ~= nil
+        end
+
+        --------------------------------
+        -- for current-line blockwise --
+        --------------------------------
+        -- SOURCE: https://github.com/numToStr/Comment.nvim/issues/224
+        return string.find(string.sub(line, scol + 1, (ecol > #line and #line or ecol + 1)), pattern) ~= nil
     end
+end
+
+---@private
+---Error handler
+---@param ... unknown
+function U.catch(fn, ...)
+    xpcall(fn, function(err)
+        vim.notify(string.format('[Comment.nvim] %s', err.msg), vim.log.levels.WARN)
+    end, ...)
 end
 
 return U
