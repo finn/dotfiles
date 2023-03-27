@@ -1,24 +1,38 @@
 # Nvim-web-devicons
 
-A `lua` fork of [vim-devicons](https://github.com/ryanoasis/vim-devicons). This plugin provides the same icons _as well as_
-colors for each icon.
+A `lua` fork of [vim-devicons](https://github.com/ryanoasis/vim-devicons). This plugin provides the same icons _as well as_ colors for each icon.
+
+Light and dark color variants are provided.
 
 ## Requirements
 
+- [neovim >=0.7.0](https://github.com/neovim/neovim/wiki/Installing-Neovim)
 - [A patched font](https://www.nerdfonts.com/)
 
 ## Installation
 
 ```vim
-Plug 'kyazdani42/nvim-web-devicons'
+Plug 'nvim-tree/nvim-web-devicons'
+```
+
+or with [packer.nvim](https://github.com/wbthomason/packer.nvim)
+
+```
+use 'nvim-tree/nvim-web-devicons'
 ```
 
 ## Usage
 
+### Variants
+
+Light or dark color variants of the icons depend on `&background`.
+
+These will be updated following `OptionSet` `background` however be advised that the plugin using nvim-web-devicons may have cached the icons.
+
 ### Setup
 
 This adds all the highlight groups for the devicons
-i.e. it calls `highlight IconNameDevicon guifg='<color>' ctermfg='<cterm_color>'` for all icons
+i.e. it calls `vim.api.nvim_set_hl` for all icons
 this might need to be re-called in a `Colorscheme` to re-apply cleared highlights
 if the color scheme changes
 
@@ -35,9 +49,35 @@ require'nvim-web-devicons'.setup {
     name = "Zsh"
   }
  };
+ -- globally enable different highlight colors per icon (default to true)
+ -- if set to false all icons will have the default icon's color
+ color_icons = true;
  -- globally enable default icons (default to false)
  -- will get overriden by `get_icons` option
  default = true;
+ -- globally enable "strict" selection of icons - icon will be looked up in
+ -- different tables, first by filename, and if not found by extension; this
+ -- prevents cases when file doesn't have any extension but still gets some icon
+ -- because its name happened to match some extension (default to false)
+ strict = true;
+ -- same as `override` but specifically for overrides by filename
+ -- takes effect when `strict` is true
+ override_by_filename = {
+  [".gitignore"] = {
+    icon = "",
+    color = "#f1502f",
+    name = "Gitignore"
+  }
+ };
+ -- same as `override` but specifically for overrides by extension
+ -- takes effect when `strict` is true
+ override_by_extension = {
+  ["log"] = {
+    icon = "",
+    color = "#81e043",
+    name = "Log"
+  }
+ };
 }
 ```
 
@@ -52,8 +92,10 @@ require'nvim-web-devicons'.get_icon(filename, extension, options)
 ```
 
 The optional `options` argument can used to change how the plugin works the keys include
-`default = <boolean>`. If the default key is set to true this function will return a default
-if there is no matching icon
+`default = <boolean>` and `strict = <boolean>`. If the default key is set to true this
+function will return a default if there is no matching icon. If the strict key is set
+to true this function will lookup icon specifically by filename, and if not found then
+specifically by extension, and fallback to default icon if default key is set to true.
 e.g.
 
 ```lua
@@ -123,3 +165,7 @@ require("nvim-web-devicons").get_icon_cterm_color_by_filetype(filetype, opts)
 These functions are the same as their counterparts without the `_by_filetype` suffix, but they take a filetype instead of a name/extension.
 
 You can also use `get_icon_name_by_filetype(filetype)` to get the icon name associated with the filetype.
+
+## Contributing
+
+PRs are always welcome! Please see [CONTRIBUTING](CONTRIBUTING.md)
