@@ -12,7 +12,10 @@ differ depending on the package manager.
 " If installed using Homebrew
 set rtp+=/usr/local/opt/fzf
 
-" If installed using git
+" If installed using Homebrew on Apple Silicon
+set rtp+=/opt/homebrew/opt/fzf
+
+" If you have cloned fzf on ~/.fzf directory
 set rtp+=~/.fzf
 ```
 
@@ -23,7 +26,7 @@ written as:
 " If installed using Homebrew
 Plug '/usr/local/opt/fzf'
 
-" If installed using git
+" If you have cloned fzf on ~/.fzf directory
 Plug '~/.fzf'
 ```
 
@@ -115,7 +118,7 @@ let g:fzf_action = {
 
 " An action can be a reference to a function that processes selected lines
 function! s:build_quickfix_list(lines)
-  call setqflist(map(copy(a:lines), '{ "filename": v:val }'))
+  call setqflist(map(copy(a:lines), '{ "filename": v:val, "lnum": 1 }'))
   copen
   cc
 endfunction
@@ -309,7 +312,7 @@ following options are allowed:
     - `yoffset` [float default 0.5 range [0 ~ 1]]
     - `xoffset` [float default 0.5 range [0 ~ 1]]
     - `relative` [boolean default v:false]
-    - `border` [string default `rounded`]: Border style
+    - `border` [string default `rounded` (`sharp` on Windows)]: Border style
         - `rounded` / `sharp` / `horizontal` / `vertical` / `top` / `bottom` / `left` / `right` / `no[ne]`
 
 `fzf#wrap`
@@ -483,4 +486,4 @@ autocmd  FileType fzf set laststatus=0 noshowmode noruler
 
 The MIT License (MIT)
 
-Copyright (c) 2013-2021 Junegunn Choi
+Copyright (c) 2013-2023 Junegunn Choi

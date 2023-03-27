@@ -29,12 +29,14 @@ BUILD_FLAGS    := -a -ldflags "-s -w -X main.version=$(VERSION) -X main.revision
 
 BINARY32       := fzf-$(GOOS)_386
 BINARY64       := fzf-$(GOOS)_amd64
+BINARYS390     := fzf-$(GOOS)_s390x
 BINARYARM5     := fzf-$(GOOS)_arm5
 BINARYARM6     := fzf-$(GOOS)_arm6
 BINARYARM7     := fzf-$(GOOS)_arm7
 BINARYARM8     := fzf-$(GOOS)_arm8
 BINARYPPC64LE  := fzf-$(GOOS)_ppc64le
 BINARYRISCV64  := fzf-$(GOOS)_riscv64
+BINARYLOONG64  := fzf-$(GOOS)_loong64
 
 # https://en.wikipedia.org/wiki/Uname
 UNAME_M := $(shell uname -m)
@@ -42,6 +44,8 @@ ifeq ($(UNAME_M),x86_64)
 	BINARY := $(BINARY64)
 else ifeq ($(UNAME_M),amd64)
 	BINARY := $(BINARY64)
+else ifeq ($(UNAME_M),s390x)
+	BINARY := $(BINARYS390)
 else ifeq ($(UNAME_M),i686)
 	BINARY := $(BINARY32)
 else ifeq ($(UNAME_M),i386)
@@ -62,6 +66,8 @@ else ifeq ($(UNAME_M),ppc64le)
 	BINARY := $(BINARYPPC64LE)
 else ifeq ($(UNAME_M),riscv64)
 	BINARY := $(BINARYRISCV64)
+else ifeq ($(UNAME_M),loongarch64)
+	BINARY := $(BINARYLOONG64)
 else
 $(error Build on $(UNAME_M) is not supported, yet.)
 endif
@@ -129,6 +135,8 @@ target/$(BINARY32): $(SOURCES)
 target/$(BINARY64): $(SOURCES)
 	GOARCH=amd64 $(GO) build $(BUILD_FLAGS) -o $@
 
+target/$(BINARYS390): $(SOURCES)
+	GOARCH=s390x $(GO) build $(BUILD_FLAGS) -o $@
 # https://github.com/golang/go/wiki/GoArm
 target/$(BINARYARM5): $(SOURCES)
 	GOARCH=arm GOARM=5 $(GO) build $(BUILD_FLAGS) -o $@
@@ -148,7 +156,11 @@ target/$(BINARYPPC64LE): $(SOURCES)
 target/$(BINARYRISCV64): $(SOURCES)
 	GOARCH=riscv64 $(GO) build $(BUILD_FLAGS) -o $@
 
+target/$(BINARYLOONG64): $(SOURCES)
+	GOARCH=loong64 $(GO) build $(BUILD_FLAGS) -o $@
+
 bin/fzf: target/$(BINARY) | bin
+	-rm -f bin/fzf
 	cp -f target/$(BINARY) bin/fzf
 
 docker:

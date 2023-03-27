@@ -18,7 +18,7 @@ builds:
       post: |
         sh -c '
         cat > /tmp/fzf-gon-amd64.hcl << EOF
-        source = ["./dist/fzf-macos_darwin_amd64/fzf"]
+        source = ["./dist/fzf-macos_darwin_amd64_v1/fzf"]
         bundle_id = "kr.junegunn.fzf"
         apple_id {
           username = "junegunn.c@gmail.com"
@@ -72,6 +72,9 @@ builds:
       - amd64
       - arm
       - arm64
+      - loong64
+      - ppc64le
+      - s390x
     goarm:
       - 5
       - 6
@@ -98,6 +101,10 @@ archives:
         format: zip
     files:
       - non-existent*
+
+checksum:
+  extra_files:
+    - glob: ./dist/fzf-*darwin*.zip
 
 release:
   github:

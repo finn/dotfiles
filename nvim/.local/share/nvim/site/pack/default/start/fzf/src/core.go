@@ -1,28 +1,4 @@
-/*
-Package fzf implements fzf, a command-line fuzzy finder.
-
-The MIT License (MIT)
-
-Copyright (c) 2013-2021 Junegunn Choi
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
-*/
+// Package fzf implements fzf, a command-line fuzzy finder.
 package fzf
 
 import (
@@ -146,18 +122,20 @@ func Run(opts *Options, version string, revision string) {
 
 	// Matcher
 	forward := true
-	for _, cri := range opts.Criteria[1:] {
-		if cri == byEnd {
+	withPos := false
+	for idx := len(opts.Criteria) - 1; idx > 0; idx-- {
+		switch opts.Criteria[idx] {
+		case byChunk:
+			withPos = true
+		case byEnd:
 			forward = false
-			break
-		}
-		if cri == byBegin {
-			break
+		case byBegin:
+			forward = true
 		}
 	}
 	patternBuilder := func(runes []rune) *Pattern {
 		return BuildPattern(
-			opts.Fuzzy, opts.FuzzyAlgo, opts.Extended, opts.Case, opts.Normalize, forward,
+			opts.Fuzzy, opts.FuzzyAlgo, opts.Extended, opts.Case, opts.Normalize, forward, withPos,
 			opts.Filter == nil, opts.Nth, opts.Delimiter, runes)
 	}
 	matcher := NewMatcher(patternBuilder, sort, opts.Tac, eventBox)
@@ -216,10 +194,17 @@ func Run(opts *Options, version string, revision string) {
 
 	// Terminal I/O
 	terminal := NewTerminal(opts, eventBox)
+	maxFit := 0 // Maximum number of items that can fit on screen
+	padHeight := 0
+	heightUnknown := opts.Height.auto
+	if heightUnknown {
+		maxFit, padHeight = terminal.MaxFitAndPad(opts)
+	}
 	deferred := opts.Select1 || opts.Exit0
 	go terminal.Loop()
-	if !deferred {
-		terminal.startChan <- true
+	if !deferred && !heightUnknown {
+		// Start right away
+		terminal.startChan <- fitpad{-1, -1}
 	}
 
 	// Event coordination
@@ -228,17 +213,39 @@ func Run(opts *Options, version string, revision string) {
 	clearSelection := util.Once(false)
 	ticks := 0
 	var nextCommand *string
+	eventBox.Watch(EvtReadNew)
+	total := 0
+	query := []rune{}
+	determine := func(final bool) {
+		if heightUnknown {
+			if total >= maxFit || final {
+				heightUnknown = false
+				terminal.startChan <- fitpad{util.Min(total, maxFit), padHeight}
+			}
+		} else if deferred {
+			deferred = false
+			terminal.startChan <- fitpad{-1, -1}
+		}
+	}
+
+	useSnapshot := false
+	var snapshot []*Chunk
+	var prevSnapshot []*Chunk
+	var count int
 	restart := func(command string) {
 		reading = true
 		clearCache = util.Once(true)
 		clearSelection = util.Once(true)
+		// We should not update snapshot if reload is triggered again while
+		// the previous reload is in progress
+		if useSnapshot && prevSnapshot != nil {
+			snapshot, count = chunkList.Snapshot()
+		}
 		chunkList.Clear()
 		itemIndex = 0
 		header = make([]string, 0, opts.HeaderLines)
 		go reader.restart(command)
 	}
-	eventBox.Watch(EvtReadNew)
-	query := []rune{}
 	for {
 		delay := true
 		ticks++
@@ -270,13 +277,23 @@ func Run(opts *Options, version string, revision string) {
 					} else {
 						reading = reading && evt == EvtReadNew
 					}
-					snapshot, count := chunkList.Snapshot()
-					terminal.UpdateCount(count, !reading, value.(*string))
+					if useSnapshot && evt == EvtReadFin {
+						useSnapshot = false
+						prevSnapshot = nil
+					}
+					if !useSnapshot {
+						snapshot, count = chunkList.Snapshot()
+					}
+					total = count
+					terminal.UpdateCount(total, !reading, value.(*string))
 					if opts.Sync {
 						opts.Sync = false
 						terminal.UpdateList(PassMerger(&snapshot, opts.Tac), false)
 					}
-					reset := clearCache()
+					if heightUnknown && !deferred {
+						determine(!reading)
+					}
+					reset := !useSnapshot && clearCache()
 					matcher.Reset(snapshot, input(reset), false, !reading, sort, reset)
 
 				case EvtSearchNew:
@@ -285,6 +302,9 @@ func Run(opts *Options, version string, revision string) {
 					case searchRequest:
 						sort = val.sort
 						command = val.command
+						if command != nil {
+							useSnapshot = val.sync
+						}
 					}
 					if command != nil {
 						if reading {
@@ -295,8 +315,10 @@ func Run(opts *Options, version string, revision string) {
 						}
 						break
 					}
-					snapshot, _ := chunkList.Snapshot()
-					reset := clearCache()
+					if !useSnapshot {
+						snapshot, _ = chunkList.Snapshot()
+					}
+					reset := !useSnapshot && clearCache()
 					matcher.Reset(snapshot, input(reset), true, !reading, sort, reset)
 					delay = false
 
@@ -317,8 +339,7 @@ func Run(opts *Options, version string, revision string) {
 						if deferred {
 							count := val.Length()
 							if opts.Select1 && count > 1 || opts.Exit0 && !opts.Select1 && count > 0 {
-								deferred = false
-								terminal.startChan <- true
+								determine(val.final)
 							} else if val.final {
 								if opts.Exit0 && count == 0 || opts.Select1 && count == 1 {
 									if opts.PrintQuery {
@@ -335,8 +356,7 @@ func Run(opts *Options, version string, revision string) {
 									}
 									os.Exit(exitNoMatch)
 								}
-								deferred = false
-								terminal.startChan <- true
+								determine(val.final)
 							}
 						}
 						terminal.UpdateList(val, clearSelection())
