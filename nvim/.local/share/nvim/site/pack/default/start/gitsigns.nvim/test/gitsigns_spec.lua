@@ -73,29 +73,34 @@ describe('gitsigns', function()
   end)
 
   it('gitdir watcher works on a fresh repo', function()
+    local nvim_ver = exec_lua('return vim.version().minor')
+    if nvim_ver == 8 then
+      -- v0.8.0 has some regression that's fixed it v0.9.0 dev
+      pending()
+    end
     screen:try_resize(20,6)
     setup_test_repo{no_add=true}
     -- Don't set this too low, or else the test will lock up
     config.watch_gitdir = {interval = 100}
     setup_gitsigns(config)
+    command('Gitsigns clear_debug')
     edit(test_file)
 
     expectf(function()
       match_dag(debug_messages(), {
-        p'run_job: git .* %-%-version',
-        'attach(1): Attaching (trigger=BufRead)',
+        'attach(1): Attaching (trigger=BufReadPost)',
         p'run_job: git .* config user.name',
         p'run_job: git .* rev%-parse %-%-show%-toplevel %-%-absolute%-git%-dir %-%-abbrev%-ref HEAD',
-        p('run_job: git .* ls%-files %-%-stage %-%-others %-%-exclude%-standard %-%-eol '..test_file),
+        p('run_job: git .* ls%-files %-%-stage %-%-others %-%-exclude%-standard %-%-eol '..helpers.pesc(test_file)),
         'watch_gitdir(1): Watching git dir',
         p'run_job: git .* show :0:dummy.txt',
-        'update(1): updates: 1, jobs: 7'
+        'update(1): updates: 1, jobs: 6'
       })
     end)
 
     check {
       status = {head='', added=18, changed=0, removed=0},
-      signs = {added=8}
+      signs = {untracked=8}
     }
 
     git{"add", test_file}
@@ -113,7 +118,7 @@ describe('gitsigns', function()
     edit(tmpfile)
 
     match_debug_messages {
-      'attach(1): Attaching (trigger=BufRead)',
+      'attach(1): Attaching (trigger=BufReadPost)',
       p'run_job: git .* config user.name',
       p'run_job: git .* rev%-parse %-%-show%-toplevel %-%-absolute%-git%-dir %-%-abbrev%-ref HEAD',
       'new: Not in git repo',
@@ -162,7 +167,7 @@ describe('gitsigns', function()
       edit(scratch..'/.git/index')
 
       match_debug_messages {
-        'attach(1): Attaching (trigger=BufRead)',
+        'attach(1): Attaching (trigger=BufReadPost)',
         'new: In git dir',
         'attach(1): Empty git obj'
       }
@@ -178,7 +183,7 @@ describe('gitsigns', function()
       edit(ignored_file)
 
       match_debug_messages {
-        'attach(1): Attaching (trigger=BufRead)',
+        'attach(1): Attaching (trigger=BufReadPost)',
         p'run_job: git .* config user.name',
         p'run_job: git .* rev%-parse %-%-show%-toplevel %-%-absolute%-git%-dir %-%-abbrev%-ref HEAD',
         p'run_job: git .* ls%-files .*/dummy_ignored.txt',
@@ -196,7 +201,7 @@ describe('gitsigns', function()
         'attach(1): Attaching (trigger=BufNewFile)',
         p'run_job: git .* config user.name',
         p'run_job: git .* rev%-parse %-%-show%-toplevel %-%-absolute%-git%-dir %-%-abbrev%-ref HEAD',
-        p('run_job: git .* ls%-files %-%-stage %-%-others %-%-exclude%-standard %-%-eol '..newfile),
+        p('run_job: git .* ls%-files %-%-stage %-%-others %-%-exclude%-standard %-%-eol '..helpers.pesc(newfile)),
         'attach(1): Not a file',
       }
 
@@ -220,7 +225,7 @@ describe('gitsigns', function()
       command("Gitsigns clear_debug")
       command("copen")
       match_debug_messages {
-        'attach(2): Attaching (trigger=BufRead)',
+        'attach(2): Attaching (trigger=BufReadPost)',
         'attach(2): Non-normal buffer',
       }
     end)
@@ -292,6 +297,11 @@ describe('gitsigns', function()
     end
 
     it('doesn\'t error on untracked files', function()
+      local nvim_ver = exec_lua('return vim.version().minor')
+      if nvim_ver >= 8 then
+        pending()
+      end
+
       setup_test_repo{no_add=true}
       edit(newfile)
       insert("line")
@@ -316,9 +326,11 @@ describe('gitsigns', function()
 
   describe('configuration', function()
     it('handled deprecated fields', function()
-      config.current_line_blame_delay = 100
-      setup_gitsigns(config)
-      eq(100, exec_lua([[return package.loaded['gitsigns.config'].config.current_line_blame_opts.delay]]))
+      --  TODO(lewis6991): All deprecated fields removed. Re-add when we have another deprecated field
+      pending()
+      -- config.current_line_blame_delay = 100
+      -- setup_gitsigns(config)
+      -- eq(100, exec_lua([[return package.loaded['gitsigns.config'].config.current_line_blame_opts.delay]]))
     end)
   end)
 
@@ -337,11 +349,11 @@ describe('gitsigns', function()
 
       edit(test_file)
       match_debug_messages {
-        'attach(1): Attaching (trigger=BufRead)',
+        'attach(1): Attaching (trigger=BufReadPost)',
         p'run_job: git .* config user.name',
         p'run_job: git .* rev%-parse %-%-show%-toplevel %-%-absolute%-git%-dir %-%-abbrev%-ref HEAD',
         p'run_job: git .* rev%-parse %-%-short HEAD',
-        p'run_job: git .* %-%-git%-dir=.* %-%-stage %-%-others %-%-exclude%-standard %-%-eol.*',
+        p'run_job: git .* %-%-git%-dir .* %-%-stage %-%-others %-%-exclude%-standard %-%-eol.*',
         'attach(1): User on_attach() returned false',
       }
     end)
@@ -472,14 +484,14 @@ describe('gitsigns', function()
           table.insert(messages, p'run_job: git .* diff .* /tmp/lua_.* /tmp/lua_.*')
         end
 
-        local jobs = internal_diff and 9 or 10
+        local jobs = internal_diff and 8 or 9
         table.insert(messages, "update(1): updates: 1, jobs: "..jobs)
 
         match_debug_messages(messages)
 
         check {
           status = {head='master', added=1, changed=0, removed=0},
-          signs  = {added=1}
+          signs  = {untracked=1}
         }
 
       end)
@@ -495,7 +507,7 @@ describe('gitsigns', function()
 
         check {
           status = {head='master', added=1, changed=0, removed=0},
-          signs  = {added=1}
+          signs  = {untracked=1}
         }
 
         feed('mhs') -- Stage the file (add file to index)
@@ -517,7 +529,7 @@ describe('gitsigns', function()
 
         check {
           status = {head='master', added=1, changed=0, removed=0},
-          signs  = {added=1}
+          signs  = {untracked=1}
         }
 
         git{"add", newfile}
@@ -531,7 +543,7 @@ describe('gitsigns', function()
 
         check {
           status = {head='master', added=1, changed=0, removed=0},
-          signs  = {added=1}
+          signs  = {untracked=1}
         }
 
       end)
@@ -616,7 +628,7 @@ describe('gitsigns', function()
 
         check {
           status = {head='master', added=3, removed=0, changed=0},
-          signs = {added=3}
+          signs = {untracked=3}
         }
 
         git{'add', spacefile}

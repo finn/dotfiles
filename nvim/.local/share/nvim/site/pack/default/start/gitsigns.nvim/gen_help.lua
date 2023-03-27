@@ -1,6 +1,6 @@
 #!/bin/sh
 _=[[
-exec lua "$0" "$@"
+exec luajit "$0" "$@"
 ]]
 -- Simple script to update the help doc by reading the config schema.
 
@@ -204,11 +204,13 @@ local function gen_config_doc()
 end
 
 local function parse_func_header(line)
-  local func = line:match('%.([^ ]+)')
+  local func = line:match('%w+%.([%w_]+)')
   if not func then
     error('Unable to parse: '..line)
   end
-  local args_raw = line:match('function%((.*)%)')
+  local args_raw =
+    line:match('function%((.*)%)') or             -- M.name = function(args)
+    line:match('function%s+%w+%.[%w_]+%((.*)%)')  -- function M.name(args)
   local args = {}
   for k in string.gmatch(args_raw, "([%w_]+):") do
     if k:sub(1, 1) ~= '_' then
@@ -268,6 +270,42 @@ local function gen_functions_doc(files)
   return res
 end
 
+local function gen_highlights_doc()
+  local res = {}
+  local highlights = require('lua.gitsigns.highlight')
+
+  local name_max = 0
+  for _, hl in ipairs(highlights.hls) do
+    for name, _ in pairs(hl) do
+      if name:len() > name_max then
+        name_max = name:len()
+      end
+    end
+  end
+
+  for _, hl in ipairs(highlights.hls) do
+    for name, spec in pairs(hl) do
+      if not spec.hidden then
+        local fallbacks_tbl = {}
+        for _, f in ipairs(spec) do
+          fallbacks_tbl[#fallbacks_tbl+1] = string.format('`%s`', f)
+        end
+        local fallbacks = table.concat(fallbacks_tbl, ', ')
+        local pad = string.rep(' ', name_max - name:len())
+        res[#res+1] = string.format('%s*hl-%s*', string.rep(' ', 56), name)
+        res[#res+1] = string.format('%s', name)
+        if spec.desc then
+          res[#res+1] = string.format('%s%s', string.rep(' ', 8), spec.desc)
+          res[#res+1] = ''
+        end
+        res[#res+1] = string.format('%sFallbacks: %s', string.rep(' ', 8), fallbacks)
+      end
+    end
+  end
+
+  return table.concat(res, '\n')
+end
+
 local function get_setup_from_readme()
   local i = read_file('README.md'):gmatch("([^\n]*)\n?")
   local res = {}
@@ -293,12 +331,14 @@ end
 
 local function get_marker_text(marker)
   return ({
-    VERSION   = '0.3-dev',
+    VERSION   = '0.7-dev',
     CONFIG    = gen_config_doc,
     FUNCTIONS = gen_functions_doc{
       'teal/gitsigns.tl',
+      'teal/gitsigns/attach.tl',
       'teal/gitsigns/actions.tl',
     },
+    HIGHLIGHTS = gen_highlights_doc,
     SETUP     = get_setup_from_readme
   })[marker]
 end

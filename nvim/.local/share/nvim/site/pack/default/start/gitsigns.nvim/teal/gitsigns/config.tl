@@ -33,6 +33,7 @@ local record M
       internal: boolean
       indent_heuristic: boolean
       vertical: boolean
+      linematch: integer
     end
 
     diff_opts: DiffOpts
@@ -47,9 +48,20 @@ local record M
       keymaps: {string:string}
     end
 
-    type SignsConfig = {string: SignConfig}
+    enum SignType
+      'add'
+      'change'
+      'delete'
+      'topdelete'
+      'changedelete'
+      'untracked'
+    end
+
+    type SignsConfig = {SignType: SignConfig}
 
     signs: SignsConfig
+    _signs_staged: SignsConfig
+    _signs_staged_enable: boolean
 
     count_chars: {string|integer:string}
     signcolumn: boolean
@@ -58,8 +70,10 @@ local record M
     show_deleted: boolean
     sign_priority: integer
     keymaps: {string:any}
+    _on_attach_pre: function(bufnr: integer, callback: function(table))
     on_attach: function(bufnr: integer)
     record watch_gitdir
+      enable: boolean
       interval: integer
       follow_files: boolean
     end
@@ -100,6 +114,12 @@ local record M
 
     trouble: boolean
 
+    record Worktree
+      toplevel: string
+      gitdir: string
+    end
+    worktrees: {Worktree}
+
     -- Undocumented
     word_diff: boolean
     _refresh_staged_on_update: boolean
@@ -109,6 +129,7 @@ local record M
 
     _git_version: string
     _verbose: boolean
+    _test_mode: boolean
   end
 
   schema: {string:SchemaElem}
@@ -122,33 +143,68 @@ M.schema = {
     type = 'table',
     deep_extend = true,
     default = {
-      add          = {hl = 'GitSignsAdd'   , text = '┃', numhl='GitSignsAddNr'   , linehl='GitSignsAddLn'    },
-      change       = {hl = 'GitSignsChange', text = '┃', numhl='GitSignsChangeNr', linehl='GitSignsChangeLn' },
-      delete       = {hl = 'GitSignsDelete', text = '▁', numhl='GitSignsDeleteNr', linehl='GitSignsDeleteLn' },
-      topdelete    = {hl = 'GitSignsDelete', text = '▔', numhl='GitSignsDeleteNr', linehl='GitSignsDeleteLn' },
-      changedelete = {hl = 'GitSignsChange', text = '~', numhl='GitSignsChangeNr', linehl='GitSignsChangeLn' },
+      add          = {hl = 'GitSignsAdd',          text = '┃', numhl = 'GitSignsAddNr',          linehl = 'GitSignsAddLn'          },
+      change       = {hl = 'GitSignsChange',       text = '┃', numhl = 'GitSignsChangeNr',       linehl = 'GitSignsChangeLn'       },
+      delete       = {hl = 'GitSignsDelete',       text = '▁', numhl = 'GitSignsDeleteNr',       linehl = 'GitSignsDeleteLn'       },
+      topdelete    = {hl = 'GitSignsTopdelete',    text = '▔', numhl = 'GitSignsTopdeleteNr',    linehl = 'GitSignsTopdeleteLn'    },
+      changedelete = {hl = 'GitSignsChangedelete', text = '~', numhl = 'GitSignsChangedeleteNr', linehl = 'GitSignsChangedeleteLn' },
+      untracked    = {hl = 'GitSignsUntracked',    text = '┆', numhl = 'GitSignsUntrackedNr',    linehl = 'GitSignsUntrackedLn'    },
     },
+    default_help = [[{
+      add          = { text = '┃' },
+      change       = { text = '┃' },
+      delete       = { text = '▁' },
+      topdelete    = { text = '▔' },
+      changedelete = { text = '~' },
+      untracked    = { text = '┆' },
+    }]],
     description = [[
       Configuration for signs:
-        • `hl` specifies the highlight group to use for the sign.
         • `text` specifies the character to use for the sign.
-        • `numhl` specifies the highlight group to use for the number column
-          (see |gitsigns-config.numhl|).
-        • `linehl` specifies the highlight group to use for the line
-          (see |gitsigns-config.linehl|).
         • `show_count` to enable showing count of hunk, e.g. number of deleted
           lines.
 
-      Note if a highlight is not defined, it will be automatically derived by
-      searching for other defined highlights in the following order:
-        • `GitGutter*`
-        • `Signify*`
-        • `Diff*Gutter`
-        • `diff*`
-        • `Diff*`
+      The highlights `GitSigns[kind][type]` is used for each kind of sign. E.g.
+      'add' signs uses the highlights:
+        • `GitSignsAdd`   (for normal text signs)
+        • `GitSignsAddNr` (for signs when `config.numhl == true`)
+        • `GitSignsAddLn `(for signs when `config.linehl == true`)
 
-      For example if `GitSignsAdd` is not defined but `GitGutterAdd` is defined,
-      then `GitSignsAdd` will be linked to `GitGutterAdd`.
+      See |gitsigns-highlight-groups|.
+    ]]
+  },
+
+  _signs_staged = {
+    type = 'table',
+    deep_extend = true,
+    default = {
+      add          = {hl = 'GitSignsStagedAdd'         , text = '┃', numhl='GitSignsStagedAddNr'         , linehl='GitSignsStagedAddLn'          },
+      change       = {hl = 'GitSignsStagedChange'      , text = '┃', numhl='GitSignsStagedChangeNr'      , linehl='GitSignsStagedChangeLn'       },
+      delete       = {hl = 'GitSignsStagedDelete'      , text = '▁', numhl='GitSignsStagedDeleteNr'      , linehl='GitSignsStagedDeleteLn'       },
+      topdelete    = {hl = 'GitSignsStagedTopdelete'   , text = '▔', numhl='GitSignsStagedTopdeleteNr'   , linehl='GitSignsStagedTopdeleteLn'    },
+      changedelete = {hl = 'GitSignsStagedChangedelete', text = '~', numhl='GitSignsStagedChangedeleteNr', linehl='GitSignsStagedChangedeleteLn' },
+    },
+    default_help = [[{
+      add          = { text = '┃' },
+      change       = { text = '┃' },
+      delete       = { text = '▁' },
+      topdelete    = { text = '▔' },
+      changedelete = { text = '~' },
+    }]],
+    description = [[
+      Configuration for signs of staged hunks.
+
+      See |gitsigns-config-signs|.
+    ]]
+  },
+
+  _signs_staged_enable = {
+    type = 'boolean',
+    default = false,
+    description = [[
+      Show signs for staged hunks.
+
+      When enabled the signs defined in |git-config-signs_staged|` are used.
     ]]
   },
 
@@ -172,6 +228,49 @@ M.schema = {
       mappings defined in this field can be disabled by setting the whole field
       to `{}`, and |gitsigns-config-on_attach| can instead be used to define
       mappings.
+    ]]
+  },
+
+  worktrees = {
+    type = 'table',
+    default = nil,
+    description = [[
+      Detached working trees.
+
+      Array of tables with the keys `gitdir` and `toplevel`.
+
+      If normal attaching fails, then each entry in the table is attempted
+      with the work tree details set.
+
+      Example: >
+        worktrees = {
+          {
+            toplevel = vim.env.HOME,
+            gitdir = vim.env.HOME .. '/projects/dotfiles/.git'
+          }
+        }
+    ]]
+  },
+
+  _on_attach_pre = {
+    type = 'function',
+    default = nil,
+    description = [[
+      Asynchronous hook called before attaching to a buffer. Mainly used to
+      configure detached worktrees.
+
+      This callback must call its callback argument. The callback argument can
+      accept an optional table argument with the keys: 'gitdir' and 'toplevel'.
+
+      Example: >
+        on_attach_pre = function(bufnr, callback)
+          ...
+          callback {
+            gitdir = ...,
+            toplevel = ...
+          }
+        end
+<
     ]]
   },
 
@@ -202,7 +301,9 @@ M.schema = {
 
   watch_gitdir = {
     type = 'table',
+    deep_extend = true,
     default = {
+      enable = true,
       interval = 1000,
       follow_files = true
     },
@@ -212,6 +313,9 @@ M.schema = {
       update signs.
 
       Fields: ~
+        • `enable`:
+            Whether the watcher is enabled.
+
         • `interval`:
             Interval the watcher waits between polls of the gitdir in milliseconds.
 
@@ -277,11 +381,12 @@ M.schema = {
     type = 'table',
     deep_extend = true,
     default = function(): {string:any}
-      local r = {
+      local r: M.Config.DiffOpts = {
         algorithm = 'myers',
         internal = false,
         indent_heuristic = false,
-        vertical = true
+        vertical = true,
+        linematch = nil
       }
       for _, o in ipairs(vim.opt.diffopt:get()) do
         if o == 'indent-heuristic' then
@@ -289,14 +394,13 @@ M.schema = {
         elseif o == 'internal' then
           if vim.diff then
             r.internal = true
-          elseif jit and jit.os ~= "Windows" then
-            -- Use FFI
-            r.internal = true
           end
         elseif o == 'horizontal' then
           r.vertical = false
         elseif vim.startswith(o, 'algorithm:') then
-          r.algorithm = string.sub(o, 11)
+          r.algorithm = string.sub(o, ('algorithm:'):len() + 1)
+        elseif vim.startswith(o, 'linematch:') then
+          r.linematch = tonumber(string.sub(o, ('linematch:'):len() + 1)) as integer
         end
       end
       return r
@@ -315,14 +419,14 @@ M.schema = {
             • "histogram"  histogram diff algorithm
         • internal: boolean
             Use Neovim's built in xdiff library for running diffs.
-
-            Note Neovim v0.5 uses LuaJIT's FFI interface, whereas v0.5+ uses
-            `vim.diff`.
         • indent_heuristic: boolean
             Use the indent heuristic for the internal
             diff library.
         • vertical: boolean
             Start diff mode with vertical splits.
+        • linematch: integer
+            Enable second-stage diff on hunks to align lines.
+            Requires `internal=true`.
     ]]
   },
 
@@ -388,7 +492,7 @@ M.schema = {
     type = 'number',
     default = 40000,
     description = [[
-      Max file length to attach to.
+      Max file length (in lines) to attach to.
     ]]
   },
 
@@ -483,7 +587,7 @@ M.schema = {
 
   current_line_blame_formatter = {
     type = {'string', 'function'},
-    default = ' <author>, <author_time> - <summary>',
+    default = ' <author>, <author_time> - <summary> ',
     description = [[
       String or function used to format the virtual text of
       |gitsigns-config-current_line_blame|.
@@ -609,6 +713,11 @@ M.schema = {
     ]]
   },
 
+  _test_mode = {
+    type = 'boolean',
+    default = false,
+  },
+
   word_diff = {
     type = 'boolean',
     default = false,
@@ -675,12 +784,6 @@ M.schema = {
     ]]
   },
 
-  watch_index                 = { deprecated = {hard = true, new_field = 'watch_gitdir' } },
-  current_line_blame_delay    = { deprecated = {hard = true, new_field = 'current_line_blame_opts.delay'} },
-  current_line_blame_position = { deprecated = {hard = true, new_field = 'current_line_blame_opts.virt_text_pos'} },
-  diff_algorithm              = { deprecated = {hard = true, new_field = 'diff_opts.algorithm'} },
-  use_decoration_api          = { deprecated = {hard = true}},
-  use_internal_diff           = { deprecated = {hard = true, new_field = 'diff_opts.internal'} },
 }
 
 warn = function(s: string, ...: any)

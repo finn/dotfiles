@@ -8,7 +8,6 @@ local gs_cache = require('gitsigns.cache')
 local cache = gs_cache.cache
 local CacheEntry = gs_cache.CacheEntry
 
-local nvim = require('gitsigns.nvim')
 local util = require('gitsigns.util')
 local manager = require('gitsigns.manager')
 local message = require('gitsigns.message')
@@ -17,7 +16,12 @@ local throttle_by_id = require('gitsigns.debounce').throttle_by_id
 
 local input = awrap(vim.ui.input, 2)
 
-local M = {}
+local M = {DiffthisOpts = {}, }
+
+
+
+
+
 
 
 
@@ -55,20 +59,22 @@ local bufwrite = void(function(bufnr, dbufnr, base, bcache)
    bcache.git_obj:stage_lines(buftext)
    scheduler()
    vim.bo[dbufnr].modified = false
-
-
+   -- If diff buffer base matches the bcache base then also update the
+   -- signs.
    if util.calc_base(base) == util.calc_base(bcache.base) then
       bcache.compare_text = buftext
       manager.update(bufnr, bcache)
    end
 end)
 
-local function run(base, diffthis, vertical)
+local function run(base, diffthis, opts)
    local bufnr = vim.api.nvim_get_current_buf()
    local bcache = cache[bufnr]
    if not bcache then
       return
    end
+
+   opts = opts or {}
 
    local comp_rev = bcache:get_compare_rev(util.calc_base(base))
    local bufname = bcache:get_rev_bufname(comp_rev)
@@ -90,7 +96,7 @@ local function run(base, diffthis, vertical)
    if comp_rev == ':0' then
       vim.bo[dbuf].buftype = 'acwrite'
 
-      nvim.autocmd('BufReadCmd', {
+      api.nvim_create_autocmd('BufReadCmd', {
          group = 'gitsigns',
          buffer = dbuf,
          callback = function()
@@ -101,7 +107,7 @@ local function run(base, diffthis, vertical)
          end,
       })
 
-      nvim.autocmd('BufWriteCmd', {
+      api.nvim_create_autocmd('BufWriteCmd', {
          group = 'gitsigns',
          buffer = dbuf,
          callback = function()
@@ -115,24 +121,36 @@ local function run(base, diffthis, vertical)
 
    if diffthis then
       vim.cmd(table.concat({
-         'keepalt', 'aboveleft',
-         vertical and 'vertical' or '',
+         'keepalt', opts.split or 'aboveleft',
+         opts.vertical and 'vertical' or '',
          'diffsplit', bufname,
       }, ' '))
    else
-
-
-      vim.cmd(table.concat({
-         'edit', bufname,
-      }, ' '))
+      vim.cmd('edit ' .. bufname)
    end
 end
 
-M.diffthis = void(function(base, vertical)
+M.diffthis = void(function(base, opts)
    if vim.wo.diff then
       return
    end
-   run(base, true, vertical)
+
+   local bufnr = vim.api.nvim_get_current_buf()
+   local bcache = cache[bufnr]
+   if not bcache then
+      return
+   end
+
+   local cwin = api.nvim_get_current_win()
+   if not base and bcache.git_obj.has_conflicts then
+      run(':2', true, opts)
+      api.nvim_set_current_win(cwin)
+      opts.split = 'belowright'
+      run(':3', true, opts)
+   else
+      run(base, true, opts)
+   end
+   api.nvim_set_current_win(cwin)
 end)
 
 M.show = void(function(base)
@@ -152,7 +170,7 @@ local function should_reload(bufnr)
    return response == 'L'
 end
 
-
+-- This function needs to be throttled as there is a call to vim.ui.input
 M.update = throttle_by_id(void(function(bufnr)
    if not vim.wo.diff then
       return
@@ -160,8 +178,8 @@ M.update = throttle_by_id(void(function(bufnr)
 
    local bcache = cache[bufnr]
 
-
-
+   -- Note this will be the bufname for the currently set base
+   -- which are the only ones we want to update
    local bufname = bcache:get_rev_bufname()
 
    for _, w in ipairs(api.nvim_list_wins()) do

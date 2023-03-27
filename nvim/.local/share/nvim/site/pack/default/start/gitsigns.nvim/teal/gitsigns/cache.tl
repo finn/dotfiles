@@ -1,23 +1,29 @@
 local Hunk = require("gitsigns.hunks").Hunk
 local GitObj = require('gitsigns.git').Obj
+local config = require('gitsigns.config').config
 
 local record M
   record CacheEntry
     file          : string
     base          : string
-    compare_text  : {string}  -- For use with internal diff
+    compare_text  : {string}
     hunks         : {Hunk}
     force_next_update: boolean
+
+    compare_text_head : {string}
+    hunks_staged      : {Hunk}
+
     staged_diffs  : {Hunk}
     gitdir_watcher : vim.loop.FSPollObj -- Timer object watching the gitdir
     git_obj       : GitObj
     commit        : string
 
-    get_compare_rev: function(CacheEntry, base: string): string
-    get_rev_bufname: function(self: CacheEntry, rev: string): string
-    invalidate: function(CacheEntry)
-    new: function(CacheEntry): CacheEntry
-    destroy: function(CacheEntry)
+    get_compare_rev        : function(CacheEntry, base: string): string
+    get_staged_compare_rev : function(CacheEntry): string
+    get_rev_bufname        : function(CacheEntry, rev: string): string
+    invalidate             : function(CacheEntry)
+    new                    : function(CacheEntry): CacheEntry
+    destroy                : function(CacheEntry)
   end
 
   record CacheObj
@@ -31,22 +37,30 @@ end
 
 local CacheEntry = M.CacheEntry
 
-CacheEntry.get_compare_rev = function(self: CacheEntry, base: string): string
+function CacheEntry:get_compare_rev(base: string): string
   base = base or self.base
   if base then
     return base
   end
 
   if self.commit then
-    -- Buffer is a fugutive commit so compare against the parent of the commit
-    return string.format('%s^', self.commit)
+    -- Buffer is a fugitive commit so compare against the parent of the commit
+    if config._signs_staged_enable then
+      return self.commit
+    else
+      return string.format('%s^', self.commit)
+    end
   end
 
   local stage = self.git_obj.has_conflicts and 1 or 0
   return string.format(':%d', stage)
 end
 
-CacheEntry.get_rev_bufname = function(self: CacheEntry, rev: string): string
+function CacheEntry:get_staged_compare_rev(): string
+  return self.commit and string.format('%s^', self.commit) or 'HEAD'
+end
+
+function CacheEntry:get_rev_bufname(rev: string): string
   rev = rev or self:get_compare_rev()
   return string.format(
     'gitsigns://%s/%s:%s',
@@ -56,25 +70,26 @@ CacheEntry.get_rev_bufname = function(self: CacheEntry, rev: string): string
   )
 end
 
-CacheEntry.invalidate = function(self: CacheEntry)
+function CacheEntry:invalidate()
   self.compare_text = nil
+  self.compare_text_head = nil
   self.hunks = nil
+  self.hunks_staged = nil
 end
 
-CacheEntry.new = function(o: CacheEntry): CacheEntry
-  o.hunks        = o.hunks
+function CacheEntry.new(o: CacheEntry): CacheEntry
   o.staged_diffs = o.staged_diffs or {}
   return setmetatable(o, {__index = CacheEntry})
 end
 
-CacheEntry.destroy = function(self: CacheEntry)
+function CacheEntry:destroy()
   local w = self.gitdir_watcher
-  if w then
-    w:stop()
+  if w and not w:is_closing() then
+    w:close()
   end
 end
 
-M.CacheObj.destroy = function(self: M.CacheObj, bufnr: integer)
+function M.CacheObj:destroy(bufnr: integer)
   self[bufnr]:destroy()
   self[bufnr] = nil
 end

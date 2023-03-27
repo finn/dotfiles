@@ -1,4 +1,5 @@
-local gsd = require("gitsigns.debug")
+local log = require("gitsigns.debug.log")
+local guv = require("gitsigns.uv")
 local uv = vim.loop
 
 local record M
@@ -9,98 +10,100 @@ local record M
     args: {string}
     cwd: string
     writer: {string} | string
-
-    record State
-      handle: uv.Process
-      pid: integer
-      stdout_data: {string}
-      stderr_data: {string}
-      stdin: uv.Pipe
-      stdout: uv.Pipe
-      stderr: uv.Pipe
-      code: integer
-      signal: integer
-    end
-    _state: State
   end
 end
 
 M.job_cnt = 0
 
-function M.run_job(obj: M.JobSpec, callback: function(integer, integer, string, string)): M.JobSpec
-  if gsd.debug_mode then
+local function try_close(...: uv.Pipe)
+  for i = 1, select('#', ...) do
+    local pipe = select(i, ...)
+    if pipe and not pipe:is_closing() then
+      pipe:close()
+    end
+  end
+end
+
+local function handle_writer(pipe: uv.Pipe, x: {string} | string)
+  if x is {string} then
+    for i, v in ipairs(x) do
+      pipe:write(v)
+      if i ~= #x then
+        pipe:write("\n")
+      else
+        pipe:write("\n", function()
+          try_close(pipe)
+        end)
+      end
+    end
+  elseif x then
+    -- write is string
+    pipe:write(x, function()
+      try_close(pipe)
+    end)
+  end
+end
+
+local function handle_reader(pipe: uv.Pipe, output: {string})
+  pipe:read_start(function(err: string, data: string)
+    if err then
+      log.eprint(err)
+    end
+    if data then
+      output[#output+1] = data
+    else
+      try_close(pipe)
+    end
+  end)
+end
+
+function M.run_job(obj: M.JobSpec, callback: function(integer, integer, string, string))
+  local __FUNC__ = 'run_job'
+  if log.debug_mode then
     local cmd: string = obj.command..' '..table.concat(obj.args, ' ')
-    gsd.dprint(cmd)
+    log.dprint(cmd)
   end
 
-  obj._state = {}
-  local s = obj._state
-  s.stdout_data = {}
-  s.stderr_data = {}
+  local stdout_data: {string} = {}
+  local stderr_data: {string} = {}
 
-  s.stdout = uv.new_pipe(false)
-  s.stderr = uv.new_pipe(false)
+  local stdout = guv.new_pipe(false)
+  local stderr = guv.new_pipe(false)
+  local stdin: uv.Pipe
   if obj.writer then
-    s.stdin = uv.new_pipe(false)
+    stdin = guv.new_pipe(false)
   end
 
-  s.handle, s.pid = uv.spawn(obj.command, {
+  local handle, pid: uv.Process, integer
+  handle, pid = vim.loop.spawn(obj.command, {
     args  = obj.args,
-    stdio = { s.stdin, s.stdout, s.stderr },
+    stdio = { stdin, stdout, stderr },
     cwd   = obj.cwd
   },
     function(code: integer, signal: integer)
-      s.code = code
-      s.signal = signal
+      handle:close()
+      stdout:read_stop()
+      stderr:read_stop()
 
-      if s.stdout then s.stdout:read_stop() end
-      if s.stderr then s.stderr:read_stop() end
+      try_close(stdin, stdout, stderr)
 
-      if s.stdin  and not s.stdin:is_closing()  then s.stdin:close()  end
-      if s.stdout and not s.stdout:is_closing() then s.stdout:close() end
-      if s.stderr and not s.stderr:is_closing() then s.stderr:close() end
-
-      local stdout_result = #s.stdout_data > 0 and table.concat(s.stdout_data) or nil
-      local stderr_result = #s.stderr_data > 0 and table.concat(s.stderr_data) or nil
+      local stdout_result = #stdout_data > 0 and table.concat(stdout_data) or nil
+      local stderr_result = #stderr_data > 0 and table.concat(stderr_data) or nil
 
       callback(code, signal, stdout_result, stderr_result)
     end
   )
 
-  if not s.handle then
+  if not handle then
+    try_close(stdin, stdout, stderr)
     error(debug.traceback("Failed to spawn process: " .. vim.inspect(obj)))
   end
 
-  s.stdout:read_start(function(_, data: string)
-    s.stdout_data[#s.stdout_data+1] = data
-  end)
-
-  s.stderr:read_start(function(_, data: string)
-    s.stderr_data[#s.stderr_data+1] = data
-  end)
-
-  local writer = obj.writer
-  if writer is {string} then
-    local writer_len = #writer
-    for i, v in ipairs(writer) do
-      s.stdin:write(v)
-      if i ~= writer_len then
-        s.stdin:write("\n")
-      else
-        s.stdin:write("\n", function()
-          s.stdin:close()
-        end)
-      end
-    end
-  elseif writer then
-    -- write is string
-    s.stdin:write(writer, function()
-      s.stdin:close()
-    end)
-  end
+  handle_reader(stdout, stdout_data)
+  handle_reader(stderr, stderr_data)
+  handle_writer(stdin, obj.writer)
 
   M.job_cnt = M.job_cnt + 1
-  return obj
 end
 
 return M

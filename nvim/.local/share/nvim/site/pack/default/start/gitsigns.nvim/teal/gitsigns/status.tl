@@ -1,5 +1,6 @@
 local api = vim.api
 
+
 local record StatusObj
   added   : integer
   removed : integer
@@ -11,29 +12,31 @@ end
 
 local Status = {
   StatusObj = StatusObj,
-  formatter: function(StatusObj): string = nil
 }
 
 function Status:update(bufnr: integer, status: StatusObj)
   if not api.nvim_buf_is_loaded(bufnr) then
     return
   end
-  local has_bstatus, bstatus = pcall(api.nvim_buf_get_var, bufnr, 'gitsigns_status_dict')
-  if has_bstatus then
+  local bstatus = vim.b[bufnr].gitsigns_status_dict
+  if bstatus then
     status = vim.tbl_extend('force', bstatus as table, status as table) as StatusObj
   end
-  api.nvim_buf_set_var(bufnr, 'gitsigns_head', status.head or '')
-  api.nvim_buf_set_var(bufnr, 'gitsigns_status_dict', status)
-  api.nvim_buf_set_var(bufnr, 'gitsigns_status', self.formatter(status))
+  vim.b[bufnr].gitsigns_head = status.head or ''
+  vim.b[bufnr].gitsigns_status_dict = status
+
+  local config = require('gitsigns.config').config
+
+  vim.b[bufnr].gitsigns_status = config.status_formatter(status)
 end
 
-function Status:clear(bufnr: number)
+function Status:clear(bufnr: integer)
   if not api.nvim_buf_is_loaded(bufnr) then
     return
   end
-  api.nvim_buf_del_var(bufnr, 'gitsigns_head')
-  api.nvim_buf_del_var(bufnr, 'gitsigns_status_dict')
-  api.nvim_buf_del_var(bufnr, 'gitsigns_status')
+  vim.b[bufnr].gitsigns_head = nil
+  vim.b[bufnr].gitsigns_status_dict = nil
+  vim.b[bufnr].gitsigns_status = nil
 end
 
 function Status:clear_diff(bufnr: integer)

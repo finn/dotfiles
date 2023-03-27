@@ -37,7 +37,7 @@ end
 M.path_sep = package.config:sub(1, 1)
 
 function M.buf_lines(bufnr)
-
+   -- nvim_buf_get_lines strips carriage returns if fileformat==dos
    local buftext = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
    if vim.bo[bufnr].fileformat == 'dos' then
       for i = 1, #buftext do
@@ -45,6 +45,20 @@ function M.buf_lines(bufnr)
       end
    end
    return buftext
+end
+
+local function delete_alt(buf)
+   local alt = vim.api.nvim_buf_call(buf, function()
+      return vim.fn.bufnr('#')
+   end)
+   if alt ~= buf and alt ~= -1 then
+      pcall(vim.api.nvim_buf_delete, alt, { force = true })
+   end
+end
+
+function M.buf_rename(bufnr, name)
+   vim.api.nvim_buf_set_name(bufnr, name)
+   delete_alt(bufnr)
 end
 
 function M.set_lines(bufnr, start_row, end_row, lines)
@@ -109,15 +123,15 @@ function M.copy_array(x)
    return r
 end
 
-
+-- Strip '\r' from the EOL of each line only if all lines end with '\r'
 function M.strip_cr(xs0)
    for i = 1, #xs0 do
       if xs0[i]:sub(-1) ~= '\r' then
-
+         -- don't strip, return early
          return xs0
       end
    end
-
+   -- all lines end with '\r', need to strip
    local xs = vim.deepcopy(xs0)
    for i = 1, #xs do
       xs[i] = xs[i]:sub(1, -2)
@@ -148,12 +162,12 @@ local function expand_date(fmt, time)
    return os.date(fmt, time)
 end
 
-
+---@param reltime Use relative time as the default date format
 function M.expand_format(fmt, info, reltime)
    local ret = {}
 
-   for _ = 1, 20 do
-
+   for _ = 1, 20 do -- loop protection
+      -- Capture <name> or <name:format>
       local scol, ecol, match, key, time_fmt = fmt:find('(<([^:>]+):?([^>]*)>)')
       if not match then
          break

@@ -8,7 +8,6 @@ local gs_cache   = require('gitsigns.cache')
 local cache      = gs_cache.cache
 local CacheEntry = gs_cache.CacheEntry
 
-local nvim    = require('gitsigns.nvim')
 local util    = require('gitsigns.util')
 local manager = require('gitsigns.manager')
 local message = require('gitsigns.message')
@@ -18,7 +17,12 @@ local throttle_by_id = require('gitsigns.debounce').throttle_by_id
 local input = awrap(vim.ui.input, 2)
 
 local record M
-  diffthis: function(base: string, vertical: boolean)
+  record DiffthisOpts
+    vertical: boolean
+    split: string
+  end
+
+  diffthis: function(base: string, opts: DiffthisOpts)
   show: function(base: string)
   update: function(bufnr: integer)
 end
@@ -63,12 +67,14 @@ local bufwrite = void(function(bufnr: integer, dbufnr: integer, base: string, bc
   end
 end)
 
-local function run(base: string, diffthis: boolean, vertical: boolean)
+local function run(base: string, diffthis: boolean, opts: M.DiffthisOpts)
   local bufnr = vim.api.nvim_get_current_buf()
   local bcache = cache[bufnr]
   if not bcache then
     return
   end
+
+  opts = opts or {}
 
   local comp_rev = bcache:get_compare_rev(util.calc_base(base))
   local bufname = bcache:get_rev_bufname(comp_rev)
@@ -90,7 +96,7 @@ local function run(base: string, diffthis: boolean, vertical: boolean)
   if comp_rev == ':0' then
     vim.bo[dbuf].buftype = 'acwrite'
 
-    nvim.autocmd('BufReadCmd', {
+    api.nvim_create_autocmd('BufReadCmd', {
       group = 'gitsigns',
       buffer = dbuf,
       callback = function()
@@ -101,7 +107,7 @@ local function run(base: string, diffthis: boolean, vertical: boolean)
       end
     })
 
-    nvim.autocmd('BufWriteCmd', {
+    api.nvim_create_autocmd('BufWriteCmd', {
       group = 'gitsigns',
       buffer = dbuf,
       callback = function()
@@ -115,24 +121,36 @@ local function run(base: string, diffthis: boolean, vertical: boolean)
 
   if diffthis then
     vim.cmd(table.concat({
-      'keepalt', 'aboveleft',
-      vertical and 'vertical' or '',
+      'keepalt', opts.split or 'aboveleft',
+      opts.vertical and 'vertical' or '',
       'diffsplit', bufname
     }, ' '))
   else
-    -- TODO(lewis6991): Pull in mods from the :Gitsigns command (split, vsplit,
-    -- etc)
-    vim.cmd(table.concat({
-      'edit', bufname
-    }, ' '))
+    vim.cmd('edit '..bufname)
   end
 end
 
-M.diffthis = void(function(base: string, vertical: boolean)
+M.diffthis = void(function(base: string, opts: M.DiffthisOpts)
   if vim.wo.diff then
     return
   end
-  run(base, true, vertical)
+
+  local bufnr = vim.api.nvim_get_current_buf()
+  local bcache = cache[bufnr]
+  if not bcache then
+    return
+  end
+
+  local cwin = api.nvim_get_current_win()
+  if not base and bcache.git_obj.has_conflicts then
+    run(':2', true, opts)
+    api.nvim_set_current_win(cwin)
+    opts.split = 'belowright'
+    run(':3', true, opts)
+  else
+    run(base, true, opts)
+  end
+  api.nvim_set_current_win(cwin)
 end)
 
 M.show = void(function(base: string)

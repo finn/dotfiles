@@ -26,7 +26,7 @@ file IO.
 USAGE                                                         *gitsigns-usage*
 
 For basic setup with all batteries included:
->
+>lua
     require('gitsigns').setup()
 <
 
@@ -64,6 +64,16 @@ having to redefine the whole field.
 {{CONFIG}}
 
 ==============================================================================
+HIGHLIGHT GROUPS                                   *gitsigns-highlight-groups*
+
+These are the highlights groups used by Gitsigns.
+
+Note if a highlight is not defined, it will be automatically derived by
+searching for other defined highlights in order.
+
+{{HIGHLIGHTS}}
+
+==============================================================================
 COMMAND                                                      *gitsigns-command*
 
                                                                     *:Gitsigns*
@@ -74,10 +84,10 @@ COMMAND                                                      *gitsigns-command*
                            if this fails the argument will remain as the
                            string given by |<f-args>|.
 
-                           Note this command is equivalent to:
-                             `:lua require('gitsigns').{subcmd}({args})`
-
-                           Examples: >
+                           Note this command is equivalent to: >vim
+                             :lua require('gitsigns').{subcmd}({args})
+<
+                           Examples: >vim
                              :Gitsigns diffthis HEAD~1
                              :Gitsigns blame_line
                              :Gitsigns toggle_signs
@@ -85,6 +95,7 @@ COMMAND                                                      *gitsigns-command*
                              :Gitsigns change_base ~
                              :Gitsigns reset_buffer
                              :Gitsigns change_base nil true
+<
 
 ==============================================================================
 SPECIFYING OBJECTS                          *gitsigns-object* *gitsigns-revision*
@@ -122,7 +133,7 @@ provided. `b:gitsigns_status` is formatted using `config.status_formatter`
         • `gitdir` - .git directory.
 
 Example:
->
+>vim
     set statusline+=%{get(b:,'gitsigns_status','')}
 <
                                             *b:gitsigns_head* *g:gitsigns_head*
@@ -132,10 +143,13 @@ a short commit hash. `g:gitsigns_head` returns the current HEAD for the
 current working directory, whereas `b:gitsigns_head` returns the current HEAD
 for each buffer.
 
-                                                  *b:gitsigns_blame_line_dict*
-If |gitsigns-config-current_line_blame| is enabled, then contains dictionary
-of the blame object for current line. For complete list of keys, see the
-{blame_info} argument from |gitsigns-config-current_line_blame_formatter|.
+                            *b:gitsigns_blame_line* *b:gitsigns_blame_line_dict*
+Provided if |gitsigns-config-current_line_blame| is enabled.
+`b:gitsigns_blame_line` if formatted using
+`config.current_line_blame_formatter`. `b:gitsigns_blame_line_dict` is a
+dictionary containing of the blame object for the current line. For complete
+list of keys, see the {blame_info} argument from
+|gitsigns-config-current_line_blame_formatter|.
 
 ==============================================================================
 TEXT OBJECTS                                             *gitsigns-textobject*
@@ -143,6 +157,20 @@ TEXT OBJECTS                                             *gitsigns-textobject*
 Since text objects are defined via keymaps, these are exposed and configurable
 via the config, see |gitsigns-config-keymaps|. The lua implementation is
 exposed through |gitsigns.select_hunk()|.
+
+==============================================================================
+EVENT                                                         *gitsigns-event*
+
+Every time Gitsigns updates its knowledge about hunks, it issues a custom
+|User| event named `GitSignsUpdate`. You can use it via usual autocommands,
+like so: >lua
+
+    vim.api.nvim_create_autocmd('User', {
+      pattern = 'GitSignsUpdate',
+      callback = function()
+        print(os.time() .. ' Gitsigns made an update')
+      end
+    })
 
 ------------------------------------------------------------------------------
 vim:tw=78:ts=8:ft=help:norl:

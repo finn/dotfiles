@@ -7,7 +7,7 @@ local cache     = require('gitsigns.cache').cache
 local config    = require('gitsigns.config').config
 local BlameInfo = require('gitsigns.git').BlameInfo
 local util      = require('gitsigns.util')
-local nvim      = require('gitsigns.nvim')
+local uv        = require('gitsigns.uv')
 
 local api = vim.api
 
@@ -15,7 +15,7 @@ local current_buf = api.nvim_get_current_buf
 
 local namespace = api.nvim_create_namespace('gitsigns_blame')
 
-local timer = vim.loop.new_timer()
+local timer = uv.new_timer(true)
 
 local record M
   setup: function()
@@ -37,10 +37,10 @@ local function get_extmark(bufnr: integer): integer
   return
 end
 
-local reset = function(bufnr: integer)
+local function reset(bufnr: integer)
   bufnr = bufnr or current_buf()
   api.nvim_buf_del_extmark(bufnr, namespace, 1)
-  pcall(api.nvim_buf_del_var, bufnr, 'gitsigns_blame_line_dict')
+  vim.b[bufnr].gitsigns_blame_line_dict = nil
 end
 
 -- TODO: expose as config
@@ -83,6 +83,14 @@ local function expand_blame_format(fmt: string, name: string, info: BlameInfo): 
     info.author = 'You'
   end
   return util.expand_format(fmt, info, config.current_line_blame_formatter_opts.relative_time)
+end
+
+local function flatten_virt_text(virt_text: {{string, string}}): string
+  local res = {}
+  for _, part in ipairs(virt_text) do
+    res[#res+1] = part[1]
+  end
+  return table.concat(res)
 end
 
 -- Update function, must be called in async context
@@ -145,8 +153,9 @@ local update = void(function()
     return
   end
 
-  api.nvim_buf_set_var(bufnr, 'gitsigns_blame_line_dict', result)
-  if opts.virt_text and result then
+  vim.b[bufnr].gitsigns_blame_line_dict = result
+
+  if result then
     local virt_text: {{string, string}}
     local clb_formatter = result.author == 'Not Committed Yet' and
       config.current_line_blame_formatter_nc or
@@ -164,34 +173,38 @@ local update = void(function()
       )
     end
 
-    set_extmark(bufnr, lnum, {
-      virt_text     = virt_text,
-      virt_text_pos = opts.virt_text_pos,
-      priority      = opts.virt_text_priority,
-      hl_mode       = 'combine',
-    })
+    vim.b[bufnr].gitsigns_blame_line = flatten_virt_text(virt_text)
+
+    if opts.virt_text then
+      set_extmark(bufnr, lnum, {
+        virt_text     = virt_text,
+        virt_text_pos = opts.virt_text_pos,
+        priority      = opts.virt_text_priority,
+        hl_mode       = 'combine',
+      })
+    end
   end
 end)
 
 M.setup = function()
-  nvim.augroup('gitsigns_blame')
+  local group = api.nvim_create_augroup('gitsigns_blame', {})
 
   for k, _ in pairs(cache as {integer:any}) do
     reset(k)
   end
 
   if config.current_line_blame then
-    nvim.autocmd(
-      {'FocusGained', 'BufEnter', 'CursorMoved', 'CursorMovedI'},
-      { group = 'gitsigns_blame', callback = function() update() end }
-    )
+    api.nvim_create_autocmd({'FocusGained', 'BufEnter', 'CursorMoved', 'CursorMovedI'}, {
+      group = group, callback = function() update() end
+    })
 
-    nvim.autocmd(
-      {'InsertEnter', 'FocusLost', 'BufLeave'},
-      { group = 'gitsigns_blame', callback = function() reset() end }
-    )
+    api.nvim_create_autocmd({'InsertEnter', 'FocusLost', 'BufLeave'}, {
+      group = group, callback = function() reset() end
+    })
 
-    update()
+    -- Call via vim.schedule to avoid the debounce timer killing the async
+    -- coroutine
+    vim.schedule(update)
   end
 end
 

@@ -18,7 +18,7 @@ local M = {Node = {}, Hunk = {}, Hunk_Public = {}, }
 
 
 
-
+   -- For internal use
 
 
 
@@ -60,21 +60,21 @@ function M.create_partial_hunk(hunks, top, bot)
 
       local added_in_range = 0
       if h.added.start >= top and h.vend <= bot then
-
+         -- Range contains hunk
          added_in_range = added_in_hunk
       else
          local added_above_bot = max(0, bot + 1 - (h.added.start + h.removed.count))
          local added_above_top = max(0, top - (h.added.start + h.removed.count))
 
          if h.added.start >= top and h.added.start <= bot then
-
+            -- Range top intersects hunk
             added_in_range = added_above_bot
          elseif h.vend >= top and h.vend <= bot then
-
+            -- Range bottom intersects hunk
             added_in_range = added_in_hunk - added_above_top
             pretop = pretop - added_above_top
          elseif h.added.start <= top and h.vend >= bot then
-
+            -- Range within hunk
             added_in_range = added_above_bot - added_above_top
             pretop = pretop - added_above_top
          end
@@ -112,8 +112,8 @@ end
 function M.parse_diff_line(line)
    local diffkey = vim.trim(vim.split(line, '@@', true)[2])
 
-
-
+   -- diffKey: "-xx,n +yy"
+   -- pre: {xx, n}, now: {yy}
    local pre, now = unpack(vim.tbl_map(function(s)
       return vim.split(string.sub(s, 2), ',')
    end, vim.split(diffkey, ' ')))
@@ -129,24 +129,27 @@ end
 
 local function change_end(hunk)
    if hunk.added.count == 0 then
-
+      -- delete
       return hunk.added.start
    elseif hunk.removed.count == 0 then
-
+      -- add
       return hunk.added.start + hunk.added.count - 1
    else
-
+      -- change
       return hunk.added.start + min(hunk.added.count, hunk.removed.count) - 1
    end
 end
 
-
-function M.calc_signs(hunk, min_lnum, max_lnum)
+-- Calculate signs needed to be applied from a hunk for a specified line range.
+function M.calc_signs(hunk, min_lnum, max_lnum, untracked)
+   assert(not untracked or hunk.type == 'add')
+   min_lnum = min_lnum or 1
+   max_lnum = max_lnum or math.huge
    local start, added, removed = hunk.added.start, hunk.added.count, hunk.removed.count
 
    if hunk.type == 'delete' and start == 0 then
       if min_lnum <= 1 then
-
+         -- topdelete signs get placed one row lower
          return { { type = 'topdelete', count = removed, lnum = 1 } }
       else
          return {}
@@ -161,7 +164,8 @@ function M.calc_signs(hunk, min_lnum, max_lnum)
       local changedelete = hunk.type == 'change' and removed > added and lnum == cend
 
       signs[#signs + 1] = {
-         type = changedelete and 'changedelete' or hunk.type,
+         type = changedelete and 'changedelete' or
+         untracked and 'untracked' or hunk.type,
          count = lnum == start and (hunk.type == 'add' and added or removed),
          lnum = lnum,
       }
@@ -245,7 +249,7 @@ function M.get_summary(hunks)
 end
 
 function M.find_hunk(lnum, hunks)
-   for i, hunk in ipairs(hunks) do
+   for i, hunk in ipairs(hunks or {}) do
       if lnum == 1 and hunk.added.start == 0 and hunk.vend == 0 then
          return hunk, i
       end
@@ -259,22 +263,25 @@ end
 function M.find_nearest_hunk(lnum, hunks, forwards, wrap)
    local ret
    local index
+   local distance = math.huge
    if forwards then
       for i = 1, #hunks do
          local hunk = hunks[i]
-         if hunk.added.start > lnum then
+         local dist = hunk.added.start - lnum
+         if dist > 0 and dist < distance then
+            distance = dist
             ret = hunk
             index = i
-            break
          end
       end
    else
       for i = #hunks, 1, -1 do
          local hunk = hunks[i]
-         if hunk.vend < lnum then
+         local dist = lnum - hunk.vend
+         if dist > 0 and dist < distance then
+            distance = dist
             ret = hunk
             index = i
-            break
          end
       end
    end
@@ -297,6 +304,99 @@ function M.compare_heads(a, b)
       end
    end
    return false
+end
+
+local function compare_new(a, b)
+   if a.added.start ~= b.added.start then
+      return false
+   end
+
+   if a.added.count ~= b.added.count then
+      return false
+   end
+
+   for i = 1, a.added.count do
+      if a.added.lines[i] ~= b.added.lines[i] then
+         return false
+      end
+   end
+
+   return true
+end
+
+-- Return hunks in a using b's hunks as a filter. Only compare the 'new' section
+-- of the hunk.
+--
+-- Eg. Given:
+--
+--       a = {
+--             1 = '@@ -24 +25,1 @@',
+--             2 = '@@ -32 +34,1 @@',
+--             3 = '@@ -37 +40,1 @@'
+--       }
+--
+--       b = {
+--             1 = '@@ -26 +25,1 @@'
+--       }
+--
+-- Since a[1] and b[1] introduce the same changes to the buffer (both have
+-- +25,1), we exclude this hunk in the output so we return:
+--
+--       {
+--             1 = '@@ -32 +34,1 @@',
+--             2 = '@@ -37 +40,1 @@'
+--       }
+--
+function M.filter_common(a, b)
+   if not a and not b then
+      return
+   end
+
+   a, b = a or {}, b or {}
+   local max_iter = math.max(#a, #b)
+
+   local a_i = 1
+   local b_i = 1
+
+   local ret = {}
+
+   for _ = 1, max_iter do
+      local a_h, b_h = a[a_i], b[b_i]
+
+      if not a_h then
+         -- Reached the end of a
+         break
+      end
+
+      if not b_h then
+         -- Reached the end of b, add remainder of a
+         for i = a_i, #a do
+            ret[#ret + 1] = a[i]
+         end
+         break
+      end
+
+      if a_h.added.start > b_h.added.start then
+         -- a pointer is ahead of b; increment b pointer
+         b_i = b_i + 1
+      elseif a_h.added.start < b_h.added.start then
+         -- b pointer is ahead of a; add a_h to ret and increment a pointer
+         ret[#ret + 1] = a_h
+         a_i = a_i + 1
+      else -- a_h.start == b_h.start
+         -- a_h and b_h start on the same line, if hunks have the same changes then
+         -- skip (filtered) otherwise add a_h to ret. Increment both hunk
+         -- pointers
+         -- TODO(lewis6991): Be smarter; if bh intercepts then break down ah.
+         if not compare_new(a_h, b_h) then
+            ret[#ret + 1] = a_h
+         end
+         a_i = a_i + 1
+         b_i = b_i + 1
+      end
+   end
+
+   return ret
 end
 
 return M

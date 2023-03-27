@@ -9,13 +9,13 @@ local B = require('gitsigns.signs.base')
 
 local M = {}
 
-
-
-
-
-
-
-
+-- The internal representation of signs in Neovim is a linked list which is slow
+-- to index. To improve efficiency we add an abstraction layer to the signs API
+-- which keeps track of which signs have already been placed in the buffer.
+--
+-- This allows us to:
+--    - efficiently query placed signs.
+--    - skip adding a sign if it has already been placed.
 
 local function capitalise_word(x)
    return x:sub(1, 1):upper() .. x:sub(2)
@@ -54,23 +54,26 @@ local function define_sign(name, opts, redefine)
 end
 
 local function define_signs(obj, redefine)
-
+   -- Define signs
    for stype, cs in pairs(obj.config) do
+      local hls = obj.hls[stype]
       define_sign(get_sign_name(stype), {
-         texthl = cs.hl,
+         texthl = hls.hl,
          text = config.signcolumn and cs.text or nil,
-         numhl = config.numhl and cs.numhl,
-         linehl = config.linehl and cs.linehl,
+         numhl = config.numhl and hls.numhl or nil,
+         linehl = config.linehl and hls.linehl or nil,
       }, redefine)
    end
 end
 
 local group_base = 'gitsigns_vimfn_signs_'
 
-function M.new(cfg, name)
+function M._new(cfg, hls, name)
    local self = setmetatable({}, { __index = M })
+   self.name = name or ''
    self.group = group_base .. (name or '')
    self.config = cfg
+   self.hls = hls
    self.placed = emptytable()
 
    define_signs(self, false)
@@ -97,28 +100,28 @@ end
 
 function M:add(bufnr, signs)
    if not config.signcolumn and not config.numhl and not config.linehl then
-
+      -- Don't place signs if it won't show anything
       return
    end
 
    local to_place = {}
 
-   local cfg = self.config
    for _, s in ipairs(signs) do
       local sign_name = get_sign_name(s.type)
 
-      local cs = cfg[s.type]
+      local cs = self.config[s.type]
       if config.signcolumn and cs.show_count and s.count then
          local count = s.count
          local cc = config.count_chars
          local count_suffix = cc[count] and tostring(count) or (cc['+'] and 'Plus') or ''
          local count_char = cc[count] or cc['+'] or ''
+         local hls = self.hls[s.type]
          sign_name = sign_name .. count_suffix
          define_sign(sign_name, {
-            texthl = cs.hl,
+            texthl = hls.hl,
             text = config.signcolumn and cs.text .. count_char or '',
-            numhl = config.numhl and cs.numhl,
-            linehl = config.linehl and cs.linehl,
+            numhl = config.numhl and hls.numhl or nil,
+            linehl = config.linehl and hls.linehl or nil,
          })
       end
 

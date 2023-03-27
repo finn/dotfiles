@@ -1,5 +1,3 @@
-local nvim = require('gitsigns.nvim')
-
 local popup = {HlMark = {}, }
 
 
@@ -26,17 +24,17 @@ local function bufnr_calc_width(bufnr, lines)
             end
          end
       end
-      return width + 1
+      return width + 1 -- Add 1 for some miinor padding
    end)
 end
 
-
+-- Expand height until all lines are visible to account for wrapped lines.
 local function expand_height(winid, nlines)
    local newheight = 0
    for _ = 0, 50 do
       local winheight = api.nvim_win_get_height(winid)
       if newheight > winheight then
-
+         -- Window must be max height
          break
       end
       local wd = api.nvim_win_call(winid, function()
@@ -95,7 +93,7 @@ local function process_linesspec(fmt)
                start_col = scol,
                end_col = pos,
             }
-         else
+         else -- hl is {HlMark}
             offset_hlmarks(hl, srow)
             vim.list_extend(hls, hl)
          end
@@ -109,59 +107,97 @@ local function process_linesspec(fmt)
    return lines, hls
 end
 
-function popup.create0(lines, opts)
-   local ts = api.nvim_buf_get_option(0, 'tabstop')
+local function close_all_but(id)
+   for _, winid in ipairs(api.nvim_list_wins()) do
+      if vim.w[winid].gitsigns_preview ~= nil and
+         vim.w[winid].gitsigns_preview ~= id then
+         pcall(api.nvim_win_close, winid, true)
+      end
+   end
+end
+
+function popup.close(id)
+   for _, winid in ipairs(api.nvim_list_wins()) do
+      if vim.w[winid].gitsigns_preview == id then
+         pcall(api.nvim_win_close, winid, true)
+      end
+   end
+end
+
+function popup.create0(lines, opts, id)
+   -- Close any popups not matching id
+   close_all_but(id)
+
+   local ts = vim.bo.tabstop
    local bufnr = api.nvim_create_buf(false, true)
    assert(bufnr, "Failed to create buffer")
 
-
-   api.nvim_buf_set_option(bufnr, 'modifiable', true)
-
+   -- In case nvim was opened with '-M'
+   vim.bo[bufnr].modifiable = true
    api.nvim_buf_set_lines(bufnr, 0, -1, true, lines)
+   vim.bo[bufnr].modifiable = false
 
-   api.nvim_buf_set_option(bufnr, 'modifiable', false)
-
-
-
-   api.nvim_buf_set_option(bufnr, 'tabstop', ts)
+   -- Set tabstop before calculating the buffer width so that the correct width
+   -- is calculated
+   vim.bo[bufnr].tabstop = ts
 
    local opts1 = vim.deepcopy(opts or {})
-   opts1.height = opts1.height or #lines
+   opts1.height = opts1.height or #lines -- Guess, adjust later
    opts1.width = opts1.width or bufnr_calc_width(bufnr, lines)
 
    local winid = api.nvim_open_win(bufnr, false, opts1)
 
-   api.nvim_win_set_var(winid, 'gitsigns_preview', true)
+   vim.w[winid].gitsigns_preview = id or true
 
    if not opts.height then
       expand_height(winid, #lines)
    end
 
    if opts1.style == 'minimal' then
-
-
-      api.nvim_win_set_option(winid, 'signcolumn', 'no')
+      -- If 'signcolumn' = auto:1-2, then a empty signcolumn will appear and cause
+      -- line wrapping.
+      vim.wo[winid].signcolumn = 'no'
    end
 
-
-
-   local group = 'gitsigns_popup' .. winid
-   nvim.augroup(group)
+   -- Close the popup when navigating to any window which is not the preview
+   -- itself.
+   local group = 'gitsigns_popup'
+   local group_id = api.nvim_create_augroup(group, {})
    local old_cursor = api.nvim_win_get_cursor(0)
 
-   nvim.autocmd({ 'CursorMoved', 'CursorMovedI' }, {
-      group = group,
+   api.nvim_create_autocmd({ 'CursorMoved', 'CursorMovedI' }, {
+      group = group_id,
       callback = function()
          local cursor = api.nvim_win_get_cursor(0)
-
+         -- Did the cursor REALLY change (neovim/neovim#12923)
          if (old_cursor[1] ~= cursor[1] or old_cursor[2] ~= cursor[2]) and
             api.nvim_get_current_win() ~= winid then
-
-            nvim.augroup(group)
+            -- Clear the augroup
+            api.nvim_create_augroup(group, {})
             pcall(api.nvim_win_close, winid, true)
             return
          end
          old_cursor = cursor
+      end,
+   })
+
+   api.nvim_create_autocmd('WinClosed', {
+      pattern = tostring(winid),
+      group = group_id,
+      callback = function()
+         -- Clear the augroup
+         api.nvim_create_augroup(group, {})
+      end,
+   })
+
+   -- update window position to follow the cursor when scrolling
+   api.nvim_create_autocmd('WinScrolled', {
+      buffer = api.nvim_get_current_buf(),
+      group = group_id,
+      callback = function()
+         if api.nvim_win_is_valid(winid) then
+            api.nvim_win_set_config(winid, opts1)
+         end
       end,
    })
 
@@ -170,9 +206,9 @@ end
 
 local ns = api.nvim_create_namespace('gitsigns_popup')
 
-function popup.create(lines_spec, opts)
+function popup.create(lines_spec, opts, id)
    local lines, highlights = process_linesspec(lines_spec)
-   local winnr, bufnr = popup.create0(lines, opts)
+   local winid, bufnr = popup.create0(lines, opts, id)
 
    for _, hl in ipairs(highlights) do
       local ok, err = pcall(api.nvim_buf_set_extmark, bufnr, ns, hl.start_row, hl.start_col or 0, {
@@ -186,17 +222,24 @@ function popup.create(lines_spec, opts)
       end
    end
 
-   return winnr, bufnr
+   return winid, bufnr
 end
 
-function popup.is_open()
+function popup.is_open(id)
    for _, winid in ipairs(api.nvim_list_wins()) do
-      local exists = pcall(api.nvim_win_get_var, winid, 'gitsigns_preview')
-      if exists then
-         return true
+      if vim.w[winid].gitsigns_preview == id then
+         return winid
       end
    end
-   return false
+   return nil
+end
+
+function popup.focus_open(id)
+   local winid = popup.is_open(id)
+   if winid then
+      api.nvim_set_current_win(winid)
+   end
+   return winid
 end
 
 return popup

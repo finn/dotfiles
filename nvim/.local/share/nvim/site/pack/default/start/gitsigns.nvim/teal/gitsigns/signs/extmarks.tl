@@ -9,9 +9,10 @@ local M: B = {}
 
 local group_base = 'gitsigns_extmark_signs_'
 
-function M.new(cfg: SignsConfig, name: string): B
+function M._new(cfg: SignsConfig, hls: {M.SignType:M.HlDef}, name: string): B
   local self = setmetatable({} as B, {__index = M})
   self.config = cfg
+  self.hls = hls
   self.group = group_base..(name or '')
   self.ns = api.nvim_create_namespace(self.group)
   return self
@@ -39,11 +40,9 @@ function M:add(bufnr: integer, signs: {M.Sign})
     return
   end
 
-  local cfg = self.config
-
   for _, s in ipairs(signs) do
     if not self:contains(bufnr, s.lnum) then
-      local cs = cfg[s.type]
+      local cs = self.config[s.type]
       local text = cs.text
       if config.signcolumn and cs.show_count and s.count then
         local count = s.count
@@ -52,14 +51,25 @@ function M:add(bufnr: integer, signs: {M.Sign})
         text = cs.text..count_char
       end
 
-      api.nvim_buf_set_extmark(bufnr, self.ns, s.lnum-1, -1, {
+      local hls = self.hls[s.type]
+
+      local ok, err = pcall(api.nvim_buf_set_extmark, bufnr, self.ns, s.lnum-1, -1, {
         id              = s.lnum,
         sign_text       = config.signcolumn and text or '',
         priority        = config.sign_priority,
-        sign_hl_group   = cs.hl,
-        number_hl_group = config.numhl and cs.numhl or nil,
-        line_hl_group   = config.linehl and cs.linehl or nil,
+        sign_hl_group   = hls.hl,
+        number_hl_group = config.numhl and hls.numhl or nil,
+        line_hl_group   = config.linehl and hls.linehl or nil,
       })
+
+      if not ok and config.debug_mode then
+        vim.schedule(function()
+          error(table.concat({
+            string.format('Error placing extmark on line %d', s.lnum),
+            err
+          }, '\n'))
+        end)
+      end
     end
   end
 end
