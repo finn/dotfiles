@@ -66,3 +66,6 @@ fish_add_path "$HOME/.krew/bin"
 
 # rust
 fish_add_path "$HOME/.cargo/bin"
+
+# pipx
+fish_add_path /Users/fsmith/.local/bin
