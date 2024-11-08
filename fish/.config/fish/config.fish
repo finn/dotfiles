@@ -57,9 +57,9 @@ end
 set -x GOPATH "$HOME/go"
 fish_add_path "$GOPATH/bin"
 
-if test -x /opt/homebrew/bin/rbenv
-  status --is-interactive; and rbenv init - fish | source
-end
+#if test -x /opt/homebrew/bin/rbenv
+#  status --is-interactive; and rbenv init - fish | source
+#end
 
 # k8s
 fish_add_path "$HOME/.krew/bin"
